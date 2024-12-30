@@ -1,9 +1,5 @@
-import OpenAI from "openai";
+import { openai } from "../../../lib/openai";
 import { NextResponse } from "next/server";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(request: Request) {
   try {

@@ -1,13 +1,9 @@
 "use server";
 
-import OpenAI from "openai";
+import { openai } from "../../lib/openai";
 import { adminAuth, adminDb } from "../../lib/firebase-admin";
 import { cookies } from "next/headers";
 import { FieldValue } from "firebase-admin/firestore";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 async function verifySession() {
   const cookieStore = await cookies();
