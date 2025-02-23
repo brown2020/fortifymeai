@@ -1,20 +1,66 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 250, 250, 250;
-  --background-end-rgb: 255, 255, 255;
+@theme {
+  --font-sans: var(--font-inter);
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom,
-    rgb(var(--background-start-rgb)),
-    rgb(var(--background-end-rgb))
-  );
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@utility btn-primary {
+  @apply inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition duration-150 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+}
+
+@utility btn-secondary {
+  @apply inline-flex items-center justify-center px-8 py-3 text-base font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out border border-gray-200 shadow-xs hover:shadow-md;
+}
+
+@utility card {
+  @apply bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100;
+}
+
+@utility heading-1 {
+  @apply text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight;
+}
+
+@utility heading-2 {
+  @apply text-3xl sm:text-4xl font-bold text-gray-900;
+}
+
+@utility paragraph {
+  @apply text-lg text-gray-600 leading-relaxed;
+}
+
+@layer utilities {
+  :root {
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 250, 250, 250;
+    --background-end-rgb: 255, 255, 255;
+  }
+
+  body {
+    color: rgb(var(--foreground-rgb));
+    background: linear-gradient(
+      to bottom,
+      rgb(var(--background-start-rgb)),
+      rgb(var(--background-end-rgb))
+    );
+  }
 }
 
 @layer base {
@@ -24,31 +70,5 @@ body {
 
   body {
     @apply min-h-screen text-gray-900;
-  }
-}
-
-@layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition duration-150 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
-  }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center px-8 py-3 text-base font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out border border-gray-200 shadow-sm hover:shadow-md;
-  }
-
-  .card {
-    @apply bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100;
-  }
-
-  .heading-1 {
-    @apply text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight;
-  }
-
-  .heading-2 {
-    @apply text-3xl sm:text-4xl font-bold text-gray-900;
-  }
-
-  .paragraph {
-    @apply text-lg text-gray-600 leading-relaxed;
   }
 }

@@ -20,7 +20,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-xl shadow-xs p-6">
             <div className="flex items-center mb-4">
               <Calendar className="h-6 w-6 text-blue-600 mr-2" />
               <h2 className="text-lg font-semibold">{`Today's Schedule`}</h2>
@@ -35,7 +35,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-xl shadow-xs p-6">
             <div className="flex items-center mb-4">
               <Activity className="h-6 w-6 text-purple-600 mr-2" />
               <h2 className="text-lg font-semibold">Progress Tracking</h2>
@@ -48,7 +48,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-xl shadow-xs p-6">
             <div className="flex items-center mb-4">
               <Bell className="h-6 w-6 text-green-600 mr-2" />
               <h2 className="text-lg font-semibold">Reminders</h2>
@@ -62,7 +62,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-xs p-6">
           <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
           <div className="text-gray-600">
             <p>No recent activity to show</p>

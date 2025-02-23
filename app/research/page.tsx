@@ -96,7 +96,7 @@ export default function Research() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Ask about any supplement..."
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
                   <button
@@ -120,7 +120,7 @@ export default function Research() {
               )}
 
               {result && (
-                <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="bg-white rounded-xl shadow-xs p-6">
                   <div
                     className="prose prose-blue max-w-none"
                     dangerouslySetInnerHTML={{
@@ -131,7 +131,7 @@ export default function Research() {
               )}
 
               {!result && !error && !loading && (
-                <div className="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div className="bg-white rounded-xl shadow-xs p-6 text-center">
                   <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                     Start Your Research
@@ -146,7 +146,7 @@ export default function Research() {
 
             {/* Search History Sidebar */}
             <div className="md:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="bg-white rounded-xl shadow-xs p-6">
                 <div className="flex items-center mb-4">
                   <History className="h-5 w-5 text-gray-500 mr-2" />
                   <h2 className="text-lg font-semibold">Recent Searches</h2>
@@ -156,7 +156,7 @@ export default function Research() {
                     {searchHistory.map((item, index) => (
                       <li
                         key={index}
-                        className="text-sm cursor-pointer hover:bg-gray-50 p-2 rounded group relative"
+                        className="text-sm cursor-pointer hover:bg-gray-50 p-2 rounded-sm group relative"
                         onClick={() => handleHistoryClick(item)}
                       >
                         <div className="flex justify-between items-start">

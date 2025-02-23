@@ -13,7 +13,7 @@ export default function Profile() {
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Profile</h1>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-xs p-6 mb-6">
             <div className="flex items-center mb-6">
               <div className="bg-blue-100 rounded-full p-3">
                 <User className="h-6 w-6 text-blue-600" />
@@ -54,7 +54,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white rounded-xl shadow-xs p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Delete Account
             </h2>

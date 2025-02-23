@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100">
       <Navbar />
 
       {/* Hero Section */}
@@ -28,7 +28,7 @@ export default function Home() {
               </Link>
               <Link
                 href="/about"
-                className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out border border-gray-200 shadow-sm hover:shadow-md"
+                className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-lg transition duration-150 ease-in-out border border-gray-200 shadow-xs hover:shadow-md"
               >
                 Learn More →
               </Link>
@@ -142,7 +142,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-700 py-16">
+      <section className="bg-linear-to-br from-blue-600 to-blue-700 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-6">
             Ready to optimize your supplement routine?
