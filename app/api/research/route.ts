@@ -1,6 +1,10 @@
 import { openai } from "../../../lib/openai";
 import { NextResponse } from "next/server";
 
+// System prompt for consistent AI responses
+const SYSTEM_PROMPT =
+  "You are a knowledgeable expert in dietary supplements. Provide accurate, scientific information about supplements, including benefits, risks, interactions, and dosage recommendations. Always include references to scientific studies when available.";
+
 export async function POST(request: Request) {
   try {
     const { query } = await request.json();
@@ -10,8 +14,7 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "system",
-          content:
-            "You are a knowledgeable expert in dietary supplements. Provide accurate, scientific information about supplements, including benefits, risks, interactions, and dosage recommendations. Always include references to scientific studies when available.",
+          content: SYSTEM_PROMPT,
         },
         {
           role: "user",

@@ -4,6 +4,34 @@ import Link from "next/link";
 import { useAuth } from "../contexts/AuthContext";
 import { Pill, Menu, X } from "lucide-react";
 import { useState } from "react";
+import Button from "./ui/Button";
+import { APP_NAME, ROUTES } from "../lib/constants";
+
+// Define types for navigation links
+type NavLinkAuthenticated = {
+  href: string;
+  label: string;
+};
+
+type NavLinkUnauthenticated = {
+  href: string;
+  label: string;
+  variant: "primary" | "secondary" | "outline" | "ghost";
+};
+
+// Navigation links configuration for DRY code
+const navLinks = {
+  authenticated: [
+    { href: ROUTES.dashboard, label: "Dashboard" },
+    { href: ROUTES.supplements, label: "My Supplements" },
+    { href: ROUTES.research, label: "Research" },
+    { href: ROUTES.profile, label: "Profile" },
+  ] as NavLinkAuthenticated[],
+  unauthenticated: [
+    { href: ROUTES.login, label: "Sign in", variant: "ghost" },
+    { href: ROUTES.signup, label: "Sign up", variant: "primary" },
+  ] as NavLinkUnauthenticated[],
+};
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -22,10 +50,10 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center">
+            <Link href={ROUTES.home} className="flex items-center">
               <Pill className="h-8 w-8 text-blue-600" />
               <span className="ml-2 text-xl font-bold text-gray-900">
-                Fortify.me
+                {APP_NAME}
               </span>
             </Link>
           </div>
@@ -34,51 +62,32 @@ export default function Navbar() {
           <div className="hidden sm:flex sm:items-center sm:space-x-4">
             {user ? (
               <>
-                <Link
-                  href="/dashboard"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/supplements"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  My Supplements
-                </Link>
-                <Link
-                  href="/research"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Research
-                </Link>
-                <Link
-                  href="/profile"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Profile
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
+                {navLinks.authenticated.map((link) => (
+                  <Button
+                    key={link.href}
+                    href={link.href}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    {link.label}
+                  </Button>
+                ))}
+                <Button onClick={handleLogout} variant="ghost" size="sm">
                   Sign out
-                </button>
+                </Button>
               </>
             ) : (
               <>
-                <Link
-                  href="/login"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/signup"
-                  className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium"
-                >
-                  Sign up
-                </Link>
+                {navLinks.unauthenticated.map((link) => (
+                  <Button
+                    key={link.href}
+                    href={link.href}
+                    variant={link.variant}
+                    size="sm"
+                  >
+                    {link.label}
+                  </Button>
+                ))}
               </>
             )}
           </div>
@@ -88,11 +97,15 @@ export default function Navbar() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              aria-expanded={isMenuOpen}
             >
+              <span className="sr-only">
+                {isMenuOpen ? "Close menu" : "Open menu"}
+              </span>
               {isMenuOpen ? (
-                <X className="block h-6 w-6" />
+                <X className="block h-6 w-6" aria-hidden="true" />
               ) : (
-                <Menu className="block h-6 w-6" />
+                <Menu className="block h-6 w-6" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -105,30 +118,15 @@ export default function Navbar() {
           <div className="pt-2 pb-3 space-y-1">
             {user ? (
               <>
-                <Link
-                  href="/dashboard"
-                  className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/supplements"
-                  className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  My Supplements
-                </Link>
-                <Link
-                  href="/research"
-                  className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  Research
-                </Link>
-                <Link
-                  href="/profile"
-                  className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  Profile
-                </Link>
+                {navLinks.authenticated.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
                 <button
                   onClick={handleLogout}
                   className="block w-full text-left px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
@@ -138,18 +136,15 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link
-                  href="/login"
-                  className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/signup"
-                  className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  Sign up
-                </Link>
+                {navLinks.unauthenticated.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
               </>
             )}
           </div>

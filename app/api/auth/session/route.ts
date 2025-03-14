@@ -1,6 +1,10 @@
 import { adminAuth } from "../../../../lib/firebase-admin";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import {
+  SESSION_COOKIE_NAME,
+  SESSION_DURATION_MS,
+} from "../../../../lib/constants";
 
 export async function POST(request: Request) {
   try {
@@ -15,15 +19,14 @@ export async function POST(request: Request) {
     console.log("Token verified for user:", decodedToken.uid);
 
     // Create session cookie
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
     const sessionCookie = await adminAuth.createSessionCookie(idToken, {
-      expiresIn,
+      expiresIn: SESSION_DURATION_MS,
     });
     console.log("Session cookie created");
 
     const cookieStore = await cookies();
-    cookieStore.set("__session", sessionCookie, {
-      maxAge: expiresIn,
+    cookieStore.set(SESSION_COOKIE_NAME, sessionCookie, {
+      maxAge: SESSION_DURATION_MS / 1000, // Convert to seconds for cookie maxAge
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
@@ -40,6 +43,6 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   const cookieStore = await cookies();
-  cookieStore.delete("__session");
+  cookieStore.delete(SESSION_COOKIE_NAME);
   return NextResponse.json({ status: "success" });
 }

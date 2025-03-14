@@ -12,6 +12,7 @@ import {
   UserCredential,
 } from "firebase/auth";
 import { auth } from "../lib/firebase";
+import { API_ROUTES } from "../lib/constants";
 
 interface AuthContextType {
   user: User | null;
@@ -39,7 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const createSession = async (userCredential: UserCredential) => {
     const idToken = await userCredential.user.getIdToken();
-    await fetch("/api/auth/session", {
+    await fetch(API_ROUTES.auth.session, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     await signOut(auth);
     // Clear the session cookie
-    await fetch("/api/auth/session", { method: "DELETE" });
+    await fetch(API_ROUTES.auth.session, { method: "DELETE" });
   };
 
   return (
