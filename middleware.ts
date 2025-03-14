@@ -1,50 +1,83 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SESSION_COOKIE_NAME } from "./lib/constants";
+import { SESSION_COOKIE_NAME, ROUTES } from "./lib/constants";
+import { verifySessionToken } from "./lib/session";
 
-// Define protected routes that require authentication
-const protectedRoutes = ["/dashboard", "/supplements", "/profile"];
+export const runtime = "experimental-edge";
 
-// Define auth routes that should redirect to dashboard if already authenticated
-const authRoutes = ["/login", "/signup"];
-
+// This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
-  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
-  const isAuthenticated = !!sessionCookie?.value;
-  const { pathname } = request.nextUrl;
+  try {
+    const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+    const { pathname } = request.nextUrl;
 
-  // Check if the route is protected and user is not authenticated
-  if (
-    protectedRoutes.some((route) => pathname.startsWith(route)) &&
-    !isAuthenticated
-  ) {
-    const url = new URL("/login", request.url);
-    url.searchParams.set("callbackUrl", encodeURI(pathname));
-    return NextResponse.redirect(url);
+    // Check if the current path is an auth page
+    const isAuthPage =
+      pathname.startsWith("/login") || pathname.startsWith("/signup");
+
+    // If on auth page and user is authenticated, redirect to dashboard
+    if (isAuthPage && sessionCookie) {
+      const session = await verifySessionToken(sessionCookie);
+      if (session?.uid) {
+        return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
+      } else {
+        // Invalid session on auth page, let them stay on the auth page
+        const response = NextResponse.next();
+        response.cookies.delete(SESSION_COOKIE_NAME);
+        return response;
+      }
+    }
+
+    // If on protected page and no session, redirect to login
+    if (!isAuthPage && !sessionCookie) {
+      const response = NextResponse.redirect(
+        new URL(ROUTES.login, request.url)
+      );
+      // Store the original URL to redirect back after login
+      response.cookies.set("redirect_url", pathname);
+      return response;
+    }
+
+    // If on protected page with session, verify it
+    if (!isAuthPage && sessionCookie) {
+      const session = await verifySessionToken(sessionCookie);
+      if (session?.uid) {
+        // Add the user ID to request headers for potential use in API routes
+        const response = NextResponse.next();
+        response.headers.set("x-user-id", session.uid);
+        return response;
+      } else {
+        const response = NextResponse.redirect(
+          new URL(ROUTES.login, request.url)
+        );
+        response.cookies.delete(SESSION_COOKIE_NAME);
+        // Store the original URL to redirect back after login
+        response.cookies.set("redirect_url", pathname);
+        return response;
+      }
+    }
+
+    // Default case - allow the request
+    return NextResponse.next();
+  } catch (error) {
+    console.error("Middleware error:", error);
+    // In case of any error, redirect to login for security
+    const response = NextResponse.redirect(new URL(ROUTES.login, request.url));
+    response.cookies.delete(SESSION_COOKIE_NAME);
+    return response;
   }
-
-  // Check if the route is an auth route and user is already authenticated
-  if (
-    authRoutes.some((route) => pathname.startsWith(route)) &&
-    isAuthenticated
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  return NextResponse.next();
 }
 
 // Configure the middleware to run on specific paths
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - api routes
-     */
-    "/((?!_next/static|_next/image|favicon.ico|public|api).*)",
+    // Protected routes
+    "/dashboard/:path*",
+    "/supplements/:path*",
+    "/research/:path*",
+    "/profile/:path*",
+    // Auth routes
+    "/login",
+    "/signup",
   ],
 };

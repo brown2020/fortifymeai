@@ -1,20 +1,26 @@
 "use server";
 
 import { openai } from "../../../lib/openai";
-import { adminAuth, adminDb } from "../../../lib/firebase-admin";
+import { adminDb } from "../../../lib/firebase-admin";
 import { cookies } from "next/headers";
 import { FieldValue } from "firebase-admin/firestore";
+import { SESSION_COOKIE_NAME } from "../../../lib/constants";
+import { verifySessionToken } from "../../../lib/session";
 
 async function verifySession() {
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("__session")?.value;
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
   if (!sessionCookie) {
     throw new Error("Please sign in to use the research feature");
   }
 
-  const decodedClaim = await adminAuth.verifySessionCookie(sessionCookie);
-  return decodedClaim.uid;
+  const session = await verifySessionToken(sessionCookie);
+  if (!session?.uid) {
+    throw new Error("Invalid session. Please sign in again.");
+  }
+
+  return session.uid;
 }
 
 export async function searchSupplement(query: string) {
@@ -22,7 +28,7 @@ export async function searchSupplement(query: string) {
     const userId = await verifySession();
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4",
       messages: [
         {
           role: "system",

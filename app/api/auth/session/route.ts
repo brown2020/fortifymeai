@@ -1,6 +1,7 @@
 import { adminAuth } from "../../../../lib/firebase-admin";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { createSessionToken } from "../../../../lib/session";
 import {
   SESSION_COOKIE_NAME,
   SESSION_DURATION_MS,
@@ -18,14 +19,12 @@ export async function POST(request: Request) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     console.log("Token verified for user:", decodedToken.uid);
 
-    // Create session cookie
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, {
-      expiresIn: SESSION_DURATION_MS,
-    });
-    console.log("Session cookie created");
+    // Create session token
+    const sessionToken = await createSessionToken(decodedToken.uid);
+    console.log("Session token created");
 
     const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE_NAME, sessionCookie, {
+    cookieStore.set(SESSION_COOKIE_NAME, sessionToken, {
       maxAge: SESSION_DURATION_MS / 1000, // Convert to seconds for cookie maxAge
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
