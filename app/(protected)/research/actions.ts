@@ -33,7 +33,7 @@ export async function searchSupplement(query: string) {
         {
           role: "system",
           content:
-            "You are a knowledgeable expert in dietary supplements. Provide accurate, scientific information about supplements, including benefits, risks, interactions, and dosage recommendations. Always include references to scientific studies when available.",
+            "You are a knowledgeable expert in dietary supplements. Provide accurate, scientific information about supplements, including benefits, risks, interactions, and dosage recommendations. Always include references to scientific studies when available. Format your response using proper markdown with the following guidelines:\n\n1. Use ## for main headings and ### for subheadings\n2. Leave a blank line before and after headings, lists, and paragraphs\n3. Use bullet points (- item) for lists of features or points\n4. Use numbered lists (1. step) for sequential steps or prioritized items\n5. Use **bold** for emphasis on important terms or warnings\n6. Use *italic* for scientific names or mild emphasis\n7. Use > for blockquotes when citing studies\n8. Structure your response with clear sections: Introduction, Benefits, Risks, Interactions, Dosage, and References\n\nDo not use HTML tags.",
         },
         {
           role: "user",

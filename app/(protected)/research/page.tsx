@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Search, BookOpen, History, Loader2, Trash2 } from "lucide-react";
 import { searchSupplement, getSearchHistory, deleteSearch } from "./actions";
 import { useAuth } from "../../../contexts/AuthContext";
+import ReactMarkdown from "react-markdown";
 
 type SearchHistory = {
   id: string;
@@ -119,12 +120,9 @@ export default function Research() {
 
             {result && (
               <div className="bg-white rounded-xl shadow-xs p-6">
-                <div
-                  className="prose prose-blue max-w-none"
-                  dangerouslySetInnerHTML={{
-                    __html: result.replace(/\n/g, "<br/>"),
-                  }}
-                />
+                <div className="prose prose-blue prose-lg max-w-none markdown-content">
+                  <ReactMarkdown>{result}</ReactMarkdown>
+                </div>
               </div>
             )}
 
