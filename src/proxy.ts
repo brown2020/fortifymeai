@@ -5,8 +5,7 @@ import { verifySessionToken } from "./lib/session";
 
 export const runtime = "experimental-edge";
 
-// This function can be marked `async` if using `await` inside
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
     const { pathname } = request.nextUrl;
@@ -44,7 +43,7 @@ export async function middleware(request: NextRequest) {
       if (session?.uid) {
         // Add the user ID to request headers for potential use in API routes
         const response = NextResponse.next();
-        response.headers.set("x-user-id", session.uid);
+        response.headers.set("x-user-id", session.uid as string);
         return response;
       } else {
         const response = NextResponse.redirect(
@@ -60,7 +59,7 @@ export async function middleware(request: NextRequest) {
     // Default case - allow the request
     return NextResponse.next();
   } catch (error) {
-    console.error("Middleware error:", error);
+    console.error("Proxy error:", error);
     // In case of any error, redirect to login for security
     const response = NextResponse.redirect(new URL(ROUTES.login, request.url));
     response.cookies.delete(SESSION_COOKIE_NAME);
@@ -68,7 +67,7 @@ export async function middleware(request: NextRequest) {
   }
 }
 
-// Configure the middleware to run on specific paths
+// Configure the proxy to run on specific paths
 export const config = {
   matcher: [
     // Protected routes
