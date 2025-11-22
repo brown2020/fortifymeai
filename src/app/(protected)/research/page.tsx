@@ -21,13 +21,20 @@ export default function Research() {
   const { user } = useAuthStore();
   const [searchHistory, setSearchHistory] = useState<SearchHistory[]>([]);
   const [historyResult, setHistoryResult] = useState("");
-  
-  const { completion, input, handleInputChange, handleSubmit, isLoading, error } = useCompletion({
+
+  const {
+    completion,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+  } = useCompletion({
     api: "/api/research",
     onFinish: async (prompt, completion) => {
       await saveSearch(prompt, completion);
       await loadSearchHistory();
-    }
+    },
   });
 
   const loadSearchHistory = useCallback(async () => {
@@ -67,7 +74,7 @@ export default function Research() {
     }
   };
 
-  const displayedResult = isLoading ? completion : (historyResult || completion);
+  const displayedResult = isLoading ? completion : historyResult || completion;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -131,14 +138,14 @@ export default function Research() {
             {!displayedResult && !error && !isLoading && (
               <Card className="text-center p-6">
                 <CardContent className="pt-6">
-                    <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
                     Start Your Research
-                    </h3>
-                    <p className="text-muted-foreground">
-                    Search for any supplement to learn about its benefits, risks,
-                    and scientific evidence
-                    </p>
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Search for any supplement to learn about its benefits,
+                    risks, and scientific evidence
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -149,39 +156,41 @@ export default function Research() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
-                    <History className="h-5 w-5 text-gray-500 mr-2" />
-                    <h2 className="text-lg font-semibold">Recent Searches</h2>
+                  <History className="h-5 w-5 text-gray-500 mr-2" />
+                  <h2 className="text-lg font-semibold">Recent Searches</h2>
                 </div>
                 {searchHistory.length > 0 ? (
-                    <ul className="space-y-3">
+                  <ul className="space-y-3">
                     {searchHistory.map((item, index) => (
-                        <li
+                      <li
                         key={index}
                         className="text-sm cursor-pointer hover:bg-gray-50 p-2 rounded-sm group relative"
                         onClick={() => handleHistoryClick(item)}
-                        >
+                      >
                         <div className="flex justify-between items-start">
-                            <div className="pr-6">
+                          <div className="pr-6">
                             <p className="text-gray-900 font-medium truncate">
-                                {item.query}
+                              {item.query}
                             </p>
                             <p className="text-gray-500 text-xs">
-                                {new Date(item.timestamp).toLocaleDateString()}
+                              {new Date(item.timestamp).toLocaleDateString()}
                             </p>
-                            </div>
-                            <button
+                          </div>
+                          <button
                             onClick={(e) => handleDelete(item.id, e)}
                             className="text-gray-400 hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100 absolute right-2 top-2"
                             title="Delete search"
-                            >
+                          >
                             <Trash2 className="h-4 w-4" />
-                            </button>
+                          </button>
                         </div>
-                        </li>
+                      </li>
                     ))}
-                    </ul>
+                  </ul>
                 ) : (
-                    <p className="text-muted-foreground text-sm">No recent searches</p>
+                  <p className="text-muted-foreground text-sm">
+                    No recent searches
+                  </p>
                 )}
               </CardContent>
             </Card>
