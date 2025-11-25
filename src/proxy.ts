@@ -3,8 +3,6 @@ import type { NextRequest } from "next/server";
 import { SESSION_COOKIE_NAME, ROUTES } from "./lib/constants";
 import { verifySessionToken } from "./lib/session";
 
-export const runtime = "experimental-edge";
-
 export async function proxy(request: NextRequest) {
   try {
     const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
