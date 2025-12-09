@@ -2,6 +2,9 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { AlertTriangle, RefreshCw, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/lib/constants";
 
 export default function SignUpError({
   error,
@@ -11,31 +14,39 @@ export default function SignUpError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    console.error("Sign up error:", error);
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 text-center">
-        <div>
-          <h2 className="text-3xl font-extrabold text-gray-900">
-            Something went wrong!
+    <div className="min-h-screen pt-20 pb-12 page-transition">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="floating-orb floating-orb-1" />
+        <div className="floating-orb floating-orb-2" />
+      </div>
+
+      <div className="relative max-w-md mx-auto px-4 pt-20">
+        <div className="glass-card p-8 text-center">
+          <div className="p-4 rounded-2xl bg-rose-500/10 w-fit mx-auto mb-4">
+            <AlertTriangle className="h-10 w-10 text-rose-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Something went wrong
           </h2>
-          <p className="mt-2 text-sm text-gray-600">{error.message}</p>
-        </div>
-        <div className="space-y-4">
-          <button
-            onClick={reset}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Try again
-          </button>
-          <Link
-            href="/"
-            className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Return to home
-          </Link>
+          <p className="text-slate-400 mb-6">
+            {error.message || "We encountered an error. Please try again."}
+          </p>
+          <div className="space-y-3">
+            <Button onClick={reset} className="w-full gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Try again
+            </Button>
+            <Link href={ROUTES.home}>
+              <Button variant="outline" className="w-full gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Return to home
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -2,7 +2,15 @@
 
 import { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
-import { Plus, Search } from "lucide-react";
+import { useToast } from "@/components/ui/toaster";
+import { 
+  Plus, 
+  Search, 
+  FlaskConical, 
+  Sparkles, 
+  Package,
+  Filter
+} from "lucide-react";
 import { Supplement, SupplementFormData } from "@/lib/models/supplement";
 import {
   getUserSupplements,
@@ -14,23 +22,20 @@ import SupplementCard from "@/components/supplements/SupplementCard";
 import SupplementForm from "@/components/supplements/SupplementForm";
 import { Button } from "@/components/ui/button";
 import { Timestamp } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Supplements() {
   const { user } = useAuthStore();
+  const { addToast } = useToast();
   const [supplements, setSupplements] = useState<Supplement[]>([]);
-  const [filteredSupplements, setFilteredSupplements] = useState<Supplement[]>(
-    []
-  );
+  const [filteredSupplements, setFilteredSupplements] = useState<Supplement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [editingSupplement, setEditingSupplement] = useState<Supplement | null>(
-    null
-  );
+  const [editingSupplement, setEditingSupplement] = useState<Supplement | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Define fetchSupplements with useCallback
   const fetchSupplements = useCallback(async () => {
     if (!user) return;
 
@@ -44,19 +49,18 @@ export default function Supplements() {
     } catch (err) {
       console.error("Error fetching supplements:", err);
       setError("Failed to load supplements. Please try again.");
+      addToast("Failed to load supplements", "error");
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, addToast]);
 
-  // Fetch supplements when component mounts or user changes
   useEffect(() => {
     if (user) {
       fetchSupplements();
     }
   }, [user, fetchSupplements]);
 
-  // Filter supplements when search query changes
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setFilteredSupplements(supplements);
@@ -65,8 +69,7 @@ export default function Supplements() {
       const filtered = supplements.filter(
         (supplement) =>
           supplement.name.toLowerCase().includes(query) ||
-          (supplement.brand &&
-            supplement.brand.toLowerCase().includes(query)) ||
+          (supplement.brand && supplement.brand.toLowerCase().includes(query)) ||
           (supplement.notes && supplement.notes.toLowerCase().includes(query))
       );
       setFilteredSupplements(filtered);
@@ -74,11 +77,7 @@ export default function Supplements() {
   }, [searchQuery, supplements]);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    // Use a simple timeout instead of the debounce utility to avoid type issues
-    const value = e.target.value;
-    setTimeout(() => {
-      setSearchQuery(value);
-    }, 300);
+    setSearchQuery(e.target.value);
   };
 
   const handleAddSupplement = () => {
@@ -104,8 +103,6 @@ export default function Supplements() {
     try {
       if (editingSupplement) {
         await updateSupplement(editingSupplement.id, data);
-
-        // Update the local state
         setSupplements((prev) =>
           prev.map((s) => {
             if (s.id === editingSupplement.id) {
@@ -121,18 +118,18 @@ export default function Supplements() {
             return s;
           })
         );
+        addToast("Supplement updated successfully", "success");
       } else {
         await createSupplement(user.uid, data);
-
-        // Refresh the supplements list
         await fetchSupplements();
+        addToast("Supplement added successfully", "success");
       }
 
       setShowForm(false);
       setEditingSupplement(null);
     } catch (err) {
       console.error("Error saving supplement:", err);
-      alert("Failed to save supplement. Please try again.");
+      addToast("Failed to save supplement. Please try again.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -141,16 +138,14 @@ export default function Supplements() {
   const handleDeleteSupplement = async (id: string) => {
     try {
       await deleteSupplement(id);
-
-      // Update the local state
       setSupplements((prev) => prev.filter((s) => s.id !== id));
+      addToast("Supplement deleted", "success");
     } catch (err) {
       console.error("Error deleting supplement:", err);
-      alert("Failed to delete supplement. Please try again.");
+      addToast("Failed to delete supplement. Please try again.", "error");
     }
   };
 
-  // Convert Supplement to SupplementFormData for the form
   const supplementToFormData = (supplement: Supplement): SupplementFormData => {
     return {
       name: supplement.name,
@@ -158,103 +153,143 @@ export default function Supplements() {
       dosage: supplement.dosage,
       frequency: supplement.frequency,
       notes: supplement.notes,
-      startDate: supplement.startDate
-        ? supplement.startDate.toDate()
-        : undefined,
+      startDate: supplement.startDate ? supplement.startDate.toDate() : undefined,
       imageUrl: supplement.imageUrl,
     };
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Supplements</h1>
-          <p className="text-gray-600 mt-2">
-            Manage and track your supplement collection
-          </p>
-        </div>
-        <Button onClick={handleAddSupplement}>
-          <Plus className="h-5 w-5 mr-2" />
-          Add Supplement
-        </Button>
+    <div className="min-h-screen pt-20 pb-12 page-transition">
+      {/* Background effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="floating-orb floating-orb-1" />
+        <div className="floating-orb floating-orb-2" />
       </div>
 
-      <div className="mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search supplements..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            onChange={handleSearchChange}
-          />
-          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <div className="flex items-center gap-2 text-emerald-400 mb-2">
+              <Sparkles className="h-5 w-5" />
+              <span className="text-sm font-medium">My Supplements</span>
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Supplement Collection
+            </h1>
+            <p className="text-slate-400">
+              Track and manage your supplement routine
+            </p>
+          </div>
+          <Button onClick={handleAddSupplement} className="gap-2">
+            <Plus className="h-5 w-5" />
+            Add Supplement
+          </Button>
         </div>
-      </div>
 
-      {showForm && (
-        <div className="mb-8">
-          <SupplementForm
-            initialData={
-              editingSupplement
-                ? supplementToFormData(editingSupplement)
-                : undefined
-            }
-            onSubmit={handleSubmitForm}
-            onCancel={handleCancelForm}
-            isSubmitting={isSubmitting}
-          />
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="glass-card p-1">
+            <div className="relative flex items-center gap-3">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Search supplements..."
+                  className="w-full h-12 pl-12 pr-4 bg-transparent text-white placeholder-slate-400 
+                    focus:outline-none text-base rounded-xl"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+                <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
+              </div>
+              <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400">
+                <Filter className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
         </div>
-      )}
 
-      {isLoading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600">Loading supplements...</p>
-        </div>
-      ) : error ? (
-        <div className="bg-red-50 text-red-700 p-4 rounded-lg text-center">
-          {error}
-          <button
-            onClick={fetchSupplements}
-            className="ml-2 underline font-medium"
-          >
-            Try again
-          </button>
-        </div>
-      ) : filteredSupplements.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+        {/* Form Modal */}
+        {showForm && (
+          <div className="mb-8">
+            <SupplementForm
+              initialData={
+                editingSupplement
+                  ? supplementToFormData(editingSupplement)
+                  : undefined
+              }
+              onSubmit={handleSubmitForm}
+              onCancel={handleCancelForm}
+              isSubmitting={isSubmitting}
+            />
+          </div>
+        )}
+
+        {/* Content */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="glass-card p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="glass-card p-8 text-center border-rose-500/30">
+            <div className="p-4 rounded-2xl bg-rose-500/10 w-fit mx-auto mb-4">
+              <FlaskConical className="h-10 w-10 text-rose-400" />
+            </div>
+            <p className="text-rose-400 mb-4">{error}</p>
+            <Button onClick={fetchSupplements} variant="outline">
+              Try again
+            </Button>
+          </div>
+        ) : filteredSupplements.length === 0 ? (
+          <div className="glass-card p-12 text-center">
+            <div className="p-4 rounded-2xl bg-slate-800/50 w-fit mx-auto mb-4">
+              <Package className="h-12 w-12 text-slate-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">
               {searchQuery.trim() !== ""
                 ? "No supplements match your search"
                 : "No supplements added yet"}
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-slate-400 mb-6 max-w-md mx-auto">
               {searchQuery.trim() !== ""
-                ? "Try a different search term"
-                : "Start building your supplement collection"}
+                ? "Try a different search term or add a new supplement"
+                : "Start building your supplement collection to track your health journey"}
             </p>
             {searchQuery.trim() === "" && (
-              <Button variant="outline" onClick={handleAddSupplement}>
-                <Plus className="h-5 w-5 mr-2" />
+              <Button onClick={handleAddSupplement} className="gap-2">
+                <Plus className="h-5 w-5" />
                 Add Your First Supplement
               </Button>
             )}
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSupplements.map((supplement) => (
-            <SupplementCard
-              key={supplement.id}
-              supplement={supplement}
-              onEdit={handleEditSupplement}
-              onDelete={handleDeleteSupplement}
-            />
-          ))}
-        </div>
-      )}
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredSupplements.map((supplement, index) => (
+              <div
+                key={supplement.id}
+                className="stagger-1"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <SupplementCard
+                  supplement={supplement}
+                  onEdit={handleEditSupplement}
+                  onDelete={handleDeleteSupplement}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,17 +1,25 @@
-import { Inter } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import Navbar from "@/components/Navbar";
+import { Toaster } from "@/components/ui/toaster";
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-display",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata = {
-  title: "Fortify.me - Your Supplement Management Platform",
+  title: "Fortify.me - AI-Powered Supplement Intelligence",
   description:
-    "AI-powered platform for tracking and managing dietary supplements",
+    "Track, research, and optimize your supplement routine with AI-powered insights backed by science.",
 };
 
 export default function RootLayout({
@@ -20,12 +28,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable}`}>
-      <body className={`min-h-screen bg-gray-50 font-sans`}>
-        <AuthProvider>
-          <Navbar />
-          <main className="pt-16">{children}</main>
-        </AuthProvider>
+    <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+      <body className="min-h-screen antialiased font-display">
+        <Toaster>
+          <AuthProvider>
+            <Navbar />
+            <main>{children}</main>
+          </AuthProvider>
+        </Toaster>
       </body>
     </html>
   );

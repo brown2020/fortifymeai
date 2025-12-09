@@ -1,41 +1,63 @@
-export default function ResearchLoading() {
+import { BookOpen, History } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function Loading() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-8">
-          <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse mr-3"></div>
-          <div>
-            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-2"></div>
-            <div className="h-4 w-64 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-        </div>
+    <div className="min-h-screen pt-20 pb-12">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="floating-orb floating-orb-1" />
+        <div className="floating-orb floating-orb-2" />
+      </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Main Search Section */}
-          <div className="md:col-span-2 space-y-6">
-            <div className="h-12 w-full bg-gray-200 rounded animate-pulse"></div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-              <div className="h-12 w-12 bg-gray-200 rounded-full animate-pulse mx-auto mb-4"></div>
-              <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mx-auto mb-2"></div>
-              <div className="h-4 w-64 bg-gray-200 rounded animate-pulse mx-auto"></div>
-            </div>
-          </div>
-
-          {/* Search History Sidebar */}
-          <div className="md:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-center mb-4">
-                <div className="h-5 w-5 bg-gray-200 rounded animate-pulse mr-2"></div>
-                <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+      <div className="relative container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <header className="mb-8">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20">
+                <BookOpen className="h-8 w-8 text-emerald-400" />
               </div>
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="p-2">
-                    <div className="h-5 w-full bg-gray-200 rounded animate-pulse mb-1"></div>
-                    <div className="h-3 w-20 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                ))}
+              <div>
+                <Skeleton className="h-9 w-64 mb-2" />
+                <Skeleton className="h-5 w-48" />
+              </div>
+            </div>
+          </header>
+
+          {/* Category Tabs */}
+          <div className="mb-6">
+            <Skeleton className="h-12 w-full max-w-2xl rounded-xl" />
+          </div>
+
+          <div className="grid lg:grid-cols-4 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* Search */}
+              <Skeleton className="h-16 w-full rounded-2xl" />
+
+              {/* Quick Queries */}
+              <div className="glass-card p-6">
+                <Skeleton className="h-6 w-32 mb-4" />
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full rounded-lg" />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="glass-card p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <History className="h-5 w-5 text-slate-400" />
+                  <Skeleton className="h-5 w-16" />
+                </div>
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
