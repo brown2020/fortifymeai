@@ -32,11 +32,11 @@ import {
 } from "./actions";
 import { useAuthStore } from "@/lib/store/auth-store";
 import ReactMarkdown from "react-markdown";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import { SkeletonText } from "@/components/ui/skeleton";
 
 // Research categories configuration
 const RESEARCH_CATEGORIES: {
@@ -157,8 +157,16 @@ export default function Research() {
   const [currentResult, setCurrentResult] = useState("");
 
   const [lastSearchQuery, setLastSearchQuery] = useState("");
+  const [lastSearchCategory, setLastSearchCategory] =
+    useState<ResearchCategory>("general");
   const completionRef = useRef("");
   const prevIsLoadingRef = useRef(false);
+
+  const resetDisplayedResult = useCallback(() => {
+    setHistoryResult("");
+    setHistoryQuery("");
+    setCurrentResult("");
+  }, []);
 
   const {
     completion,
@@ -183,10 +191,9 @@ export default function Research() {
   }, [completion]);
 
   const loadSearchHistory = useCallback(async () => {
-    if (user) {
-      const history = await getSearchHistory(user.uid, 15);
-      setSearchHistory(history);
-    }
+    if (!user) return;
+    const history = await getSearchHistory(15);
+    setSearchHistory(history);
   }, [user]);
 
   // Load history on mount
@@ -205,7 +212,11 @@ export default function Research() {
         if (finalCompletion) {
           setCurrentResult(finalCompletion);
           try {
-            await saveSearch(lastSearchQuery, finalCompletion, activeCategory);
+            await saveSearch(
+              lastSearchQuery,
+              finalCompletion,
+              lastSearchCategory
+            );
             await loadSearchHistory();
           } catch (error) {
             console.error("Failed to save search:", error);
@@ -216,7 +227,7 @@ export default function Research() {
 
     saveCompletedSearch();
     prevIsLoadingRef.current = isLoading;
-  }, [isLoading, lastSearchQuery, activeCategory, loadSearchHistory]);
+  }, [isLoading, lastSearchQuery, lastSearchCategory, loadSearchHistory]);
 
   // Auto-scroll to result when new content arrives
   useEffect(() => {
@@ -229,18 +240,16 @@ export default function Research() {
     e.preventDefault();
     if (!input.trim()) return;
     setLastSearchQuery(input); // Capture query before submit
-    setHistoryResult("");
-    setHistoryQuery("");
-    setCurrentResult("");
+    setLastSearchCategory(activeCategory); // Capture category used for this search
+    resetDisplayedResult();
     baseHandleSubmit(e);
   };
 
   const handleQuickQuery = (query: string) => {
     setInput(query);
     setLastSearchQuery(query); // Capture query for saving
-    setHistoryResult("");
-    setHistoryQuery("");
-    setCurrentResult("");
+    setLastSearchCategory(activeCategory); // Capture category used for this search
+    resetDisplayedResult();
     // Focus input and trigger search after state update
     setTimeout(() => {
       inputRef.current?.form?.requestSubmit();
@@ -257,10 +266,9 @@ export default function Research() {
   const handleDelete = async (searchId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      if (user) {
-        await deleteSearch(user.uid, searchId);
-        await loadSearchHistory();
-      }
+      if (!user) return;
+      await deleteSearch(searchId);
+      await loadSearchHistory();
     } catch (error) {
       console.error("Failed to delete search:", error);
     }
@@ -291,7 +299,10 @@ export default function Research() {
   const displayedResult = isLoading
     ? completion
     : historyResult || currentResult || completion;
-  const displayedQuery = historyQuery || (completion ? input : "");
+  const displayedQuery =
+    historyQuery || (displayedResult ? lastSearchQuery : "");
+  const displayedCategory: ResearchCategory =
+    historyResult || historyQuery ? activeCategory : lastSearchCategory;
 
   const getCategoryConfig = (categoryId: ResearchCategory) => {
     return (
@@ -511,12 +522,12 @@ export default function Research() {
                     <div className="flex items-center gap-3">
                       <Badge
                         variant={
-                          activeCategory === "interactions"
+                          displayedCategory === "interactions"
                             ? "warning"
                             : "default"
                         }
                       >
-                        {getCategoryConfig(activeCategory).label}
+                        {getCategoryConfig(displayedCategory).label}
                       </Badge>
                       {displayedQuery && (
                         <span className="text-sm text-slate-400 truncate max-w-md">

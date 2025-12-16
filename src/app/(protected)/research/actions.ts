@@ -88,10 +88,10 @@ export async function saveSearch(
  * Get search history with optional limit
  */
 export async function getSearchHistory(
-  userId: string,
   limit: number = 20
 ): Promise<SearchHistoryItem[]> {
   try {
+    const userId = await verifySession();
     const searchesSnapshot = await adminDb
       .collection("users")
       .doc(userId)
@@ -123,10 +123,10 @@ export async function getSearchHistory(
  * Delete a search from history
  */
 export async function deleteSearch(
-  userId: string, 
   searchId: string
 ): Promise<{ success: boolean }> {
   try {
+    const userId = await verifySession();
     await adminDb
       .collection("users")
       .doc(userId)
