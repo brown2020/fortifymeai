@@ -23,6 +23,15 @@ export const metadata: Metadata = {
   title: "Dashboard | Fortify.me",
 };
 
+type ScheduleTime = "morning" | "midday" | "evening" | "bedtime" | "anytime";
+type ScheduledSupplement = {
+  id: string;
+  name: string;
+  dosage?: string;
+  frequency?: string;
+  scheduleTimes?: string[];
+};
+
 async function getSupplementCount(userId: string): Promise<number> {
   try {
     const snapshot = await adminDb
@@ -33,6 +42,61 @@ async function getSupplementCount(userId: string): Promise<number> {
     return snapshot.data().count;
   } catch {
     return 0;
+  }
+}
+
+async function getTodaysSchedule(userId: string): Promise<Record<ScheduleTime, ScheduledSupplement[]>> {
+  const grouped: Record<ScheduleTime, ScheduledSupplement[]> = {
+    morning: [],
+    midday: [],
+    evening: [],
+    bedtime: [],
+    anytime: [],
+  };
+
+  try {
+    const snapshot = await adminDb
+      .collection("supplements")
+      .where("userId", "==", userId)
+      .orderBy("createdAt", "desc")
+      .limit(50)
+      .get();
+
+    const supplements = snapshot.docs.map((doc) => {
+      const data = doc.data() as Record<string, unknown>;
+      return {
+        id: doc.id,
+        name: typeof data.name === "string" ? data.name : "Untitled",
+        dosage: typeof data.dosage === "string" ? data.dosage : undefined,
+        frequency: typeof data.frequency === "string" ? data.frequency : undefined,
+        scheduleTimes: Array.isArray(data.scheduleTimes)
+          ? (data.scheduleTimes.filter((t) => typeof t === "string") as string[])
+          : undefined,
+      } satisfies ScheduledSupplement;
+    });
+
+    for (const supplement of supplements) {
+      const times = supplement.scheduleTimes?.length
+        ? supplement.scheduleTimes
+        : ["anytime"];
+
+      for (const time of times) {
+        if (
+          time === "morning" ||
+          time === "midday" ||
+          time === "evening" ||
+          time === "bedtime"
+        ) {
+          grouped[time].push(supplement);
+        } else {
+          grouped.anytime.push(supplement);
+        }
+      }
+    }
+
+    return grouped;
+  } catch {
+    return grouped;
   }
 }
 
@@ -58,6 +122,13 @@ export default async function Dashboard() {
   let userEmail = "";
   let supplementCount = 0;
   let searchCount = 0;
+  let todaysSchedule: Record<ScheduleTime, ScheduledSupplement[]> = {
+    morning: [],
+    midday: [],
+    evening: [],
+    bedtime: [],
+    anytime: [],
+  };
   
   if (sessionToken) {
     const payload = await verifySessionToken(sessionToken);
@@ -70,6 +141,7 @@ export default async function Dashboard() {
         // Get counts
         supplementCount = await getSupplementCount(payload.uid as string);
         searchCount = await getSearchCount(payload.uid as string);
+        todaysSchedule = await getTodaysSchedule(payload.uid as string);
       } catch (e) {
         console.error("Error fetching user", e);
       }
@@ -158,7 +230,7 @@ export default async function Dashboard() {
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`p-2.5 rounded-xl bg-gradient-to-br ${stat.bgColor}`}>
+                  <div className={`p-2.5 rounded-xl bg-linear-to-br ${stat.bgColor}`}>
                     <Icon className={`h-5 w-5 ${stat.color}`} />
                   </div>
                 </div>
@@ -175,7 +247,7 @@ export default async function Dashboard() {
             {/* Today's Schedule */}
             <div className="glass-card p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20">
+                <div className="p-2.5 rounded-xl bg-linear-to-br from-emerald-500/20 to-teal-500/20">
                   <Calendar className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div>
@@ -196,23 +268,75 @@ export default async function Dashboard() {
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-emerald-500/20">
-                        <Clock className="h-4 w-4 text-emerald-400" />
+                <div className="space-y-4">
+                  {(
+                    [
+                      { key: "morning", label: "Morning" },
+                      { key: "midday", label: "Midday" },
+                      { key: "evening", label: "Evening" },
+                      { key: "bedtime", label: "Bedtime" },
+                      { key: "anytime", label: "Anytime" },
+                    ] as const
+                  ).map(({ key, label }) => {
+                    const items = todaysSchedule[key];
+                    if (!items.length) return null;
+                    return (
+                      <div key={key} className="rounded-xl bg-slate-800/30 border border-slate-700/50 overflow-hidden">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-emerald-500/15">
+                              <Clock className="h-4 w-4 text-emerald-400" />
+                            </div>
+                            <div>
+                              <p className="text-white font-medium">{label}</p>
+                              <p className="text-xs text-slate-500">{items.length} item{items.length === 1 ? "" : "s"}</p>
+                            </div>
+                          </div>
+                          <Link href={ROUTES.supplements}>
+                            <Button variant="ghost" size="sm" className="gap-1">
+                              View <ArrowRight className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </div>
+                        <ul className="divide-y divide-slate-700/50">
+                          {items.slice(0, 5).map((s) => (
+                            <li key={`${key}-${s.id}`} className="px-4 py-3 flex items-center justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-sm text-white truncate">{s.name}</p>
+                                {(s.dosage || s.frequency) && (
+                                  <p className="text-xs text-slate-400 truncate">
+                                    {[s.dosage, s.frequency].filter(Boolean).join(" • ")}
+                                  </p>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                          {items.length > 5 && (
+                            <li className="px-4 py-3">
+                              <Link href={ROUTES.supplements} className="text-sm text-emerald-400 hover:text-emerald-300">
+                                View {items.length - 5} more…
+                              </Link>
+                            </li>
+                          )}
+                        </ul>
                       </div>
-                      <div>
-                        <p className="text-white font-medium">Morning routine</p>
-                        <p className="text-sm text-slate-400">View your supplements</p>
-                      </div>
+                    );
+                  })}
+                  {Object.values(todaysSchedule).every((arr) => arr.length === 0) && (
+                    <div className="text-center py-8 rounded-xl bg-slate-800/30 border border-slate-700/50">
+                      <Clock className="h-10 w-10 text-slate-600 mx-auto mb-3" />
+                      <p className="text-slate-400 mb-2">No schedule set yet</p>
+                      <p className="text-sm text-slate-500 mb-4">
+                        Add “Schedule” times to your supplements (Morning/Midday/Evening/Bedtime) to build a daily plan.
+                      </p>
+                      <Link href={ROUTES.supplements}>
+                        <Button size="sm" className="gap-2">
+                          <ArrowRight className="h-4 w-4" />
+                          Set schedules
+                        </Button>
+                      </Link>
                     </div>
-                    <Link href={ROUTES.supplements}>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        View <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
@@ -220,7 +344,7 @@ export default async function Dashboard() {
             {/* Recent Activity */}
             <div className="glass-card p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20">
+                <div className="p-2.5 rounded-xl bg-linear-to-br from-violet-500/20 to-purple-500/20">
                   <Activity className="h-5 w-5 text-violet-400" />
                 </div>
                 <div>
@@ -287,7 +411,7 @@ export default async function Dashboard() {
                       <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-800/30 
                         border border-slate-700/50 hover:border-slate-600/50 
                         hover:bg-slate-800/50 transition-all cursor-pointer group">
-                        <div className={`p-2.5 rounded-xl bg-gradient-to-br ${action.color} 
+                        <div className={`p-2.5 rounded-xl bg-linear-to-br ${action.color} 
                           group-hover:scale-110 transition-transform`}>
                           <Icon className="h-5 w-5 text-white" />
                         </div>
@@ -307,7 +431,7 @@ export default async function Dashboard() {
             {/* Reminders */}
             <div className="glass-card p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20">
+                <div className="p-2.5 rounded-xl bg-linear-to-br from-amber-500/20 to-orange-500/20">
                   <Bell className="h-5 w-5 text-amber-400" />
                 </div>
                 <h2 className="text-lg font-semibold text-white">Reminders</h2>
@@ -324,7 +448,7 @@ export default async function Dashboard() {
             </div>
 
             {/* Pro Tip */}
-            <div className="glass-card p-6 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 
+            <div className="glass-card p-6 bg-linear-to-br from-emerald-500/5 to-teal-500/5 
               border-emerald-500/20">
               <div className="flex items-start gap-3">
                 <div className="p-2 rounded-xl bg-emerald-500/20 shrink-0">

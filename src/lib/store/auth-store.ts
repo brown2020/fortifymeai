@@ -11,6 +11,10 @@ import {
 import { auth } from '../firebase';
 import { API_ROUTES } from '../constants';
 
+type SessionResponse =
+  | { status: "success"; uid: string }
+  | { error: string };
+
 interface AuthState {
   user: User | null;
   loading: boolean;
@@ -24,13 +28,26 @@ interface AuthState {
 
 const createSession = async (userCredential: UserCredential) => {
   const idToken = await userCredential.user.getIdToken();
-  await fetch(API_ROUTES.auth.session, {
+  const res = await fetch(API_ROUTES.auth.session, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ idToken }),
   });
+
+  if (!res.ok) {
+    let message = "Failed to create server session.";
+    try {
+      const data = (await res.json()) as SessionResponse;
+      if ("error" in data && typeof data.error === "string") {
+        message = data.error;
+      }
+    } catch {
+      // ignore
+    }
+    throw new Error(message);
+  }
 };
 
 export const useAuthStore = create<AuthState>((set) => ({

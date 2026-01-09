@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,6 +10,25 @@ import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+function getCookieValue(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const raw = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${name}=`))
+    ?.split("=")[1];
+  if (!raw) return null;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+function clearCookie(name: string) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=; Max-Age=0; path=/; samesite=lax`;
+}
 
 const benefits = [
   "Track unlimited supplements",
@@ -26,6 +45,12 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { signUp, signInWithGoogle } = useAuthStore();
+  const [callbackUrl, setCallbackUrl] = useState(ROUTES.dashboard);
+
+  useEffect(() => {
+    const redirectCookie = getCookieValue("redirect_url");
+    setCallbackUrl(redirectCookie || ROUTES.dashboard);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +69,8 @@ export default function SignUp() {
       setError("");
       setLoading(true);
       await signUp(email, password);
-      router.push(ROUTES.dashboard);
+      clearCookie("redirect_url");
+      router.push(callbackUrl);
     } catch (err: unknown) {
       setError(
         "Failed to create an account. " +
@@ -60,7 +86,8 @@ export default function SignUp() {
       setError("");
       setLoading(true);
       await signInWithGoogle();
-      router.push(ROUTES.dashboard);
+      clearCookie("redirect_url");
+      router.push(callbackUrl);
     } catch (err: unknown) {
       setError(
         "Failed to sign in with Google. " +
@@ -92,7 +119,7 @@ export default function SignUp() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-6">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 
+            <div className="p-2.5 rounded-xl bg-linear-to-br from-emerald-500/20 to-teal-500/20 
               border border-emerald-500/20">
               <Pill className="h-6 w-6 text-emerald-400" />
             </div>

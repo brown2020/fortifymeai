@@ -31,7 +31,12 @@ export async function proxy(request: NextRequest) {
         new URL(ROUTES.login, request.url)
       );
       // Store the original URL to redirect back after login
-      response.cookies.set("redirect_url", pathname);
+      response.cookies.set("redirect_url", pathname, {
+        path: "/",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 10, // 10 minutes
+      });
       return response;
     }
 
@@ -39,17 +44,26 @@ export async function proxy(request: NextRequest) {
     if (!isAuthPage && sessionCookie) {
       const session = await verifySessionToken(sessionCookie);
       if (session?.uid) {
-        // Add the user ID to request headers for potential use in API routes
-        const response = NextResponse.next();
-        response.headers.set("x-user-id", session.uid as string);
-        return response;
+        // Add the user ID to *request* headers for potential use downstream
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set("x-user-id", session.uid as string);
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
       } else {
         const response = NextResponse.redirect(
           new URL(ROUTES.login, request.url)
         );
         response.cookies.delete(SESSION_COOKIE_NAME);
         // Store the original URL to redirect back after login
-        response.cookies.set("redirect_url", pathname);
+        response.cookies.set("redirect_url", pathname, {
+          path: "/",
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 60 * 10, // 10 minutes
+        });
         return response;
       }
     }

@@ -152,6 +152,7 @@ export default function Supplements() {
       brand: supplement.brand,
       dosage: supplement.dosage,
       frequency: supplement.frequency,
+      scheduleTimes: supplement.scheduleTimes,
       notes: supplement.notes,
       startDate: supplement.startDate ? supplement.startDate.toDate() : undefined,
       imageUrl: supplement.imageUrl,

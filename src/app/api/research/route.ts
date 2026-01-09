@@ -1,5 +1,9 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { z } from "zod";
+import { cookies } from "next/headers";
+import { SESSION_COOKIE_NAME } from "@/lib/constants";
+import { verifySessionToken } from "@/lib/session";
 
 // Research category-specific system prompts
 const RESEARCH_PROMPTS = {
@@ -78,11 +82,71 @@ Be balanced and critical. Acknowledge limitations in the research and areas of s
 
 export type ResearchCategory = keyof typeof RESEARCH_PROMPTS;
 
+const researchRequestSchema = z.object({
+  prompt: z.string().trim().min(1).max(8_000),
+  category: z
+    .enum(["general", "benefits", "dosing", "interactions", "stacking", "evidence"])
+    .optional()
+    .default("general"),
+});
+
+type RateLimitState = { windowStartMs: number; count: number };
+const rateLimitByUser = new Map<string, RateLimitState>();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 20;
+
 export async function POST(request: Request) {
   try {
-    const { prompt, category = "general" } = await request.json();
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    if (!sessionToken) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-    const systemPrompt = RESEARCH_PROMPTS[category as ResearchCategory] || RESEARCH_PROMPTS.general;
+    const session = await verifySessionToken(sessionToken);
+    if (!session?.uid) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Best-effort in-memory rate limiting (per server instance)
+    const now = Date.now();
+    const existing = rateLimitByUser.get(session.uid);
+    if (!existing || now - existing.windowStartMs >= RATE_LIMIT_WINDOW_MS) {
+      rateLimitByUser.set(session.uid, { windowStartMs: now, count: 1 });
+    } else {
+      existing.count += 1;
+      if (existing.count > RATE_LIMIT_MAX_REQUESTS) {
+        const retryAfterSeconds = Math.ceil(
+          (existing.windowStartMs + RATE_LIMIT_WINDOW_MS - now) / 1000
+        );
+        return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": String(retryAfterSeconds),
+          },
+        });
+      }
+    }
+
+    const parsed = researchRequestSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return new Response(
+        JSON.stringify({ error: "Invalid request", details: parsed.error.flatten() }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const { prompt, category } = parsed.data;
+
+    const systemPrompt =
+      RESEARCH_PROMPTS[category as ResearchCategory] || RESEARCH_PROMPTS.general;
 
     const result = streamText({
       model: openai("gpt-4o"),

@@ -3,23 +3,35 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { SupplementFormData } from "@/lib/models/supplement";
+import { ScheduleTime, SupplementFormData } from "@/lib/models/supplement";
 import { X, Pill } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 
+const SCHEDULE_TIME_OPTIONS: { value: ScheduleTime; label: string }[] = [
+  { value: "morning", label: "Morning" },
+  { value: "midday", label: "Midday" },
+  { value: "evening", label: "Evening" },
+  { value: "bedtime", label: "Bedtime" },
+];
+
 const supplementSchema = z.object({
   name: z.string().min(1, "Name is required"),
   brand: z.string().optional(),
   dosage: z.string().optional(),
   frequency: z.string().optional(),
+  scheduleTimes: z
+    .array(z.enum(["morning", "midday", "evening", "bedtime"]))
+    .default([]),
   notes: z.string().optional(),
   startDate: z.string().optional(),
 });
 
-type SupplementFormValues = z.infer<typeof supplementSchema>;
+// Use the schema *input* type so React Hook Form + zodResolver agree on optionality.
+// (Zod defaults make fields optional on input, required on output.)
+type SupplementFormValues = z.input<typeof supplementSchema>;
 
 interface SupplementFormProps {
   initialData?: Partial<SupplementFormData>;
@@ -41,6 +53,7 @@ export default function SupplementForm({
       brand: initialData?.brand || "",
       dosage: initialData?.dosage || "",
       frequency: initialData?.frequency || "",
+      scheduleTimes: initialData?.scheduleTimes || [],
       notes: initialData?.notes || "",
       startDate: initialData?.startDate
         ? initialData.startDate.toISOString().split("T")[0]
@@ -54,6 +67,7 @@ export default function SupplementForm({
       brand: values.brand,
       dosage: values.dosage,
       frequency: values.frequency,
+      scheduleTimes: values.scheduleTimes?.length ? values.scheduleTimes : undefined,
       notes: values.notes,
       startDate: values.startDate ? new Date(values.startDate) : undefined,
     });
@@ -64,7 +78,7 @@ export default function SupplementForm({
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-slate-700/50">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 
+          <div className="p-2.5 rounded-xl bg-linear-to-br from-emerald-500/20 to-teal-500/20 
             border border-emerald-500/20">
             <Pill className="h-5 w-5 text-emerald-400" />
           </div>
@@ -145,6 +159,31 @@ export default function SupplementForm({
           </div>
         </div>
 
+        {/* Schedule */}
+        <div className="space-y-2">
+          <Label className="text-slate-300">Schedule (optional)</Label>
+          <p className="text-xs text-slate-500">
+            Pick when you typically take it so the dashboard can build your daily plan.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {SCHEDULE_TIME_OPTIONS.map((option) => (
+              <label
+                key={option.value}
+                className="flex items-center gap-2 rounded-lg border border-slate-700/50 bg-slate-800/30 px-3 py-2
+                  text-sm text-slate-300 hover:bg-slate-800/50 cursor-pointer select-none"
+              >
+                <input
+                  type="checkbox"
+                  value={option.value}
+                  {...form.register("scheduleTimes")}
+                  className="h-4 w-4 accent-emerald-500"
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        </div>
+
         {/* Start Date */}
         <div className="space-y-2">
           <Label htmlFor="startDate" className="text-slate-300">Start Date</Label>
@@ -154,7 +193,7 @@ export default function SupplementForm({
             {...form.register("startDate")}
             className="bg-slate-800/50 border-slate-700 text-white 
               focus:border-emerald-500/50 focus:ring-emerald-500/20
-              [color-scheme:dark]"
+              scheme-dark"
           />
         </div>
 

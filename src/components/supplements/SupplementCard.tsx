@@ -20,6 +20,18 @@ export default function SupplementCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showActions, setShowActions] = useState(false);
 
+  const scheduleLabelByTime = {
+    morning: "Morning",
+    midday: "Midday",
+    evening: "Evening",
+    bedtime: "Bedtime",
+  } as const;
+
+  const scheduleText =
+    supplement.scheduleTimes?.length
+      ? supplement.scheduleTimes.map((t) => scheduleLabelByTime[t]).join(", ")
+      : null;
+
   const handleDelete = async () => {
     if (isDeleting) return;
 
@@ -39,7 +51,7 @@ export default function SupplementCard({
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 
+          <div className="p-2.5 rounded-xl bg-linear-to-br from-emerald-500/20 to-teal-500/20 
             border border-emerald-500/20 shrink-0">
             <Pill className="h-5 w-5 text-emerald-400" />
           </div>
@@ -112,6 +124,15 @@ export default function SupplementCard({
                 ? `${supplement.dosage}, ${supplement.frequency}`
                 : supplement.dosage || supplement.frequency}
             </span>
+          </div>
+        )}
+
+        {scheduleText && (
+          <div className="flex items-center gap-2 text-sm">
+            <div className="p-1.5 rounded-lg bg-slate-800/50">
+              <Clock className="h-3.5 w-3.5 text-emerald-400" />
+            </div>
+            <span className="text-slate-300">Schedule: {scheduleText}</span>
           </div>
         )}
 

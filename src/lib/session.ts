@@ -1,10 +1,17 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "your-secret-key"
-);
+function getJwtSecret(): Uint8Array {
+  const raw = process.env.JWT_SECRET;
+  if (!raw) {
+    throw new Error(
+      "Missing JWT_SECRET. Set a strong random secret for session signing."
+    );
+  }
+  return new TextEncoder().encode(raw);
+}
 
 export async function createSessionToken(uid: string) {
+  const JWT_SECRET = getJwtSecret();
   return new SignJWT({ uid })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -17,13 +24,17 @@ export async function createSessionToken(uid: string) {
 
 export async function verifySessionToken(token: string) {
   try {
+    const JWT_SECRET = getJwtSecret();
     const { payload } = await jwtVerify(token, JWT_SECRET, {
       issuer: "fortifyme",
-      // Removed strict algorithms check as it was causing spurious errors with valid HS256 tokens in some environments
-      // or when re-verification logic is tricky. jwtVerify verifies signature anyway.
+      algorithms: ["HS256"],
     });
 
-    if (!payload.uid || !payload.sub || payload.sub !== payload.uid) {
+    if (typeof payload.uid !== "string") {
+      console.error("Invalid token claims: uid missing");
+      return null;
+    }
+    if (typeof payload.sub !== "string" || payload.sub !== payload.uid) {
       console.error("Invalid token claims");
       return null;
     }
