@@ -8,7 +8,6 @@ import {
   Pill, 
   BookOpen, 
   TrendingUp,
-  Clock,
   Sparkles,
   ArrowRight,
   Plus,
@@ -18,18 +17,20 @@ import { verifySessionToken } from "@/lib/session";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { SESSION_COOKIE_NAME, ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+import { TodaySchedule, type GroupedDoseEntries, type ScheduleTime } from "@/components/dashboard/today-schedule";
+import { getDoseLogTakenEntryIds } from "./actions";
 
 export const metadata: Metadata = {
   title: "Dashboard | Fortify.me",
 };
 
-type ScheduleTime = "morning" | "midday" | "evening" | "bedtime" | "anytime";
 type ScheduledSupplement = {
-  id: string;
+  supplementId: string;
+  entryId: string;
+  time: ScheduleTime;
   name: string;
   dosage?: string;
   frequency?: string;
-  scheduleTimes?: string[];
 };
 
 async function getSupplementCount(userId: string): Promise<number> {
@@ -45,8 +46,12 @@ async function getSupplementCount(userId: string): Promise<number> {
   }
 }
 
-async function getTodaysSchedule(userId: string): Promise<Record<ScheduleTime, ScheduledSupplement[]>> {
-  const grouped: Record<ScheduleTime, ScheduledSupplement[]> = {
+function getUtcDateId(date: Date = new Date()): string {
+  return date.toISOString().slice(0, 10);
+}
+
+async function getTodaysSchedule(userId: string): Promise<GroupedDoseEntries> {
+  const grouped: GroupedDoseEntries = {
     morning: [],
     midday: [],
     evening: [],
@@ -72,7 +77,7 @@ async function getTodaysSchedule(userId: string): Promise<Record<ScheduleTime, S
         scheduleTimes: Array.isArray(data.scheduleTimes)
           ? (data.scheduleTimes.filter((t) => typeof t === "string") as string[])
           : undefined,
-      } satisfies ScheduledSupplement;
+      };
     });
 
     for (const supplement of supplements) {
@@ -81,16 +86,24 @@ async function getTodaysSchedule(userId: string): Promise<Record<ScheduleTime, S
         : ["anytime"];
 
       for (const time of times) {
-        if (
+        const normalized: ScheduleTime =
           time === "morning" ||
           time === "midday" ||
           time === "evening" ||
           time === "bedtime"
-        ) {
-          grouped[time].push(supplement);
-        } else {
-          grouped.anytime.push(supplement);
-        }
+            ? time
+            : "anytime";
+
+        const entryId = `${supplement.id}:${normalized}`;
+
+        grouped[normalized].push({
+          supplementId: supplement.id,
+          entryId,
+          time: normalized,
+          name: supplement.name,
+          dosage: supplement.dosage,
+          frequency: supplement.frequency,
+        });
       }
     }
 
@@ -117,18 +130,24 @@ async function getSearchCount(userId: string): Promise<number> {
 export default async function Dashboard() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const dateId = getUtcDateId();
+  const last7DateIds = Array.from({ length: 7 }).map((_, i) =>
+    getUtcDateId(new Date(Date.now() - i * 24 * 60 * 60 * 1000))
+  );
   
   let userName = "User";
   let userEmail = "";
   let supplementCount = 0;
   let searchCount = 0;
-  let todaysSchedule: Record<ScheduleTime, ScheduledSupplement[]> = {
+  let todaysSchedule: GroupedDoseEntries = {
     morning: [],
     midday: [],
     evening: [],
     bedtime: [],
     anytime: [],
   };
+  let takenEntryIds: string[] = [];
+  let daysActiveLast7 = 0;
   
   if (sessionToken) {
     const payload = await verifySessionToken(sessionToken);
@@ -142,6 +161,13 @@ export default async function Dashboard() {
         supplementCount = await getSupplementCount(payload.uid as string);
         searchCount = await getSearchCount(payload.uid as string);
         todaysSchedule = await getTodaysSchedule(payload.uid as string);
+        takenEntryIds = await getDoseLogTakenEntryIds(dateId);
+
+        // Days active (last 7 days) = any dose marked taken that day
+        const logs = await Promise.all(
+          last7DateIds.map((d) => getDoseLogTakenEntryIds(d).catch(() => []))
+        );
+        daysActiveLast7 = logs.filter((ids) => ids.length > 0).length;
       } catch (e) {
         console.error("Error fetching user", e);
       }
@@ -182,7 +208,7 @@ export default async function Dashboard() {
     },
     {
       title: "Days Active",
-      value: 1,
+      value: daysActiveLast7,
       icon: Activity,
       color: "text-amber-400",
       bgColor: "from-amber-500/20 to-orange-500/20",
@@ -268,76 +294,11 @@ export default async function Dashboard() {
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {(
-                    [
-                      { key: "morning", label: "Morning" },
-                      { key: "midday", label: "Midday" },
-                      { key: "evening", label: "Evening" },
-                      { key: "bedtime", label: "Bedtime" },
-                      { key: "anytime", label: "Anytime" },
-                    ] as const
-                  ).map(({ key, label }) => {
-                    const items = todaysSchedule[key];
-                    if (!items.length) return null;
-                    return (
-                      <div key={key} className="rounded-xl bg-slate-800/30 border border-slate-700/50 overflow-hidden">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-emerald-500/15">
-                              <Clock className="h-4 w-4 text-emerald-400" />
-                            </div>
-                            <div>
-                              <p className="text-white font-medium">{label}</p>
-                              <p className="text-xs text-slate-500">{items.length} item{items.length === 1 ? "" : "s"}</p>
-                            </div>
-                          </div>
-                          <Link href={ROUTES.supplements}>
-                            <Button variant="ghost" size="sm" className="gap-1">
-                              View <ArrowRight className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                        </div>
-                        <ul className="divide-y divide-slate-700/50">
-                          {items.slice(0, 5).map((s) => (
-                            <li key={`${key}-${s.id}`} className="px-4 py-3 flex items-center justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="text-sm text-white truncate">{s.name}</p>
-                                {(s.dosage || s.frequency) && (
-                                  <p className="text-xs text-slate-400 truncate">
-                                    {[s.dosage, s.frequency].filter(Boolean).join(" • ")}
-                                  </p>
-                                )}
-                              </div>
-                            </li>
-                          ))}
-                          {items.length > 5 && (
-                            <li className="px-4 py-3">
-                              <Link href={ROUTES.supplements} className="text-sm text-emerald-400 hover:text-emerald-300">
-                                View {items.length - 5} more…
-                              </Link>
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    );
-                  })}
-                  {Object.values(todaysSchedule).every((arr) => arr.length === 0) && (
-                    <div className="text-center py-8 rounded-xl bg-slate-800/30 border border-slate-700/50">
-                      <Clock className="h-10 w-10 text-slate-600 mx-auto mb-3" />
-                      <p className="text-slate-400 mb-2">No schedule set yet</p>
-                      <p className="text-sm text-slate-500 mb-4">
-                        Add “Schedule” times to your supplements (Morning/Midday/Evening/Bedtime) to build a daily plan.
-                      </p>
-                      <Link href={ROUTES.supplements}>
-                        <Button size="sm" className="gap-2">
-                          <ArrowRight className="h-4 w-4" />
-                          Set schedules
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
+                <TodaySchedule
+                  dateId={dateId}
+                  groups={todaysSchedule}
+                  initialTakenEntryIds={takenEntryIds}
+                />
               )}
             </div>
 
