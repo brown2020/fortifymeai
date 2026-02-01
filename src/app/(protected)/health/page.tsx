@@ -29,7 +29,7 @@ import { useToast } from "@/components/ui/toaster";
 
 export default function HealthPage() {
   const { user } = useAuthStore();
-  const { toast } = useToast();
+  const { addToast } = useToast();
 
   const [todayMetrics, setTodayMetrics] = useState<HealthMetricEntry | null>(null);
   const [yesterdayMetrics, setYesterdayMetrics] = useState<HealthMetricEntry | null>(null);
@@ -66,11 +66,7 @@ export default function HealthPage() {
       }
     } catch (error) {
       console.error("Error loading health data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load health data",
-        variant: "destructive",
-      });
+      addToast("Failed to load health data", "error");
     } finally {
       setIsLoading(false);
     }
@@ -83,17 +79,10 @@ export default function HealthPage() {
       await saveHealthMetrics(user.uid, data);
       const updated = await getTodayHealthMetrics(user.uid);
       setTodayMetrics(updated);
-      toast({
-        title: "Saved",
-        description: "Health check-in saved successfully",
-      });
+      addToast("Health check-in saved successfully", "success");
     } catch (error) {
       console.error("Error saving metrics:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save health check-in",
-        variant: "destructive",
-      });
+      addToast("Failed to save health check-in", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -110,17 +99,10 @@ export default function HealthPage() {
       const updated = await getRecentSideEffects(user.uid, 30);
       setSideEffects(updated);
       setShowSideEffectForm(false);
-      toast({
-        title: "Logged",
-        description: "Side effect logged successfully",
-      });
+      addToast("Side effect logged successfully", "success");
     } catch (error) {
       console.error("Error logging side effect:", error);
-      toast({
-        title: "Error",
-        description: "Failed to log side effect",
-        variant: "destructive",
-      });
+      addToast("Failed to log side effect", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -132,17 +114,10 @@ export default function HealthPage() {
       await resolveSideEffect(user.uid, id, resolution);
       const updated = await getRecentSideEffects(user.uid, 30);
       setSideEffects(updated);
-      toast({
-        title: "Resolved",
-        description: "Side effect marked as resolved",
-      });
+      addToast("Side effect marked as resolved", "success");
     } catch (error) {
       console.error("Error resolving side effect:", error);
-      toast({
-        title: "Error",
-        description: "Failed to resolve side effect",
-        variant: "destructive",
-      });
+      addToast("Failed to resolve side effect", "error");
     }
   };
 
@@ -152,17 +127,10 @@ export default function HealthPage() {
       await deleteSideEffect(user.uid, id);
       const updated = await getRecentSideEffects(user.uid, 30);
       setSideEffects(updated);
-      toast({
-        title: "Deleted",
-        description: "Side effect deleted",
-      });
+      addToast("Side effect deleted", "success");
     } catch (error) {
       console.error("Error deleting side effect:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete side effect",
-        variant: "destructive",
-      });
+      addToast("Failed to delete side effect", "error");
     }
   };
 

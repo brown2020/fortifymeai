@@ -22,7 +22,7 @@ import { useToast } from "@/components/ui/toaster";
 
 export default function AnalyticsPage() {
   const { user } = useAuthStore();
-  const { toast } = useToast();
+  const { addToast } = useToast();
 
   const [doseLogs, setDoseLogs] = useState<DoseLog[]>([]);
   const [healthTrend, setHealthTrend] = useState<HealthMetricsTrend[]>([]);
@@ -67,11 +67,7 @@ export default function AnalyticsPage() {
       setStreakInfo(streak);
     } catch (error) {
       console.error("Error loading analytics data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load analytics data",
-        variant: "destructive",
-      });
+      addToast("Failed to load analytics data", "error");
     } finally {
       setIsLoading(false);
     }

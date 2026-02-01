@@ -65,6 +65,31 @@ This app expects Firebase env vars for both **client** and **server** code.
 
 - `OPENAI_API_KEY` (required for `/api/research`)
 
+### Firestore Security Rules
+
+This app includes Firestore security rules in `firestore.rules`. To deploy them:
+
+1. Install Firebase CLI if you haven't:
+   ```bash
+   npm install -g firebase-tools
+   ```
+
+2. Login and select your project:
+   ```bash
+   firebase login
+   firebase use YOUR_PROJECT_ID
+   ```
+
+3. Deploy the rules:
+   ```bash
+   firebase deploy --only firestore:rules
+   ```
+
+4. (Optional) Deploy indexes for better query performance:
+   ```bash
+   firebase deploy --only firestore:indexes
+   ```
+
 ### Scripts
 
 - `npm run dev`: start Next.js in development

@@ -1,0 +1,52 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if the user owns this resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Supplements collection (uses userId field)
+    // For queries with where("userId", "==", uid) to work, 
+    // we need to allow reads where the query filters by userId matching auth.uid
+    match /supplements/{supplementId} {
+      // Allow list/read if:
+      // - User is authenticated AND
+      // - Either reading a single doc they own, or querying with userId filter
+      allow read: if isAuthenticated() && 
+        (resource == null || resource.data.userId == request.auth.uid);
+      
+      // Allow create if user is setting themselves as owner
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Allow update if user owns the supplement (keep userId unchanged)
+      allow update: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid;
+      
+      // Allow delete if user owns the supplement
+      allow delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+
+    // User documents and all subcollections
+    match /users/{userId} {
+      // Allow user to read/write their own document
+      allow read, write: if isOwner(userId);
+      
+      // Wildcard match for ALL subcollections under a user document
+      // This covers: searches, doseLogs, healthMetrics, sideEffects, stats, achievements, etc.
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+  }
+}
