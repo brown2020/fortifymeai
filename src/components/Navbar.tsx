@@ -3,16 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "../lib/store/auth-store";
-import { 
-  Pill, 
-  Menu, 
-  X, 
-  LayoutDashboard, 
-  FlaskConical, 
-  BookOpen, 
+import {
+  Pill,
+  Menu,
+  X,
+  LayoutDashboard,
+  FlaskConical,
+  BookOpen,
   User,
   LogOut,
-  Sparkles
+  Sparkles,
+  Heart,
+  BarChart3,
+  Calendar
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -24,6 +27,9 @@ const navLinks = {
   authenticated: [
     { href: ROUTES.dashboard, label: "Dashboard", icon: LayoutDashboard },
     { href: ROUTES.supplements, label: "Supplements", icon: FlaskConical },
+    { href: ROUTES.health, label: "Health", icon: Heart },
+    { href: ROUTES.analytics, label: "Analytics", icon: BarChart3 },
+    { href: ROUTES.calendar, label: "Calendar", icon: Calendar },
     { href: ROUTES.research, label: "Research", icon: BookOpen },
     { href: ROUTES.profile, label: "Profile", icon: User },
   ],
