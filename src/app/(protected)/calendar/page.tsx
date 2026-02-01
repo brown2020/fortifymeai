@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/toaster";
 
 export default function CalendarPage() {
   const { user } = useAuthStore();
-  const { toast } = useToast();
+  const { addToast } = useToast();
 
   const [doseLogs, setDoseLogs] = useState<DoseLog[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -33,11 +33,7 @@ export default function CalendarPage() {
       setDoseLogs(logs);
     } catch (error) {
       console.error("Error loading calendar data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load calendar data",
-        variant: "destructive",
-      });
+      addToast("Failed to load calendar data", "error");
     } finally {
       setIsLoading(false);
     }

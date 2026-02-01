@@ -72,7 +72,7 @@ export default function AdherenceChart({ data, className }: AdherenceChartProps)
                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
               labelStyle={{ color: "#f8fafc" }}
-              formatter={(value: number) => [`${value}%`, "Adherence"]}
+              formatter={(value) => [`${value}%`, "Adherence"]}
             />
             <ReferenceLine
               y={80}
