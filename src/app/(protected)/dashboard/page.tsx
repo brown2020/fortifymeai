@@ -130,10 +130,13 @@ async function getSearchCount(userId: string): Promise<number> {
 export default async function Dashboard() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  const dateId = getUtcDateId();
-  const last7DateIds = Array.from({ length: 7 }).map((_, i) =>
-    getUtcDateId(new Date(Date.now() - i * 24 * 60 * 60 * 1000))
-  );
+  const now = new Date();
+  const dateId = getUtcDateId(now);
+  const last7DateIds = Array.from({ length: 7 }).map((_, i) => {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    return getUtcDateId(date);
+  });
   
   let userName = "User";
   let userEmail = "";
