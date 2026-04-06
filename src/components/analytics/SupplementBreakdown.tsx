@@ -60,10 +60,10 @@ export default function SupplementBreakdown({ data, className }: SupplementBreak
                     border: "1px solid #334155",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number, name: string) => [
-                    `${value} doses (${Math.round((value / totalDoses) * 100)}%)`,
-                    name,
-                  ]}
+                  formatter={(value: unknown) => {
+                    const num = typeof value === 'number' ? value : 0;
+                    return [`${num} doses (${Math.round((num / totalDoses) * 100)}%)`, ''];
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
