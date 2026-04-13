@@ -69,8 +69,28 @@ export const useAuthStore = create<AuthState>((set) => ({
     await createSession(userCredential);
   },
   logout: async () => {
-    await signOut(auth);
-    await fetch(API_ROUTES.auth.session, { method: "DELETE" });
-    set({ user: null });
+    try {
+      // 1. Delete server session cookie BEFORE Firebase sign-out.
+      //    signOut(auth) triggers onAuthStateChanged which may navigate
+      //    before the cookie delete completes, leaving a ghost session.
+      await fetch(API_ROUTES.auth.session, { method: "DELETE" });
+
+      // 2. Sign out of Firebase.
+      await signOut(auth);
+
+      // 3. Clear store state.
+      set({ user: null });
+
+      // 4. Clear browser storage.
+      if (typeof window !== "undefined") {
+        sessionStorage.clear();
+      }
+    } catch {
+      // Best-effort cleanup even on error
+      set({ user: null });
+      if (typeof window !== "undefined") {
+        sessionStorage.clear();
+      }
+    }
   },
 }));
