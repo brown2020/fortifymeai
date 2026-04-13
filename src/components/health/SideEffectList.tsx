@@ -61,7 +61,7 @@ export default function SideEffectList({
           <CheckCircle className="h-12 w-12 text-emerald-400/50 mb-3" />
           <h3 className="text-lg font-medium text-white mb-1">No Side Effects</h3>
           <p className="text-sm text-slate-400">
-            You haven't logged any side effects yet.
+            You haven&apos;t logged any side effects yet.
           </p>
         </div>
       </div>

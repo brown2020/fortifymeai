@@ -44,8 +44,8 @@ export default function Navbar() {
     try {
       await logout();
       window.location.href = ROUTES.home;
-    } catch (error) {
-      console.error("Failed to logout:", error);
+    } catch {
+      // Logout failed — user stays on current page
     }
   };
 

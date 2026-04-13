@@ -49,8 +49,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
 export function safeJsonParse<T>(json: string, fallback: T): T {
   try {
     return JSON.parse(json) as T;
-  } catch (error) {
-    console.error("Error parsing JSON:", error);
+  } catch {
     return fallback;
   }
 }

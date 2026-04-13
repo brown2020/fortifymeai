@@ -24,14 +24,6 @@ export const metadata: Metadata = {
   title: "Dashboard | Fortify.me",
 };
 
-type ScheduledSupplement = {
-  supplementId: string;
-  entryId: string;
-  time: ScheduleTime;
-  name: string;
-  dosage?: string;
-  frequency?: string;
-};
 
 async function getSupplementCount(userId: string): Promise<number> {
   try {
@@ -171,8 +163,8 @@ export default async function Dashboard() {
           last7DateIds.map((d) => getDoseLogTakenEntryIds(d).catch(() => []))
         );
         daysActiveLast7 = logs.filter((ids) => ids.length > 0).length;
-      } catch (e) {
-        console.error("Error fetching user", e);
+      } catch {
+        // Dashboard will show default values if data fetch fails
       }
     }
   }

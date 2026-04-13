@@ -9,12 +9,11 @@ import {
   orderBy,
   Timestamp,
   serverTimestamp,
-  limit,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { DoseLog, DoseLogEntry, DoseLogFormData, DoseLogStats } from "../models/dose-log";
 import { ScheduleTime } from "../models/supplement";
-import { format, subDays, startOfDay, parseISO } from "date-fns";
+import { format, subDays } from "date-fns";
 
 /**
  * Get date ID in YYYY-MM-DD format

@@ -8,10 +8,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { HealthMetricsTrend } from "@/lib/models/health-metrics";
 import { useState } from "react";
 

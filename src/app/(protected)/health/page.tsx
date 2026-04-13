@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,13 +39,7 @@ export default function HealthPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSideEffectForm, setShowSideEffectForm] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      loadData();
-    }
-  }, [user]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
     try {
@@ -64,13 +58,18 @@ export default function HealthPage() {
       if (recentMetrics.length > 1) {
         setYesterdayMetrics(recentMetrics[1]);
       }
-    } catch (error) {
-      console.error("Error loading health data:", error);
+    } catch {
       addToast("Failed to load health data", "error");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, addToast]);
+
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user, loadData]);
 
   const handleSaveMetrics = async (data: HealthMetricFormData) => {
     if (!user) return;
@@ -80,8 +79,7 @@ export default function HealthPage() {
       const updated = await getTodayHealthMetrics(user.uid);
       setTodayMetrics(updated);
       addToast("Health check-in saved successfully", "success");
-    } catch (error) {
-      console.error("Error saving metrics:", error);
+    } catch {
       addToast("Failed to save health check-in", "error");
     } finally {
       setIsSubmitting(false);
@@ -100,8 +98,7 @@ export default function HealthPage() {
       setSideEffects(updated);
       setShowSideEffectForm(false);
       addToast("Side effect logged successfully", "success");
-    } catch (error) {
-      console.error("Error logging side effect:", error);
+    } catch {
       addToast("Failed to log side effect", "error");
     } finally {
       setIsSubmitting(false);
@@ -115,8 +112,7 @@ export default function HealthPage() {
       const updated = await getRecentSideEffects(user.uid, 30);
       setSideEffects(updated);
       addToast("Side effect marked as resolved", "success");
-    } catch (error) {
-      console.error("Error resolving side effect:", error);
+    } catch {
       addToast("Failed to resolve side effect", "error");
     }
   };
@@ -128,8 +124,7 @@ export default function HealthPage() {
       const updated = await getRecentSideEffects(user.uid, 30);
       setSideEffects(updated);
       addToast("Side effect deleted", "success");
-    } catch (error) {
-      console.error("Error deleting side effect:", error);
+    } catch {
       addToast("Failed to delete side effect", "error");
     }
   };
