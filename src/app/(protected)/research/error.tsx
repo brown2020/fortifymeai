@@ -1,20 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ResearchError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error("Research page error:", error);
-  }, [error]);
-
   return (
     <div className="min-h-screen pt-20 pb-12 page-transition">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">

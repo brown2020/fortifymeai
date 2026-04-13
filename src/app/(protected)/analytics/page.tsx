@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AdherenceChart from "@/components/analytics/AdherenceChart";
@@ -9,15 +9,15 @@ import SupplementBreakdown from "@/components/analytics/SupplementBreakdown";
 import StreakCard from "@/components/dashboard/StreakCard";
 import AdherenceRing from "@/components/dashboard/AdherenceRing";
 import AchievementBadge from "@/components/dashboard/AchievementBadge";
-import { getRecentDoseLogs, getDoseLogStats } from "@/lib/services/doseLogService";
+import { getRecentDoseLogs } from "@/lib/services/doseLogService";
 import { getHealthMetricsTrend } from "@/lib/services/healthMetricsService";
 import { getUserStats, getAchievementProgress, getStreakInfo } from "@/lib/services/userStatsService";
 import { getUserSupplements } from "@/lib/services/supplementService";
 import { DoseLog } from "@/lib/models/dose-log";
 import { HealthMetricsTrend } from "@/lib/models/health-metrics";
-import { UserStats, ACHIEVEMENTS } from "@/lib/models/user-stats";
+import { ACHIEVEMENTS } from "@/lib/models/user-stats";
 import { Supplement } from "@/lib/models/supplement";
-import { BarChart3, TrendingUp, Award, Calendar } from "lucide-react";
+import { TrendingUp, Award, Calendar } from "lucide-react";
 import { useToast } from "@/components/ui/toaster";
 
 export default function AnalyticsPage() {
@@ -26,7 +26,6 @@ export default function AnalyticsPage() {
 
   const [doseLogs, setDoseLogs] = useState<DoseLog[]>([]);
   const [healthTrend, setHealthTrend] = useState<HealthMetricsTrend[]>([]);
-  const [stats, setStats] = useState<UserStats | null>(null);
   const [supplements, setSupplements] = useState<Supplement[]>([]);
   const [achievementProgress, setAchievementProgress] = useState<
     { achievement: typeof ACHIEVEMENTS[number]; progress: number; earned: boolean }[]
@@ -40,17 +39,11 @@ export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState(30);
 
-  useEffect(() => {
-    if (user) {
-      loadData();
-    }
-  }, [user, timeRange]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
     try {
-      const [logs, health, userStats, supps, achievements, streak] = await Promise.all([
+      const [logs, health, , supps, achievements, streak] = await Promise.all([
         getRecentDoseLogs(user.uid, timeRange),
         getHealthMetricsTrend(user.uid, timeRange),
         getUserStats(user.uid),
@@ -61,17 +54,21 @@ export default function AnalyticsPage() {
 
       setDoseLogs(logs);
       setHealthTrend(health);
-      setStats(userStats);
       setSupplements(supps);
       setAchievementProgress(achievements);
       setStreakInfo(streak);
-    } catch (error) {
-      console.error("Error loading analytics data:", error);
+    } catch {
       addToast("Failed to load analytics data", "error");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, timeRange, addToast]);
+
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user, loadData]);
 
   // Calculate adherence chart data
   const adherenceData = useMemo(() => {

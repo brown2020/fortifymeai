@@ -75,12 +75,8 @@ export async function saveSearch(
       });
 
     return { success: true, id: docRef.id };
-  } catch (error) {
-    console.error(
-      "Save search error:",
-      error instanceof Error ? error.message : "Unknown error"
-    );
-    throw error;
+  } catch {
+    return { success: false };
   }
 }
 
@@ -111,10 +107,7 @@ export async function getSearchHistory(
         isBookmarked: data.isBookmarked || false,
       };
     });
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    console.error("History error:", errorMessage);
+  } catch {
     return [];
   }
 }
@@ -134,12 +127,8 @@ export async function deleteSearch(
       .doc(searchId)
       .delete();
     return { success: true };
-  } catch (error) {
-    console.error(
-      "Delete error:",
-      error instanceof Error ? error.message : "Unknown error"
-    );
-    throw error;
+  } catch {
+    return { success: false };
   }
 }
 
@@ -149,37 +138,33 @@ export async function deleteSearch(
 export async function toggleBookmark(
   searchId: string
 ): Promise<{ success: boolean; isBookmarked: boolean }> {
-  try {
-    const userId = await verifySession();
+  const userId = await verifySession();
 
-    const searchRef = adminDb
-      .collection("users")
-      .doc(userId)
-      .collection("searches")
-      .doc(searchId);
+  const searchRef = adminDb
+    .collection("users")
+    .doc(userId)
+    .collection("searches")
+    .doc(searchId);
 
-    const searchDoc = await searchRef.get();
-    
+  const newBookmarked = await adminDb.runTransaction(async (tx) => {
+    const searchDoc = await tx.get(searchRef);
+
     if (!searchDoc.exists) {
       throw new Error("Search not found");
     }
 
     const currentBookmarked = searchDoc.data()?.isBookmarked || false;
-    const newBookmarked = !currentBookmarked;
+    const toggled = !currentBookmarked;
 
-    await searchRef.update({
-      isBookmarked: newBookmarked,
-      bookmarkedAt: newBookmarked ? FieldValue.serverTimestamp() : null,
+    tx.update(searchRef, {
+      isBookmarked: toggled,
+      bookmarkedAt: toggled ? FieldValue.serverTimestamp() : null,
     });
 
-    return { success: true, isBookmarked: newBookmarked };
-  } catch (error) {
-    console.error(
-      "Toggle bookmark error:",
-      error instanceof Error ? error.message : "Unknown error"
-    );
-    throw error;
-  }
+    return toggled;
+  });
+
+  return { success: true, isBookmarked: newBookmarked };
 }
 
 /**
@@ -210,11 +195,7 @@ export async function getBookmarkedResearch(): Promise<BookmarkedResearch[]> {
         notes: data.notes,
       };
     });
-  } catch (error) {
-    console.error(
-      "Get bookmarks error:",
-      error instanceof Error ? error.message : "Unknown error"
-    );
+  } catch {
     return [];
   }
 }
@@ -242,12 +223,8 @@ export async function updateBookmarkDetails(
       });
 
     return { success: true };
-  } catch (error) {
-    console.error(
-      "Update bookmark error:",
-      error instanceof Error ? error.message : "Unknown error"
-    );
-    throw error;
+  } catch {
+    return { success: false };
   }
 }
 
@@ -295,11 +272,7 @@ export async function getSearchStats(): Promise<{
       totalBookmarks,
       categoryCounts,
     };
-  } catch (error) {
-    console.error(
-      "Get stats error:",
-      error instanceof Error ? error.message : "Unknown error"
-    );
+  } catch {
     return {
       totalSearches: 0,
       totalBookmarks: 0,
@@ -340,11 +313,7 @@ export async function clearSearchHistory(): Promise<{ success: boolean; deletedC
     await batch.commit();
 
     return { success: true, deletedCount };
-  } catch (error) {
-    console.error(
-      "Clear history error:",
-      error instanceof Error ? error.message : "Unknown error"
-    );
-    throw error;
+  } catch {
+    return { success: false, deletedCount: 0 };
   }
 }

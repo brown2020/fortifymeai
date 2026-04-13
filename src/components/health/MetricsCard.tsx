@@ -114,7 +114,7 @@ export default function MetricsCard({
   if (!hasAnyMetric) {
     return (
       <div className={cn("glass-card p-6", className)}>
-        <h3 className="text-lg font-semibold text-white mb-4">Today's Check-in</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">Today&apos;s Check-in</h3>
         <p className="text-slate-400 text-center py-8">
           No health metrics logged today.
         </p>
@@ -124,7 +124,7 @@ export default function MetricsCard({
 
   return (
     <div className={cn("glass-card p-6", className)}>
-      <h3 className="text-lg font-semibold text-white mb-4">Today's Check-in</h3>
+      <h3 className="text-lg font-semibold text-white mb-4">Today&apos;s Check-in</h3>
       <div className="space-y-2">
         {(Object.keys(HEALTH_METRICS) as (keyof typeof HEALTH_METRICS)[]).map(
           (key) => renderMetric(key, metrics[key])
