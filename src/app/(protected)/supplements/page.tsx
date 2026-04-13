@@ -46,8 +46,7 @@ export default function Supplements() {
       const data = await getUserSupplements(user.uid);
       setSupplements(data);
       setFilteredSupplements(data);
-    } catch (err) {
-      console.error("Error fetching supplements:", err);
+    } catch {
       setError("Failed to load supplements. Please try again.");
       addToast("Failed to load supplements", "error");
     } finally {
@@ -127,8 +126,7 @@ export default function Supplements() {
 
       setShowForm(false);
       setEditingSupplement(null);
-    } catch (err) {
-      console.error("Error saving supplement:", err);
+    } catch {
       addToast("Failed to save supplement. Please try again.", "error");
     } finally {
       setIsSubmitting(false);
@@ -140,8 +138,7 @@ export default function Supplements() {
       await deleteSupplement(id);
       setSupplements((prev) => prev.filter((s) => s.id !== id));
       addToast("Supplement deleted", "success");
-    } catch (err) {
-      console.error("Error deleting supplement:", err);
+    } catch {
       addToast("Failed to delete supplement. Please try again.", "error");
     }
   };

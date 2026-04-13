@@ -116,6 +116,16 @@ export async function POST(request: Request) {
 
     // Best-effort in-memory rate limiting (per server instance)
     const now = Date.now();
+
+    // Periodically clean up stale rate-limit entries to prevent memory growth
+    if (rateLimitByUser.size > 1000) {
+      for (const [key, val] of rateLimitByUser) {
+        if (now - val.windowStartMs >= RATE_LIMIT_WINDOW_MS) {
+          rateLimitByUser.delete(key);
+        }
+      }
+    }
+
     const existing = rateLimitByUser.get(session.uid);
     if (!existing || now - existing.windowStartMs >= RATE_LIMIT_WINDOW_MS) {
       rateLimitByUser.set(session.uid, { windowStartMs: now, count: 1 });

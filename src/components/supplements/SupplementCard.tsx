@@ -19,6 +19,7 @@ export default function SupplementCard({
 }: SupplementCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const scheduleLabelByTime = {
     morning: "Morning",
@@ -34,15 +35,11 @@ export default function SupplementCard({
 
   const handleDelete = async () => {
     if (isDeleting) return;
-
-    if (confirm("Are you sure you want to delete this supplement?")) {
-      setIsDeleting(true);
-      try {
-        await onDelete(supplement.id);
-      } catch (error) {
-        console.error("Error deleting supplement:", error);
-        setIsDeleting(false);
-      }
+    setIsDeleting(true);
+    try {
+      await onDelete(supplement.id);
+    } catch {
+      setIsDeleting(false);
     }
   };
 
@@ -94,18 +91,39 @@ export default function SupplementCard({
                   <Edit className="h-4 w-4" />
                   Edit
                 </button>
-                <button
-                  onClick={() => {
-                    setShowActions(false);
-                    handleDelete();
-                  }}
-                  disabled={isDeleting}
-                  className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-rose-400 
-                    hover:text-rose-300 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </button>
+                {showDeleteConfirm ? (
+                  <div className="flex items-center gap-1 px-3 py-2">
+                    <button
+                      onClick={() => {
+                        setShowActions(false);
+                        setShowDeleteConfirm(false);
+                        handleDelete();
+                      }}
+                      disabled={isDeleting}
+                      className="px-2 py-1 rounded text-xs font-medium text-white bg-rose-600
+                        hover:bg-rose-700 transition-colors disabled:opacity-50"
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="px-2 py-1 rounded text-xs font-medium text-slate-300
+                        hover:text-white hover:bg-slate-700/50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    disabled={isDeleting}
+                    className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-rose-400
+                      hover:text-rose-300 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                )}
               </div>
             </>
           )}

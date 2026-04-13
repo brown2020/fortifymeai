@@ -1,9 +1,6 @@
 import admin from "firebase-admin";
 import { getApps } from "firebase-admin/app";
 
-let adminDb: admin.firestore.Firestore;
-let adminAuth: admin.auth.Auth;
-
 try {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY
     ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
@@ -27,14 +24,14 @@ try {
       credential: admin.credential.cert(serviceAccount),
     });
   }
-} catch (e) {
+} catch {
   // Firebase admin init failed (e.g. missing credentials at build time)
   if (!getApps().length) {
     admin.initializeApp();
   }
 }
 
-adminDb = admin.firestore();
-adminAuth = admin.auth();
+const adminDb = admin.firestore();
+const adminAuth = admin.auth();
 
 export { adminDb, adminAuth };

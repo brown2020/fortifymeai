@@ -16,10 +16,11 @@ import {
   BookOpen,
   GraduationCap,
 } from "lucide-react";
-import { Achievement } from "@/lib/models/user-stats";
+import type { Achievement } from "@/lib/models/user-stats";
+import type { Timestamp } from "firebase/firestore";
 
 interface AchievementBadgeProps {
-  achievement: Omit<Achievement, "earnedAt"> & { earnedAt?: any };
+  achievement: Omit<Achievement, "earnedAt"> & { earnedAt?: Timestamp | Date };
   earned: boolean;
   progress?: number;
   size?: "sm" | "md" | "lg";

@@ -71,16 +71,9 @@ export async function toggleDoseEntry(dateId: string, entryId: string): Promise<
       return { taken: !isTaken };
     }
 
-    tx.set(
-      docRef,
-      {
-        dateId,
-        updatedAt: FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
-
     tx.update(docRef, {
+      dateId,
+      updatedAt: FieldValue.serverTimestamp(),
       takenEntryIds: isTaken
         ? FieldValue.arrayRemove(entryId)
         : FieldValue.arrayUnion(entryId),

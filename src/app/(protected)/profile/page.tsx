@@ -28,8 +28,7 @@ export default function Profile() {
     try {
       await logout();
       window.location.href = ROUTES.home;
-    } catch (error) {
-      console.error("Failed to logout:", error);
+    } catch {
       addToast("Failed to sign out. Please try again.", "error");
     }
   };

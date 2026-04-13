@@ -218,8 +218,8 @@ export default function Research() {
               lastSearchCategory
             );
             await loadSearchHistory();
-          } catch (error) {
-            console.error("Failed to save search:", error);
+          } catch {
+            // Save failed — search result is still displayed to user
           }
         }
       }
@@ -269,8 +269,8 @@ export default function Research() {
       if (!user) return;
       await deleteSearch(searchId);
       await loadSearchHistory();
-    } catch (error) {
-      console.error("Failed to delete search:", error);
+    } catch {
+      // Delete failed silently — list stays unchanged
     }
   };
 
@@ -282,8 +282,8 @@ export default function Research() {
     try {
       await toggleBookmark(searchId);
       await loadSearchHistory();
-    } catch (error) {
-      console.error("Failed to toggle bookmark:", error);
+    } catch {
+      // Bookmark toggle failed silently — list stays unchanged
     }
   };
 

@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
 import SupplementCalendar from "@/components/calendar/SupplementCalendar";
 import DayDetail from "@/components/calendar/DayDetail";
 import { getRecentDoseLogs } from "@/lib/services/doseLogService";
 import { DoseLog } from "@/lib/models/dose-log";
-import { Calendar } from "lucide-react";
 import { useToast } from "@/components/ui/toaster";
 
 export default function CalendarPage() {
@@ -18,26 +17,24 @@ export default function CalendarPage() {
   const [selectedLog, setSelectedLog] = useState<DoseLog | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      loadData();
-    }
-  }, [user]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
     try {
-      // Load 90 days of data for the calendar
       const logs = await getRecentDoseLogs(user.uid, 90);
       setDoseLogs(logs);
-    } catch (error) {
-      console.error("Error loading calendar data:", error);
+    } catch {
       addToast("Failed to load calendar data", "error");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, addToast]);
+
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user, loadData]);
 
   const handleDateSelect = (date: Date, log?: DoseLog) => {
     setSelectedDate(date);

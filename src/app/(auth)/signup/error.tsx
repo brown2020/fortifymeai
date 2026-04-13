@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, RefreshCw, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,10 +12,6 @@ export default function SignUpError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error("Sign up error:", error);
-  }, [error]);
-
   return (
     <div className="min-h-screen pt-20 pb-12 page-transition">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">

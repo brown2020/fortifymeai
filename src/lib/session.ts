@@ -31,17 +31,14 @@ export async function verifySessionToken(token: string) {
     });
 
     if (typeof payload.uid !== "string") {
-      console.error("Invalid token claims: uid missing");
       return null;
     }
     if (typeof payload.sub !== "string" || payload.sub !== payload.uid) {
-      console.error("Invalid token claims");
       return null;
     }
 
     return { uid: payload.uid };
-  } catch (error) {
-    console.error("Session verification failed:", error);
+  } catch {
     return null;
   }
 }
