@@ -7,7 +7,6 @@ import {
   query,
   where,
   getDocs,
-  getDoc,
   orderBy,
   Timestamp,
   serverTimestamp,
@@ -34,20 +33,6 @@ export async function getUserSupplements(
     id: doc.id,
     ...doc.data(),
   })) as Supplement[];
-}
-
-/**
- * Get a single supplement by ID
- */
-export async function getSupplement(id: string): Promise<Supplement | null> {
-  const docRef = doc(db, COLLECTION_NAME, id);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() } as Supplement;
-  }
-
-  return null;
 }
 
 /**
