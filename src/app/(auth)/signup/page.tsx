@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { Mail, Lock, ArrowLeft, Sparkles, Pill, CheckCircle2 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
+import { getSafeRedirectPath } from "@/lib/safe-redirect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,7 +50,7 @@ export default function SignUp() {
 
   useEffect(() => {
     const redirectCookie = getCookieValue("redirect_url");
-    setCallbackUrl(redirectCookie || ROUTES.dashboard);
+    setCallbackUrl(getSafeRedirectPath(redirectCookie, ROUTES.dashboard));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
