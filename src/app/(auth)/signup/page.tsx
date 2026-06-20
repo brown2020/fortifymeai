@@ -136,8 +136,8 @@ export default function SignUp() {
         <div className="mb-6 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
           <p className="text-sm font-medium text-emerald-400 mb-3">What you get:</p>
           <ul className="space-y-2">
-            {benefits.map((benefit, index) => (
-              <li key={index} className="flex items-center gap-2 text-sm text-slate-300">
+            {benefits.map((benefit) => (
+              <li key={benefit} className="flex items-center gap-2 text-sm text-slate-300">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                 {benefit}
               </li>

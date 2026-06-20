@@ -24,6 +24,15 @@ import { Button } from "@/components/ui/button";
 import { Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const supplementSkeletonCards = [
+  "supplement-skeleton-1",
+  "supplement-skeleton-2",
+  "supplement-skeleton-3",
+  "supplement-skeleton-4",
+  "supplement-skeleton-5",
+  "supplement-skeleton-6",
+];
+
 export default function Supplements() {
   const { user } = useAuthStore();
   const { addToast } = useToast();
@@ -226,8 +235,8 @@ export default function Supplements() {
         {/* Content */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="glass-card p-6 space-y-4">
+            {supplementSkeletonCards.map((card) => (
+              <div key={card} className="glass-card p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <Skeleton className="h-6 w-32" />
                   <Skeleton className="h-8 w-16" />

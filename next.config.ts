@@ -11,7 +11,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "www.gstatic.com",
+        pathname: "/firebasejs/ui/**",
       },
     ],
   },
