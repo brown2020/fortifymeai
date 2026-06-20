@@ -57,8 +57,8 @@ future product priorities.
 - No dedicated unit, integration, or browser test script is configured.
 - There is no `proxy.ts`/`middleware.ts`; route protection currently depends on
   the protected layout plus server/API checks.
-- Auth redirects use client-provided callback/cookie values and should be
-  reviewed for safe relative URL handling.
+- Auth redirects normalize client-provided callback/cookie values to safe
+  app-relative paths before navigation.
 - Several large page and service modules carry broad responsibilities, most
   notably the research page and user stats/service modules.
 - Client-side Firestore service modules repeat collection path and timestamp
