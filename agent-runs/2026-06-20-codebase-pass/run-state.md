@@ -11,26 +11,23 @@
 
 ## Current State
 
-- Phase: Package and Dead-Code Cleanup
-- Task: T-005
+- Phase: Review
+- Task: T-006
 - Status: In progress
-- Last command: npm audit --audit-level=low
-- Last result: 10 remaining moderate advisories after safe audit fix and semver-compatible updates; lint/build passed
-- Last pushed commit: bf073f6
+- Last command: git diff --name-status origin/main..dev
+- Last result: Accumulated dev diff reviewed; no P0/P1 issues found
+- Last pushed commit: 583f489
 - Branch sync: local dev matches origin/dev
-- Working tree: package/dead-code/report edits owned by T-005
-- Next action: Commit/push cleanup checkpoint, then run review
+- Working tree: clean before review report edit
+- Next action: Commit/push review report, then run stabilization/final gates
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| package-lock.json | In-scope package | T-005 safe audit fix and semver-compatible updates |
-| src/lib/services/supplementService.ts | In-scope source | T-005 dead export removal |
-| src/lib/services/userStatsService.ts | In-scope source | T-005 dead export removal |
-| agent-runs/2026-06-20-codebase-pass/05-package-and-dead-code-cleanup.md | Safe-to-commit | T-005 cleanup report |
-| agent-runs/2026-06-20-codebase-pass/run-state.md | Safe-to-commit | T-005 run state |
-| agent-runs/2026-06-20-codebase-pass/task-queue.md | Safe-to-commit | T-005 queue update |
+| agent-runs/2026-06-20-codebase-pass/06-review.md | Safe-to-commit | T-006 review report |
+| agent-runs/2026-06-20-codebase-pass/run-state.md | Safe-to-commit | T-006 run state |
+| agent-runs/2026-06-20-codebase-pass/task-queue.md | Safe-to-commit | T-006 queue update |
 
 ## Blockers
 
