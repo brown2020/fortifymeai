@@ -11,28 +11,26 @@
 
 ## Current State
 
-- Phase: Execute Fixes and Improvements
-- Task: T-004
+- Phase: Package and Dead-Code Cleanup
+- Task: T-005
 - Status: In progress
-- Last command: node --experimental-strip-types -e '... getSafeRedirectPath cases ...'
-- Last result: Safe redirect cases passed; lint and build passed
-- Last pushed commit: b0e91cc
+- Last command: npm audit --audit-level=low
+- Last result: 10 remaining moderate advisories after safe audit fix and semver-compatible updates; lint/build passed
+- Last pushed commit: bf073f6
 - Branch sync: local dev matches origin/dev
-- Working tree: source/report edits owned by T-004
-- Next action: Commit/push F-001/F-003 fix batch, then run package/dead-code cleanup
+- Working tree: package/dead-code/report edits owned by T-005
+- Next action: Commit/push cleanup checkpoint, then run review
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| src/lib/safe-redirect.ts | In-scope source | T-004 F-001 redirect sanitizer |
-| src/app/(auth)/login/page.tsx | In-scope source | T-004 F-001 safe post-login redirect |
-| src/app/(auth)/signup/page.tsx | In-scope source | T-004 F-001 safe post-signup redirect |
-| src/app/logout/route.ts | In-scope source | T-004 F-003 request-origin logout redirect |
-| SPEC.md | Safe-to-commit | T-004 current-state risk update |
-| agent-runs/2026-06-20-codebase-pass/04-execute-fixes-and-improvements.md | Safe-to-commit | T-004 execution report |
-| agent-runs/2026-06-20-codebase-pass/run-state.md | Safe-to-commit | T-004 run state |
-| agent-runs/2026-06-20-codebase-pass/task-queue.md | Safe-to-commit | T-004 queue update |
+| package-lock.json | In-scope package | T-005 safe audit fix and semver-compatible updates |
+| src/lib/services/supplementService.ts | In-scope source | T-005 dead export removal |
+| src/lib/services/userStatsService.ts | In-scope source | T-005 dead export removal |
+| agent-runs/2026-06-20-codebase-pass/05-package-and-dead-code-cleanup.md | Safe-to-commit | T-005 cleanup report |
+| agent-runs/2026-06-20-codebase-pass/run-state.md | Safe-to-commit | T-005 run state |
+| agent-runs/2026-06-20-codebase-pass/task-queue.md | Safe-to-commit | T-005 queue update |
 
 ## Blockers
 
