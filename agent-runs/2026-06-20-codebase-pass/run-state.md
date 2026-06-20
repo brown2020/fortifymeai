@@ -11,23 +11,23 @@
 
 ## Current State
 
-- Phase: Baseline Validation
-- Task: T-002
+- Phase: Findings Backlog
+- Task: T-003
 - Status: In progress
-- Last command: npm audit --audit-level=low
-- Last result: Failed with 19 advisories (2 low, 12 moderate, 4 high, 1 critical); lint and build passed
-- Last pushed commit: 44d3b49
+- Last command: npm outdated --long
+- Last result: Reported patch/minor drift for core dependencies; package cleanup queued
+- Last pushed commit: bd12001
 - Branch sync: local dev matches origin/dev
-- Working tree: clean before baseline report edit
-- Next action: Commit/push baseline report, then build findings backlog
+- Working tree: clean before findings report edit
+- Next action: Commit/push findings backlog, then execute highest-priority fix
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| agent-runs/2026-06-20-codebase-pass/02-baseline-validation.md | Safe-to-commit | T-002 baseline report |
-| agent-runs/2026-06-20-codebase-pass/run-state.md | Safe-to-commit | T-002 run state |
-| agent-runs/2026-06-20-codebase-pass/task-queue.md | Safe-to-commit | T-002 queue update |
+| agent-runs/2026-06-20-codebase-pass/03-findings-backlog.md | Safe-to-commit | T-003 findings backlog |
+| agent-runs/2026-06-20-codebase-pass/run-state.md | Safe-to-commit | T-003 run state |
+| agent-runs/2026-06-20-codebase-pass/task-queue.md | Safe-to-commit | T-003 queue update |
 
 ## Blockers
 
