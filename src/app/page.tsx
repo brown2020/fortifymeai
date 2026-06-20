@@ -48,6 +48,35 @@ const stats = [
   { value: "99.9%", label: "Uptime" },
 ];
 
+const ratingStars = [
+  "rating-star-1",
+  "rating-star-2",
+  "rating-star-3",
+  "rating-star-4",
+  "rating-star-5",
+];
+
+const gettingStartedSteps = [
+  {
+    step: "01",
+    title: "Create Account",
+    description: "Sign up for free and set up your profile with your health goals.",
+    icon: Sparkles,
+  },
+  {
+    step: "02",
+    title: "Add Supplements",
+    description: "Log your current supplements or research new ones with AI.",
+    icon: Pill,
+  },
+  {
+    step: "03",
+    title: "Get Insights",
+    description: "Receive personalized recommendations and track your progress.",
+    icon: Zap,
+  },
+];
+
 export default function Home() {
   return (
     <div className="min-h-screen">
@@ -108,8 +137,8 @@ export default function Home() {
             <div className="mt-12 flex items-center justify-center gap-8 text-slate-500
               animate-in fade-in duration-700 delay-500">
               <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                {ratingStars.map((star) => (
+                  <Star key={star} className="h-4 w-4 fill-amber-400 text-amber-400" />
                 ))}
                 <span className="ml-2 text-sm text-slate-400">4.9/5 rating</span>
               </div>
@@ -124,8 +153,8 @@ export default function Home() {
       <section className="relative py-16 border-y border-slate-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
+            {stats.map((stat) => (
+              <div key={stat.label} className="text-center">
                 <p className="text-3xl sm:text-4xl font-bold gradient-text mb-1">
                   {stat.value}
                 </p>
@@ -151,11 +180,11 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-            {features.map((feature, index) => {
+            {features.map((feature) => {
               const Icon = feature.icon;
               return (
                 <div 
-                  key={index} 
+                  key={feature.title}
                   className="glass-card p-8 card-hover group"
                 >
                   {/* Icon */}
@@ -174,8 +203,8 @@ export default function Home() {
 
                   {/* Feature list */}
                   <ul className="space-y-2">
-                    {feature.items.map((item, i) => (
-                      <li key={i} className="flex items-center text-sm text-slate-300">
+                    {feature.items.map((item) => (
+                      <li key={item} className="flex items-center text-sm text-slate-300">
                         <CheckCircle2 className={`h-4 w-4 mr-2 ${feature.iconColor}`} />
                         {item}
                       </li>
@@ -201,29 +230,10 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "01",
-                title: "Create Account",
-                description: "Sign up for free and set up your profile with your health goals.",
-                icon: Sparkles,
-              },
-              {
-                step: "02",
-                title: "Add Supplements",
-                description: "Log your current supplements or research new ones with AI.",
-                icon: Pill,
-              },
-              {
-                step: "03",
-                title: "Get Insights",
-                description: "Receive personalized recommendations and track your progress.",
-                icon: Zap,
-              },
-            ].map((item, index) => {
+            {gettingStartedSteps.map((item, index) => {
               const Icon = item.icon;
               return (
-                <div key={index} className="relative">
+                <div key={item.step} className="relative">
                   {/* Connector line */}
                   {index < 2 && (
                     <div className="hidden md:block absolute top-8 left-[60%] w-full h-px 

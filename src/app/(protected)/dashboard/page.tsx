@@ -246,7 +246,7 @@ export default async function Dashboard() {
             const Icon = stat.icon;
             return (
               <div 
-                key={index}
+                key={stat.title}
                 className="glass-card p-6 stagger-1"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
@@ -360,10 +360,10 @@ export default async function Dashboard() {
             <div className="glass-card p-6">
               <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
               <div className="space-y-3">
-                {quickActions.map((action, index) => {
+                {quickActions.map((action) => {
                   const Icon = action.icon;
                   return (
-                    <Link key={index} href={action.href}>
+                    <Link key={action.href} href={action.href}>
                       <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-800/30 
                         border border-slate-700/50 hover:border-slate-600/50 
                         hover:bg-slate-800/50 transition-all cursor-pointer group">

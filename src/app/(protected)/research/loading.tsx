@@ -1,6 +1,21 @@
 import { BookOpen, History } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const quickQuerySkeletons = [
+  "quick-query-skeleton-1",
+  "quick-query-skeleton-2",
+  "quick-query-skeleton-3",
+  "quick-query-skeleton-4",
+];
+
+const historySkeletons = [
+  "history-skeleton-1",
+  "history-skeleton-2",
+  "history-skeleton-3",
+  "history-skeleton-4",
+  "history-skeleton-5",
+];
+
 export default function Loading() {
   return (
     <div className="min-h-screen pt-20 pb-12">
@@ -39,8 +54,8 @@ export default function Loading() {
               <div className="glass-card p-6">
                 <Skeleton className="h-6 w-32 mb-4" />
                 <div className="grid sm:grid-cols-2 gap-3">
-                  {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-12 w-full rounded-lg" />
+                  {quickQuerySkeletons.map((skeleton) => (
+                    <Skeleton key={skeleton} className="h-12 w-full rounded-lg" />
                   ))}
                 </div>
               </div>
@@ -54,8 +69,8 @@ export default function Loading() {
                   <Skeleton className="h-5 w-16" />
                 </div>
                 <div className="space-y-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                  {historySkeletons.map((skeleton) => (
+                    <Skeleton key={skeleton} className="h-16 w-full rounded-lg" />
                   ))}
                 </div>
               </div>

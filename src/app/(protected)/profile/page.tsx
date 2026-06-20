@@ -143,11 +143,11 @@ export default function Profile() {
         <div className="glass-card p-6 mb-6">
           <h2 className="text-lg font-semibold text-white mb-4">Settings</h2>
           <div className="space-y-3">
-            {settingsSections.map((section, index) => {
+            {settingsSections.map((section) => {
               const Icon = section.icon;
               return (
                 <button
-                  key={index}
+                  key={section.title}
                   className="w-full flex items-center gap-4 p-4 rounded-xl bg-slate-800/30 
                     border border-slate-700/50 hover:border-slate-600/50 
                     hover:bg-slate-800/50 transition-all text-left group"

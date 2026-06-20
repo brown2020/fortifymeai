@@ -16,14 +16,16 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
 }
 
 export function SkeletonText({ lines = 3, className }: { lines?: number; className?: string }) {
+  const lineKeys = Array.from({ length: lines }, (_, index) => `line-${index + 1}`);
+
   return (
     <div className={cn("space-y-3", className)}>
-      {Array.from({ length: lines }).map((_, i) => (
+      {lineKeys.map((lineKey, index) => (
         <Skeleton
-          key={i}
+          key={lineKey}
           className={cn(
             "h-4",
-            i === lines - 1 ? "w-3/4" : "w-full"
+            index === lines - 1 ? "w-3/4" : "w-full"
           )}
         />
       ))}
@@ -45,6 +47,5 @@ export function SkeletonCard() {
     </div>
   );
 }
-
 
 
