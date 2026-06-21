@@ -58,7 +58,8 @@
 
 ## Commits Pushed
 
-- Pending commit/push after final validation; final response will include the pushed commit hash.
+- `4098645` - `feat: harden Firebase auth workflow`
+- Final report closure commit follows this report update; final response records the pushed hash.
 
 ## Deferred Add-Ons
 
@@ -87,8 +88,8 @@
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Working tree clean | Pending | Will be checked after commit/push. |
-| Local dev matches origin/dev | Pending | Will be checked after push. |
+| Working tree clean | Pass | Verified after pushing `4098645`; this final-report closure update is being committed separately. |
+| Local dev matches origin/dev | Pass | `git rev-list --left-right --count origin/dev...HEAD` returned `0 0` after fetch. |
 | Existing auth provider detected/replaced | Pass | Firebase provider inventory complete; custom JWT session replaced. |
 | Firebase setup gate clear | Partial | Code/env names present; Firebase Console provider/domain/action URL setup requires external confirmation. |
 | Firebase flows covered | Pass/partial | Code paths implemented; provider-submit QA needs test users. |
