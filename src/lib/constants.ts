@@ -43,6 +43,9 @@ export const ROUTES = {
   profile: "/profile",
   login: "/login",
   signup: "/signup",
+  forgotPassword: "/forgot-password",
+  verifyEmail: "/verify-email",
+  authAction: "/auth/action",
 };
 
 // API endpoints

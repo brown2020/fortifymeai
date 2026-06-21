@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
         hostname: "www.gstatic.com",
         pathname: "/firebasejs/ui/**",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+      },
     ],
   },
 };

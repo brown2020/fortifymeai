@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuthStore } from "@/lib/store/auth-store";
-import { Mail, Lock, ArrowLeft, Sparkles, Pill, CheckCircle2 } from "lucide-react";
+import { Mail, ArrowLeft, Sparkles, Pill, CheckCircle2 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import { getSafeRedirectPath } from "@/lib/safe-redirect";
+import { getAuthErrorMessage } from "@/lib/auth-errors";
+import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,14 +71,11 @@ export default function SignUp() {
     try {
       setError("");
       setLoading(true);
-      await signUp(email, password);
+      const user = await signUp(email, password);
       clearCookie("redirect_url");
-      router.push(callbackUrl);
+      router.push(user.emailVerified ? callbackUrl : ROUTES.verifyEmail);
     } catch (err: unknown) {
-      setError(
-        "Failed to create an account. " +
-          (err instanceof Error ? err.message : "Please try again")
-      );
+      setError(getAuthErrorMessage(err, "We could not create your account."));
     } finally {
       setLoading(false);
     }
@@ -90,10 +89,7 @@ export default function SignUp() {
       clearCookie("redirect_url");
       router.push(callbackUrl);
     } catch (err: unknown) {
-      setError(
-        "Failed to sign in with Google. " +
-          (err instanceof Error ? err.message : "Please try again")
-      );
+      setError(getAuthErrorMessage(err, "We could not sign you in with Google."));
     } finally {
       setLoading(false);
     }
@@ -175,45 +171,25 @@ export default function SignUp() {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
+              <PasswordField
+                id="password"
+                name="password"
+                label="Password"
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
 
-              <div>
-                <Label htmlFor="confirm-password">Confirm Password</Label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <Input
-                    id="confirm-password"
-                    name="confirm-password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
+              <PasswordField
+                id="confirm-password"
+                name="confirm-password"
+                label="Confirm Password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
             </div>
 
             <div className="space-y-4">

@@ -1,43 +1,38 @@
-import { SignJWT, jwtVerify } from "jose";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import { SESSION_DURATION_MS } from "@/lib/constants";
+import { adminAuth } from "@/lib/firebase-admin";
 
-function getJwtSecret(): Uint8Array {
-  const raw = process.env.JWT_SECRET;
-  if (!raw) {
-    throw new Error(
-      "Missing JWT_SECRET. Set a strong random secret for session signing."
-    );
-  }
-  return new TextEncoder().encode(raw);
+export type VerifiedSession = {
+  uid: string;
+  email?: string;
+  emailVerified: boolean;
+  claims: DecodedIdToken;
+};
+
+export async function createSessionCookie(idToken: string) {
+  const decodedToken = await adminAuth.verifyIdToken(idToken);
+  const sessionCookie = await adminAuth.createSessionCookie(idToken, {
+    expiresIn: SESSION_DURATION_MS,
+  });
+
+  return { decodedToken, sessionCookie };
 }
 
-export async function createSessionToken(uid: string) {
-  const JWT_SECRET = getJwtSecret();
-  return new SignJWT({ uid })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("5d")
-    .setNotBefore(0)
-    .setSubject(uid)
-    .setIssuer("fortifyme")
-    .sign(JWT_SECRET);
-}
-
-export async function verifySessionToken(token: string) {
+export async function verifySessionToken(
+  token: string
+): Promise<VerifiedSession | null> {
   try {
-    const JWT_SECRET = getJwtSecret();
-    const { payload } = await jwtVerify(token, JWT_SECRET, {
-      issuer: "fortifyme",
-      algorithms: ["HS256"],
-    });
-
-    if (typeof payload.uid !== "string") {
-      return null;
-    }
-    if (typeof payload.sub !== "string" || payload.sub !== payload.uid) {
+    const decodedToken = await adminAuth.verifySessionCookie(token, true);
+    if (!decodedToken.uid) {
       return null;
     }
 
-    return { uid: payload.uid };
+    return {
+      uid: decodedToken.uid,
+      email: decodedToken.email,
+      emailVerified: decodedToken.email_verified === true,
+      claims: decodedToken,
+    };
   } catch {
     return null;
   }
