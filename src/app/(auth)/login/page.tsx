@@ -5,9 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuthStore } from "@/lib/store/auth-store";
-import { Mail, Lock, ArrowLeft, Sparkles, Pill } from "lucide-react";
+import { Mail, ArrowLeft, Sparkles, Pill, Send } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import { getSafeRedirectPath } from "@/lib/safe-redirect";
+import { getAuthErrorMessage } from "@/lib/auth-errors";
+import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,11 +37,12 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [callbackUrl, setCallbackUrl] = useState(ROUTES.dashboard);
-  const { signIn, signInWithGoogle } = useAuthStore();
+  const { signIn, signInWithGoogle, sendEmailSignInLink } = useAuthStore();
 
   const searchParamCallbackUrl = useMemo(
     () => searchParams.get("callbackUrl"),
@@ -58,15 +61,13 @@ export default function Login() {
 
     try {
       setError("");
+      setStatus("");
       setLoading(true);
-      await signIn(email, password);
+      const user = await signIn(email, password);
       clearCookie("redirect_url");
-      router.push(callbackUrl);
+      router.push(user.emailVerified ? callbackUrl : ROUTES.verifyEmail);
     } catch (err: unknown) {
-      setError(
-        "Failed to sign in. " +
-          (err instanceof Error ? err.message : "Invalid credentials")
-      );
+      setError(getAuthErrorMessage(err, "We could not sign you in."));
     } finally {
       setLoading(false);
     }
@@ -75,15 +76,32 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setError("");
+      setStatus("");
       setLoading(true);
       await signInWithGoogle();
       clearCookie("redirect_url");
       router.push(callbackUrl);
     } catch (err: unknown) {
-      setError(
-        "Failed to sign in with Google. " +
-          (err instanceof Error ? err.message : "Please try again")
-      );
+      setError(getAuthErrorMessage(err, "We could not sign you in with Google."));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailLink = async () => {
+    if (!email) {
+      setError("Enter your email address first.");
+      return;
+    }
+
+    try {
+      setError("");
+      setStatus("");
+      setLoading(true);
+      await sendEmailSignInLink(email);
+      setStatus("Check your email for a secure sign-in link.");
+    } catch (err: unknown) {
+      setError(getAuthErrorMessage(err, "We could not send a sign-in link."));
     } finally {
       setLoading(false);
     }
@@ -130,6 +148,11 @@ export default function Login() {
                 {error}
               </div>
             )}
+            {status && (
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm">
+                {status}
+              </div>
+            )}
 
             <div className="space-y-4">
               <div>
@@ -152,25 +175,33 @@ export default function Login() {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
+              <PasswordField
+                id="password"
+                name="password"
+                label="Password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Link
+                href={ROUTES.forgotPassword}
+                className="text-sm text-emerald-400 hover:text-emerald-300 font-medium"
+              >
+                Forgot password?
+              </Link>
+              <button
+                type="button"
+                onClick={handleEmailLink}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white disabled:opacity-50"
+              >
+                <Send className="h-3.5 w-3.5" />
+                Email me a link
+              </button>
             </div>
 
             <div className="space-y-4">

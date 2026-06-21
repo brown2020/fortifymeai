@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { useToast } from "@/components/ui/toaster";
+import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { 
   User, 
   Mail, 
@@ -20,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/constants";
 
 export default function Profile() {
-  const { user, logout } = useAuthStore();
+  const { user, logout, sendPasswordReset } = useAuthStore();
   const { addToast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -30,6 +31,20 @@ export default function Profile() {
       window.location.href = ROUTES.home;
     } catch {
       addToast("Failed to sign out. Please try again.", "error");
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!user?.email) {
+      addToast("No email address is available for this account.", "error");
+      return;
+    }
+
+    try {
+      await sendPasswordReset(user.email);
+      addToast("Password reset email sent.", "success");
+    } catch (err: unknown) {
+      addToast(getAuthErrorMessage(err, "Failed to send reset email."), "error");
     }
   };
 
@@ -130,7 +145,7 @@ export default function Profile() {
                   variant="ghost" 
                   size="sm"
                   className="text-emerald-400 hover:text-emerald-300"
-                  onClick={() => addToast("Password reset email would be sent here.", "info")}
+                  onClick={handlePasswordReset}
                 >
                   Change
                 </Button>

@@ -25,8 +25,8 @@ future product priorities.
 - Framework: Next.js App Router with TypeScript strict mode.
 - UI: React 19 components with Tailwind CSS utility styling and local
   primitives under `src/components/ui/`.
-- Auth: Firebase client Auth, a Zustand auth store, and a signed HTTP-only
-  session cookie for protected server rendering and server APIs.
+- Auth: Firebase client Auth, a Zustand auth store, and a Firebase Admin
+  HTTP-only session cookie for protected server rendering and server APIs.
 - Data: Firestore client services for supplement, dose-log, health, side-effect,
   and stats data. Firebase Admin is used in server actions and route handlers.
 - AI: Vercel AI SDK with OpenAI in `src/app/api/research/route.ts`.
@@ -41,7 +41,7 @@ future product priorities.
   Google sign-in, and logout.
 - Successful sign-in and sign-up send a Firebase ID token to
   `/api/auth/session`; the route verifies the ID token with Firebase Admin and
-  sets `fortify_session_v1`.
+  sets `fortify_session_v1` as a Firebase Admin session cookie.
 - `src/app/(protected)/layout.tsx` redirects to `/login` when the session cookie
   is missing or invalid.
 - `src/app/api/research/route.ts` verifies the server session before calling
@@ -55,8 +55,8 @@ future product priorities.
 ## Known Quality Risks
 
 - No dedicated unit, integration, or browser test script is configured.
-- There is no `proxy.ts`/`middleware.ts`; route protection currently depends on
-  the protected layout plus server/API checks.
+- `src/proxy.ts` provides early auth-only/protected route redirects; protected
+  layout and server/API checks remain the authoritative data boundary.
 - Auth redirects normalize client-provided callback/cookie values to safe
   app-relative paths before navigation.
 - Several large page and service modules carry broad responsibilities, most

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/constants";
+import { HardSignOutButton } from "@/components/auth/hard-sign-out-button";
 
 const features = [
   {
@@ -301,6 +302,7 @@ export default function Home() {
             <p className="text-sm text-slate-500">
               © {new Date().getFullYear()} Fortify.me. All rights reserved.
             </p>
+            <HardSignOutButton />
           </div>
         </div>
       </footer>

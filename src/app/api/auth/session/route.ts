@@ -1,7 +1,6 @@
-import { adminAuth } from "../../../../lib/firebase-admin";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { createSessionToken } from "../../../../lib/session";
+import { createSessionCookie } from "../../../../lib/session";
 import {
   SESSION_COOKIE_NAME,
   SESSION_DURATION_MS,
@@ -12,8 +11,47 @@ const createSessionSchema = z.object({
   idToken: z.string().min(1),
 });
 
+function isSameOriginRequest(request: Request) {
+  const requestUrl = new URL(request.url);
+  const origin = request.headers.get("origin");
+  const secFetchSite = request.headers.get("sec-fetch-site");
+
+  if (origin && origin !== requestUrl.origin) {
+    return false;
+  }
+
+  if (
+    secFetchSite &&
+    secFetchSite !== "same-origin" &&
+    secFetchSite !== "same-site" &&
+    secFetchSite !== "none"
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+async function clearSessionCookie() {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE_NAME, "", {
+    maxAge: 0,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    sameSite: "lax",
+  });
+}
+
 export async function POST(request: Request) {
   try {
+    if (!isSameOriginRequest(request)) {
+      return NextResponse.json(
+        { error: "Session requests must come from this app." },
+        { status: 403 }
+      );
+    }
+
     const parsed = createSessionSchema.safeParse(await request.json());
     if (!parsed.success) {
       return NextResponse.json(
@@ -23,14 +61,10 @@ export async function POST(request: Request) {
     }
     const { idToken } = parsed.data;
 
-    // Verify the ID token first
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
-
-    // Create session token
-    const sessionToken = await createSessionToken(decodedToken.uid);
+    const { decodedToken, sessionCookie } = await createSessionCookie(idToken);
 
     const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE_NAME, sessionToken, {
+    cookieStore.set(SESSION_COOKIE_NAME, sessionCookie, {
       maxAge: SESSION_DURATION_MS / 1000, // Convert to seconds for cookie maxAge
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -40,13 +74,19 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ status: "success", uid: decodedToken.uid });
   } catch (error) {
-    console.error("Session creation error:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Session creation error:", error);
+    }
     const message = error instanceof Error ? error.message : "Unknown error";
 
-    // If server is misconfigured (most commonly missing JWT_SECRET), return 500
-    if (message.toLowerCase().includes("jwt_secret")) {
+    // If server is misconfigured, return 500 without exposing credential details.
+    if (
+      message.toLowerCase().includes("credential") ||
+      message.toLowerCase().includes("private_key") ||
+      message.toLowerCase().includes("project_id")
+    ) {
       return NextResponse.json(
-        { error: "Server session is not configured (missing JWT_SECRET)." },
+        { error: "Server session is not configured." },
         { status: 500 }
       );
     }
@@ -56,8 +96,14 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
-  const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE_NAME);
+export async function DELETE(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json(
+      { error: "Session requests must come from this app." },
+      { status: 403 }
+    );
+  }
+
+  await clearSessionCookie();
   return NextResponse.json({ status: "success" });
 }

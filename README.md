@@ -38,10 +38,6 @@ Open `http://localhost:3000`.
 
 This app expects Firebase env vars for both **client** and **server** code.
 
-**App (required)**
-
-- `JWT_SECRET` (required): strong random string used to sign the HTTP-only session cookie JWTs.
-
 **Client (public) Firebase config** (used by `src/lib/firebase.ts`):
 
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
@@ -60,6 +56,9 @@ This app expects Firebase env vars for both **client** and **server** code.
 - `FIREBASE_CLIENT_EMAIL`
 - `FIREBASE_CLIENT_ID`
 - `FIREBASE_CLIENT_CERTS_URL`
+
+Firebase Admin is also used to create and verify the app's HTTP-only auth
+session cookie.
 
 **AI**
 

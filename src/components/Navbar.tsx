@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "../lib/store/auth-store";
@@ -15,7 +16,8 @@ import {
   Sparkles,
   Heart,
   BarChart3,
-  Calendar
+  Calendar,
+  ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -31,17 +33,19 @@ const navLinks = {
     { href: ROUTES.analytics, label: "Analytics", icon: BarChart3 },
     { href: ROUTES.calendar, label: "Calendar", icon: Calendar },
     { href: ROUTES.research, label: "Research", icon: BookOpen },
-    { href: ROUTES.profile, label: "Profile", icon: User },
   ],
 };
 
 export default function Navbar() {
   const { user, loading, logout } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
+      setIsUserMenuOpen(false);
+      setIsMenuOpen(false);
       await logout();
       window.location.href = ROUTES.home;
     } catch {
@@ -50,6 +54,11 @@ export default function Navbar() {
   };
 
   const isActive = (href: string) => pathname === href;
+  const displayName = user?.displayName || user?.email || "Account";
+  const initial = displayName.trim().charAt(0).toUpperCase() || "U";
+  const safePhotoUrl = user?.photoURL?.startsWith("https://lh3.googleusercontent.com/")
+    ? user.photoURL
+    : null;
 
   return (
     <nav className="fixed w-full top-0 z-50 glass-card border-b border-slate-700/50 rounded-none">
@@ -91,16 +100,56 @@ export default function Navbar() {
                     </Link>
                   );
                 })}
-                <div className="ml-2 pl-2 border-l border-slate-700/50">
-                  <Button 
-                    onClick={handleLogout} 
-                    variant="ghost" 
-                    size="sm"
-                    className="gap-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"
+                <div className="relative ml-2 pl-2 border-l border-slate-700/50">
+                  <button
+                    type="button"
+                    onClick={() => setIsUserMenuOpen((open) => !open)}
+                    className="inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-slate-300 hover:bg-slate-800/50 hover:text-white"
+                    aria-expanded={isUserMenuOpen}
+                    aria-label="Open account menu"
                   >
-                    <LogOut className="h-4 w-4" />
-                    Sign out
-                  </Button>
+                    <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-emerald-500/30 bg-emerald-500/10 text-sm font-semibold text-emerald-200">
+                      {safePhotoUrl ? (
+                        <Image
+                          src={safePhotoUrl}
+                          alt=""
+                          width={32}
+                          height={32}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        initial
+                      )}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-slate-500" />
+                  </button>
+
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-slate-700/70 bg-slate-900/95 p-2 shadow-xl shadow-black/30 backdrop-blur-xl">
+                      <div className="px-3 py-2">
+                        <p className="truncate text-sm font-medium text-white">{displayName}</p>
+                        {user.email && (
+                          <p className="truncate text-xs text-slate-500">{user.email}</p>
+                        )}
+                      </div>
+                      <Link
+                        href={ROUTES.profile}
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/70 hover:text-white"
+                      >
+                        <User className="h-4 w-4" />
+                        Account
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-slate-300 hover:bg-rose-500/10 hover:text-rose-300"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign out
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             ) : !loading ? (
@@ -177,6 +226,19 @@ export default function Navbar() {
                   );
                 })}
                 <div className="pt-2 mt-2 border-t border-slate-700/50">
+                  <Link
+                    href={ROUTES.profile}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors",
+                      isActive(ROUTES.profile)
+                        ? "bg-slate-800/80 text-white"
+                        : "text-slate-300 hover:text-white hover:bg-slate-800/50"
+                    )}
+                  >
+                    <User className="h-5 w-5" />
+                    Account
+                  </Link>
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);
