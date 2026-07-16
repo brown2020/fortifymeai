@@ -54,10 +54,10 @@ export default function HealthPage() {
       setSideEffects(effects);
       setSupplements(supps);
 
-      // Get yesterday's metrics for comparison
-      if (recentMetrics.length > 1) {
-        setYesterdayMetrics(recentMetrics[1]);
-      }
+      // Results are ascending; select the most recent entry that is not today.
+      setYesterdayMetrics(
+        recentMetrics.find((entry) => entry.dateId !== metrics?.dateId) ?? null
+      );
     } catch {
       addToast("Failed to load health data", "error");
     } finally {

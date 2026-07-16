@@ -163,6 +163,7 @@ export default function Research() {
   const prevIsLoadingRef = useRef(false);
 
   const resetDisplayedResult = useCallback(() => {
+    completionRef.current = "";
     setHistoryResult("");
     setHistoryQuery("");
     setCurrentResult("");
@@ -207,7 +208,7 @@ export default function Research() {
   useEffect(() => {
     const saveCompletedSearch = async () => {
       // Detect transition from loading to not loading
-      if (prevIsLoadingRef.current && !isLoading && lastSearchQuery) {
+      if (prevIsLoadingRef.current && !isLoading && !error && lastSearchQuery) {
         const finalCompletion = completionRef.current;
         if (finalCompletion) {
           setCurrentResult(finalCompletion);
@@ -227,7 +228,7 @@ export default function Research() {
 
     saveCompletedSearch();
     prevIsLoadingRef.current = isLoading;
-  }, [isLoading, lastSearchQuery, lastSearchCategory, loadSearchHistory]);
+  }, [error, isLoading, lastSearchQuery, lastSearchCategory, loadSearchHistory]);
 
   // Auto-scroll to result when new content arrives
   useEffect(() => {
@@ -347,7 +348,7 @@ export default function Research() {
             style={{ animation: "slide-up 0.5s ease-out" }}
           >
             <Tabs
-              defaultValue="general"
+              value={activeCategory}
               onValueChange={(value) =>
                 setActiveCategory(value as ResearchCategory)
               }

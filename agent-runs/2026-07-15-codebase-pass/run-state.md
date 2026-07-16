@@ -11,24 +11,26 @@
 
 ## Current State
 
-- Phase: Findings Backlog
-- Task: T-003
+- Phase: Execute Fixes and Improvements
+- Task: T-004
 - Status: Ready for checkpoint
-- Last command: source risk/import/export searches, critical-flow inspection, and npm package/peer metadata checks
-- Last result: Five confirmed behavior/race bugs, dependency migrations, and proven dead-code/dependency cleanup items queued with verification paths
-- Last pushed commit: f912b54
-- Branch sync: Synced with origin/dev after baseline push
-- Working tree: In-scope findings/run-report updates only
-- Next action: Review and checkpoint findings, then execute F-001 through F-005
+- Last command: `npm run lint`; `npm run build`; `git diff --check`
+- Last result: F-001 through F-005 fixed; lint/build/whitespace gates passed
+- Last pushed commit: c6c6f52
+- Branch sync: Synced with origin/dev after findings push
+- Working tree: T-004-owned source and run-report updates only
+- Next action: Review and checkpoint the bug-fix batch, then start package/dead-code cleanup
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| `agent-runs/2026-07-15-codebase-pass/02-baseline-validation.md` | In-scope report | Close T-002 checkpoint metadata |
-| `agent-runs/2026-07-15-codebase-pass/03-findings-backlog.md` | In-scope report | T-003 evidence and scorecard |
-| `agent-runs/2026-07-15-codebase-pass/run-state.md` | In-scope report | Resume state for T-003 |
-| `agent-runs/2026-07-15-codebase-pass/task-queue.md` | In-scope report | T-002/T-003 status and execution ownership |
+| `src/app/(protected)/research/page.tsx` | In-scope source | F-001 and F-004 |
+| `src/app/(protected)/health/page.tsx` | In-scope source | F-002 |
+| `src/app/api/research/route.ts` | In-scope source | F-003 |
+| `src/components/ui/tabs.tsx` | In-scope source | F-004 |
+| `src/components/dashboard/today-schedule.tsx` | In-scope source | F-005 |
+| `agent-runs/2026-07-15-codebase-pass/{03-findings-backlog.md,04-execute-fixes-and-improvements.md,run-state.md,task-queue.md}` | In-scope report | Close T-003 and record T-004 |
 
 ## Blockers
 
