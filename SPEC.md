@@ -51,6 +51,8 @@ future product priorities.
 
 - `npm run lint`: primary static quality gate.
 - `npm run build`: production build and type integration check.
+- `npm outdated --long`: direct dependency drift report.
+- `npm audit --audit-level=low`: dependency vulnerability report.
 
 ## Known Quality Risks
 

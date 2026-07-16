@@ -14,10 +14,16 @@ Zustand for auth state, and the Vercel AI SDK/OpenAI for the research API.
 - `npm run build`: run a production build.
 - `npm run start`: run the production server after a build.
 - `npm run lint`: run ESLint across the repository.
+- `npm outdated --long`: compare direct dependency ranges with the npm registry.
+- `npm audit --audit-level=low`: inspect known dependency vulnerabilities.
 
 There is no dedicated test script currently configured in `package.json`.
 Use `npm run lint` as the first quality gate, then `npm run build` when the
 change can affect runtime, route, or type behavior.
+
+For dependency maintenance, keep `package.json` and `package-lock.json` in the
+same change. Treat major upgrades as runtime/type changes: review their migration
+notes and require both lint and build to pass before committing them.
 
 ## Important Paths
 
