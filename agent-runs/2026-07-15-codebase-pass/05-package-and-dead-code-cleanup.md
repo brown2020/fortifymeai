@@ -16,9 +16,9 @@ Baseline/findings reports; npm registry/audit/tree/why metadata; official Fireba
 
 - Branch: dev
 - Upstream: origin/dev
-- Commit: e17601a before this cleanup checkpoint
-- Pushed to: Pending checkpoint
-- Sync status: Clean and synchronized before package/source cleanup
+- Commit: 430d0f0
+- Pushed to: origin/dev
+- Sync status: Clean and synchronized after push (`0 0` ahead/behind)
 
 ## Loop
 
@@ -31,10 +31,10 @@ Baseline/findings reports; npm registry/audit/tree/why metadata; official Fireba
 
 ## Run State
 
-- Current phase: Package and Dead-Code Cleanup
-- Current task: T-005
-- Last pushed commit: e17601a
-- Next action: Checkpoint cleanup, then review accumulated changes
+- Current phase: Review
+- Current task: T-006
+- Last pushed commit: 430d0f0
+- Next action: Review accumulated changes
 - Blockers: None
 
 ## Commands Run
@@ -118,11 +118,11 @@ git diff --check
 ## Commit-Push Checkpoint
 
 - Status inspected: T-005-owned package, source cleanup, docs, and reports only
-- Diff checked: Source/package diff reviewed; final post-report whitespace check pending
-- Files staged: Pending
-- Dry-run push: Pending
-- Push: Pending
-- Post-push sync: Pending
+- Diff checked: Passed; source/package diff and whitespace reviewed
+- Files staged: Package/lockfile, modular Admin migration, dead-code/config cleanup, docs, and T-005 reports
+- Dry-run push: Passed
+- Push: Passed (`430d0f0` to origin/dev)
+- Post-push sync: Passed (`0 0` ahead/behind; clean tree)
 
 ## Stabilization
 

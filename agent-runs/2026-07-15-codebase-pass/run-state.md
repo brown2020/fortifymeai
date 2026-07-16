@@ -11,26 +11,21 @@
 
 ## Current State
 
-- Phase: Package and Dead-Code Cleanup
-- Task: T-005
-- Status: Ready for checkpoint
-- Last command: clean `npm ci`; final lint/build/audit/outdated/package-tree/install-script/reference checks
-- Last result: All compatible packages current; audit zero; lint/build/package tree clean; TypeScript 7 incompatibility and one upstream clean-install deprecation classified
-- Last pushed commit: e17601a
-- Branch sync: Synced with origin/dev after bug-fix push
-- Working tree: T-005-owned package, migration, dead-code, docs, and run-report updates only
-- Next action: Review and checkpoint package/dead-code cleanup, then run Judge Loop
+- Phase: Review
+- Task: T-006
+- Status: Ready for checkpoint; Judge verdict NEEDS FIX
+- Last command: accumulated diff/type/dependency/reference/Git review
+- Last result: No P0/P1 findings; F-011 P2 health-comparison edge case assigned to stabilization
+- Last pushed commit: 430d0f0
+- Branch sync: Synced with origin/dev before review report update
+- Working tree: T-006-owned review/package-report/state updates only
+- Next action: Checkpoint review, then fix F-011 and run stabilization gates
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| `package.json`, `package-lock.json` | In-scope package | F-006/F-007 updates, overrides, engines, and reviewed install-script policy |
-| `src/lib/firebase-admin.ts` | In-scope source | Firebase Admin v14 modular migration |
-| `postcss.config.js`, `postcss.config.mjs`, `src/lib/openai.ts` | In-scope cleanup | F-007 config/files |
-| `src/lib/services/*`, `src/lib/utils.ts`, `src/app/(protected)/research/actions.ts`, `src/app/(protected)/analytics/page.tsx` | In-scope cleanup | F-008 dead exports and redundant read |
-| `README.md`, `CLAUDE.md`, `AGENTS.md`, `SPEC.md` | In-scope docs | Current dependency/session/runtime truth |
-| `agent-runs/2026-07-15-codebase-pass/{03-findings-backlog.md,04-execute-fixes-and-improvements.md,05-package-and-dead-code-cleanup.md,run-state.md,task-queue.md}` | In-scope report | Close T-004 and record T-005 |
+| `agent-runs/2026-07-15-codebase-pass/{05-package-and-dead-code-cleanup.md,06-review.md,run-state.md,task-queue.md}` | In-scope report | Close T-005 and record T-006 Judge result |
 
 ## Blockers
 
