@@ -11,23 +11,24 @@
 
 ## Current State
 
-- Phase: Preflight and Repo Docs
-- Task: T-001
+- Phase: Baseline Validation
+- Task: T-002
 - Status: Ready for checkpoint
-- Last command: `npm run lint`
-- Last result: Passed with no warnings or errors
-- Last pushed commit: 22ada9e
-- Branch sync: Synced with origin/dev before report creation
-- Working tree: In-scope preflight docs and run reports only
-- Next action: Review the diff and checkpoint the preflight/docs phase
+- Last command: `npm run lint`; `npm run build`; `npm outdated --long`; `npm audit --audit-level=low`; `npm ls --depth=0`
+- Last result: Lint/build/package tree passed; outdated found 15 direct upgrade candidates; audit found 10 moderate transitive advisories
+- Last pushed commit: 74abb88
+- Branch sync: Synced with origin/dev after preflight/docs push
+- Working tree: In-scope baseline/run-report updates only
+- Next action: Review and checkpoint the baseline report, then build the findings backlog
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| `AGENTS.md` | In-scope source | Dependency maintenance guidance for T-001 |
-| `SPEC.md` | In-scope source | Current validation commands for T-001 |
-| `agent-runs/2026-07-15-codebase-pass/*` | Safe-to-commit | Run scaffolding and T-001 reports |
+| `agent-runs/2026-07-15-codebase-pass/01-preflight-and-repo-docs.md` | In-scope report | Close T-001 checkpoint metadata |
+| `agent-runs/2026-07-15-codebase-pass/02-baseline-validation.md` | In-scope report | T-002 baseline evidence |
+| `agent-runs/2026-07-15-codebase-pass/run-state.md` | In-scope report | Resume state for T-002 |
+| `agent-runs/2026-07-15-codebase-pass/task-queue.md` | In-scope report | T-001/T-002 status |
 
 ## Blockers
 

@@ -2,96 +2,111 @@
 
 ## Agent
 
-Name:
+Name: Codex
 
 ## Scope
 
-What this phase inspected or changed:
+Established the pre-change code and dependency baseline without editing application or package files.
 
 ## Inputs
 
-Reports, files, or commands used:
+`package.json`, installed npm tree, npm registry metadata, npm advisory data, ESLint, and the Next.js production build.
 
 ## Branch and Push
 
-- Branch:
-- Upstream:
-- Commit:
-- Pushed to:
-- Sync status:
+- Branch: dev
+- Upstream: origin/dev
+- Commit: 74abb88 before this report checkpoint
+- Pushed to: Pending checkpoint
+- Sync status: Clean and synchronized before baseline commands
 
 ## Loop
 
-- Name:
-- Goal:
-- Verify gate:
-- Stop condition:
-- Attempt:
-- Result:
+- Name: Baseline Validation Loop and Quality Gate Selection Loop
+- Goal: reproduce and classify lint, type/build, package drift, audit, and dependency-tree results before edits
+- Verify gate: every command passes or each failure has concise evidence, ownership, and next action
+- Stop condition: baseline is clean or all failures are classified
+- Attempt: 1/2
+- Result: Code gates passed; dependency drift/audit/extraneous items classified for T-003/T-005
 
 ## Run State
 
-- Current phase:
-- Current task:
-- Last pushed commit:
-- Next action:
-- Blockers:
+- Current phase: Baseline Validation
+- Current task: T-002
+- Last pushed commit: 74abb88
+- Next action: Checkpoint baseline, then audit source/imports and package migrations
+- Blockers: None
 
 ## Commands Run
 
 ```text
-None.
+npm run lint
+npm run build
+npm outdated --long
+npm audit --audit-level=low
+npm ls --depth=0
 ```
 
 ## Findings
 
-- None.
+- `npm run lint` passed with no warnings or errors.
+- `npm run build` passed under Next.js 16.2.9, including TypeScript and all 18 routes plus Proxy middleware.
+- `npm outdated --long` identified 15 direct upgrade candidates. Patch/minor candidates include the AI SDK 6/3 line, Tailwind/PostCSS, Node types 25, ESLint, Next, Firebase, OpenAI, React Hook Form, and Recharts. Major candidates are AI SDK 7/4, Firebase Admin 14, Lucide 1, Node types 26, and TypeScript 7.
+- `npm audit --audit-level=low` reported 10 moderate transitive advisories: nested Next/PostCSS and Firebase Admin Google Cloud/UUID paths. npm's suggested force fixes are regressive/breaking and are not safe evidence by themselves.
+- `npm ls --depth=0` passed but reported five extraneous native/WASM runtime packages in `node_modules`; a lockfile-aligned install/update should prune them.
+- No dedicated automated test script exists, so lint/build and targeted checks are the available local quality gates.
 
 ## Changes Made
 
-- None.
+- Updated baseline report, task queue, run state, and prior checkpoint metadata only.
 
 ## Verification
 
-Checks performed and results:
+| Command | Result | Notes |
+| --- | --- | --- |
+| `npm run lint` | Passed | No warnings/errors |
+| `npm run build` | Passed | Production compile, TypeScript, page generation, and route manifest completed |
+| `npm outdated --long` | Findings (exit 1) | 15 direct upgrade candidates; expected nonzero status when outdated |
+| `npm audit --audit-level=low` | Findings (exit 1) | 10 moderate transitive advisories |
+| `npm ls --depth=0` | Passed with notices | Five extraneous native/WASM packages reported |
 
 ## Architecture and Lean Code Scorecard
 
 | Area | Status | Evidence | Action |
 | --- | --- | --- | --- |
-| Dependency direction | Not assessed | N/A | Assess if relevant |
-| Module cohesion | Not assessed | N/A | Assess if relevant |
-| Public surface area | Not assessed | N/A | Assess if relevant |
-| Data and side-effect flow | Not assessed | N/A | Assess if relevant |
-| Async/cache/resource lifecycle | Not assessed | N/A | Assess if relevant |
-| Duplication and dead code | Not assessed | N/A | Assess if relevant |
-| Dependency lean-ness | Not assessed | N/A | Assess if relevant |
-| Testability | Not assessed | N/A | Assess if relevant |
+| Dependency direction | Pass | Lint/build complete across client/server boundaries. | Reassess after changes |
+| Module cohesion | Watch | Baseline does not prove a module bug; known large modules remain. | Source audit in T-003 |
+| Public surface area | Watch | Direct package/import use not yet reconciled. | Audit in T-003/T-005 |
+| Data and side-effect flow | Pass | Route compilation/type integration passed. | Preserve behavior |
+| Async/cache/resource lifecycle | Watch | Build cannot validate live external-service lifecycles. | Inspect source in T-003 |
+| Duplication and dead code | Watch | Extraneous installed packages and possible unused direct dependencies require proof. | Search/package analysis |
+| Dependency lean-ness | Fail | 15 outdated direct packages and 10 moderate advisories. | Queue T-005 migrations |
+| Testability | Watch | No test script; lint/build only. | Use targeted checks and document gap |
 
 ## Quality Gate
 
-- Command:
-- Result:
-- Notes:
+- Command: `npm run lint`; `npm run build`
+- Result: Passed
+- Notes: Strongest configured static/runtime integration gates
 
 ## Commit-Push Checkpoint
 
-- Status inspected:
-- Diff checked:
-- Files staged:
-- Dry-run push:
-- Push:
-- Post-push sync:
+- Status inspected: Baseline report files only
+- Diff checked: Pending checkpoint review
+- Files staged: Pending
+- Dry-run push: Pending
+- Push: Pending
+- Post-push sync: Pending
 
 ## Stabilization
 
-- Cycle:
-- Completion criteria status:
-- Remaining blockers:
+- Cycle: Not started
+- Completion criteria status: Code baseline clean; package findings open
+- Remaining blockers: None
 
 ## Risks
 
-Known risks or uncertainties:
+Major package migrations may introduce API/type changes and must be evaluated separately. Audit remediation must be validated against actual installed dependency paths rather than using npm's unsafe force suggestions.
 
 ## Open Questions
 
@@ -99,4 +114,4 @@ Known risks or uncertainties:
 
 ## Recommended Next Step
 
-What should happen next:
+Checkpoint the baseline, then produce an evidence-backed findings backlog from source/import/reference inspection and package metadata.
