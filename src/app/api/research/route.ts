@@ -114,6 +114,24 @@ export async function POST(request: Request) {
       });
     }
 
+    let requestBody: unknown;
+    try {
+      requestBody = await request.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid request" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const parsed = researchRequestSchema.safeParse(requestBody);
+    if (!parsed.success) {
+      return new Response(
+        JSON.stringify({ error: "Invalid request", details: parsed.error.flatten() }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     // Best-effort in-memory rate limiting (per server instance)
     const now = Date.now();
 
@@ -143,14 +161,6 @@ export async function POST(request: Request) {
           },
         });
       }
-    }
-
-    const parsed = researchRequestSchema.safeParse(await request.json());
-    if (!parsed.success) {
-      return new Response(
-        JSON.stringify({ error: "Invalid request", details: parsed.error.flatten() }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
     }
 
     const { prompt, category } = parsed.data;

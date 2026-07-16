@@ -161,6 +161,7 @@ export function TodaySchedule({
                       variant={isTaken ? "secondary" : "outline"}
                       size="sm"
                       onClick={() => handleToggle(entry.entryId)}
+                      disabled={isPending}
                       className={cn(
                         "gap-2 shrink-0",
                         isTaken && "border border-emerald-500/30"
@@ -184,4 +185,3 @@ export function TodaySchedule({
     </div>
   );
 }
-

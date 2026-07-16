@@ -16,9 +16,9 @@ Baseline report; prior improvement/auth reports; critical server/client source f
 
 - Branch: dev
 - Upstream: origin/dev
-- Commit: f912b54 before this report checkpoint
-- Pushed to: Pending checkpoint
-- Sync status: Clean and synchronized before findings work
+- Commit: c6c6f52
+- Pushed to: origin/dev
+- Sync status: Clean and synchronized after push (`0 0` ahead/behind)
 
 ## Loop
 
@@ -95,9 +95,9 @@ Each executable finding has direct local source/command evidence and a lint/buil
 - Status inspected: Findings/run-report files only
 - Diff checked: Passed; whitespace check clean and report diff reviewed
 - Files staged: Findings report, baseline checkpoint metadata, run state, and queue
-- Dry-run push: Pending
-- Push: Pending
-- Post-push sync: Pending
+- Dry-run push: Passed
+- Push: Passed (`c6c6f52` to origin/dev)
+- Post-push sync: Passed (`0 0` ahead/behind; clean tree)
 
 ## Stabilization
 

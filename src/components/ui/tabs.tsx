@@ -19,22 +19,27 @@ function useTabsContext() {
 }
 
 interface TabsProps extends HTMLAttributes<HTMLDivElement> {
-  defaultValue: string;
+  defaultValue?: string;
+  value?: string;
   onValueChange?: (value: string) => void;
 }
 
 export function Tabs({ 
   defaultValue, 
+  value,
   onValueChange, 
   className, 
   children, 
   ...props 
 }: TabsProps) {
-  const [activeTab, setActiveTab] = useState(defaultValue);
+  const [internalActiveTab, setInternalActiveTab] = useState(defaultValue ?? "");
+  const activeTab = value ?? internalActiveTab;
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    onValueChange?.(value);
+  const handleTabChange = (nextValue: string) => {
+    if (value === undefined) {
+      setInternalActiveTab(nextValue);
+    }
+    onValueChange?.(nextValue);
   };
 
   return (
@@ -109,6 +114,4 @@ export function TabsContent({ value, className, children, ...props }: TabsConten
     </div>
   );
 }
-
-
 
