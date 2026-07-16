@@ -16,9 +16,9 @@ Established the pre-change code and dependency baseline without editing applicat
 
 - Branch: dev
 - Upstream: origin/dev
-- Commit: 74abb88 before this report checkpoint
-- Pushed to: Pending checkpoint
-- Sync status: Clean and synchronized before baseline commands
+- Commit: f912b54
+- Pushed to: origin/dev
+- Sync status: Clean and synchronized after push (`0 0` ahead/behind)
 
 ## Loop
 
@@ -91,12 +91,12 @@ npm ls --depth=0
 
 ## Commit-Push Checkpoint
 
-- Status inspected: Baseline report files only
-- Diff checked: Pending checkpoint review
-- Files staged: Pending
-- Dry-run push: Pending
-- Push: Pending
-- Post-push sync: Pending
+- Status inspected: Baseline/run-report files only
+- Diff checked: Passed; staged diff and whitespace checks clean
+- Files staged: Baseline report, preflight checkpoint metadata, run state, and queue
+- Dry-run push: Passed
+- Push: Passed (`f912b54` to origin/dev)
+- Post-push sync: Passed (`0 0` ahead/behind; clean tree)
 
 ## Stabilization
 
