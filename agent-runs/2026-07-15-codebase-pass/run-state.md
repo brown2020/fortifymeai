@@ -11,22 +11,21 @@
 
 ## Current State
 
-- Phase: Stabilization
-- Task: T-007
-- Status: Ready for checkpoint; final Judge verdict PASS
-- Last command: clean install plus lint/type/build/audit/tree/drift/script/diff and F-011 state-flow gates
-- Last result: F-011 fixed; all completion criteria pass with documented TS7/upstream-deprecation deferrals
-- Last pushed commit: 281c78c
-- Branch sync: Synced with origin/dev before stabilization updates
-- Working tree: Health F-011 fix plus T-007-owned review/stabilization/state updates
-- Next action: Checkpoint stabilization, then integrate final report and run final Git gate
+- Phase: Integrate
+- Task: T-008
+- Status: Complete after final report checkpoint and Git gate
+- Last command: final lint/diff/remote-read/dry-run-push/push/sync/clean-tree completion gate
+- Last result: All local completion criteria pass; final report closure pushed to synchronized `dev`
+- Last pushed commit: 8b92979 plus this final report checkpoint
+- Branch sync: Required final state is `0 0` ahead/behind after report push
+- Working tree: Required final state is clean after report push
+- Next action: User smoke-tests `dev` with service credentials
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| `src/app/(protected)/health/page.tsx` | In-scope fix | Resolve F-011 explicit yesterday comparison |
-| `agent-runs/2026-07-15-codebase-pass/{06-review.md,07-stabilization-loop.md,run-state.md,task-queue.md}` | In-scope report | Close T-006 and record T-007 PASS |
+| `agent-runs/2026-07-15-codebase-pass/{07-stabilization-loop.md,08-integrator.md,final-report.md,run-state.md,task-queue.md,skill-improvement-log.md}` | In-scope report | Close T-007/T-008 and publish final evidence |
 
 ## Blockers
 
