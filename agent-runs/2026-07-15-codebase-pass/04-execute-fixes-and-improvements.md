@@ -16,9 +16,9 @@ Findings F-001 through F-005, research page/API, health page/service ordering, s
 
 - Branch: dev
 - Upstream: origin/dev
-- Commit: c6c6f52 before this fix checkpoint
-- Pushed to: Pending checkpoint
-- Sync status: Clean and synchronized before source edits
+- Commit: e17601a
+- Pushed to: origin/dev
+- Sync status: Clean and synchronized after push (`0 0` ahead/behind)
 
 ## Loop
 
@@ -94,10 +94,10 @@ git diff -- <five owned source files>
 
 - Status inspected: Five T-004 source files plus owned run reports only
 - Diff checked: Passed; source diff reviewed and whitespace clean
-- Files staged: Pending
-- Dry-run push: Pending
-- Push: Pending
-- Post-push sync: Pending
+- Files staged: Five source files plus execution/findings/run-state reports
+- Dry-run push: Passed
+- Push: Passed (`e17601a` to origin/dev)
+- Post-push sync: Passed (`0 0` ahead/behind; clean tree)
 
 ## Stabilization
 

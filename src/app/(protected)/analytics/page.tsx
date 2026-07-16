@@ -11,7 +11,7 @@ import AdherenceRing from "@/components/dashboard/AdherenceRing";
 import AchievementBadge from "@/components/dashboard/AchievementBadge";
 import { getRecentDoseLogs } from "@/lib/services/doseLogService";
 import { getHealthMetricsTrend } from "@/lib/services/healthMetricsService";
-import { getUserStats, getAchievementProgress, getStreakInfo } from "@/lib/services/userStatsService";
+import { getAchievementProgress, getStreakInfo } from "@/lib/services/userStatsService";
 import { getUserSupplements } from "@/lib/services/supplementService";
 import { DoseLog } from "@/lib/models/dose-log";
 import { HealthMetricsTrend } from "@/lib/models/health-metrics";
@@ -43,10 +43,9 @@ export default function AnalyticsPage() {
     if (!user) return;
     setIsLoading(true);
     try {
-      const [logs, health, , supps, achievements, streak] = await Promise.all([
+      const [logs, health, supps, achievements, streak] = await Promise.all([
         getRecentDoseLogs(user.uid, timeRange),
         getHealthMetricsTrend(user.uid, timeRange),
-        getUserStats(user.uid),
         getUserSupplements(user.uid),
         getAchievementProgress(user.uid),
         getStreakInfo(user.uid),

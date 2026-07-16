@@ -30,6 +30,8 @@ future product priorities.
 - Data: Firestore client services for supplement, dose-log, health, side-effect,
   and stats data. Firebase Admin is used in server actions and route handlers.
 - AI: Vercel AI SDK with OpenAI in `src/app/api/research/route.ts`.
+- Runtime: Node.js 22 or newer; direct packages are current except TypeScript,
+  which remains on 6.x because Next.js/ESLint fail under TypeScript 7.
 - Validation: ESLint is configured through `eslint.config.mjs`. No test script
   is currently configured in `package.json`.
 
@@ -61,8 +63,8 @@ future product priorities.
   layout and server/API checks remain the authoritative data boundary.
 - Auth redirects normalize client-provided callback/cookie values to safe
   app-relative paths before navigation.
-- Several large page and service modules carry broad responsibilities, most
-  notably the research page and user stats/service modules.
+- Several large page modules carry broad responsibilities, most notably the
+  research and dashboard pages.
 - Client-side Firestore service modules repeat collection path and timestamp
   patterns; consolidation may reduce maintenance cost if done without changing
   behavior.

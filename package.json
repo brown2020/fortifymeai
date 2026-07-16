@@ -2,6 +2,9 @@
   "name": "fortifymeai",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,39 +12,47 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.53",
-    "@ai-sdk/react": "^3.0.170",
+    "@ai-sdk/openai": "^4.0.15",
+    "@ai-sdk/react": "^4.0.32",
     "@hookform/resolvers": "^5.2.2",
-    "@tailwindcss/typography": "^0.5.19",
-    "ai": "^6.0.168",
+    "ai": "^7.0.29",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "firebase": "^12.12.0",
-    "firebase-admin": "^13.8.0",
-    "lucide-react": "0.468.0",
-    "next": "^16.2.4",
-    "openai": "^6.34.0",
+    "firebase": "^12.16.0",
+    "firebase-admin": "^14.1.0",
+    "lucide-react": "^1.24.0",
+    "next": "^16.2.10",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "react-hook-form": "^7.72.1",
+    "react-hook-form": "^7.81.0",
     "react-is": "^19.2.5",
     "react-markdown": "^10.1.0",
-    "recharts": "^3.8.1",
+    "recharts": "^3.9.2",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.5",
-    "@tailwindcss/forms": "^0.5.11",
-    "@tailwindcss/postcss": "^4.2.2",
-    "@types/node": "^25.6.0",
+    "@tailwindcss/postcss": "^4.3.2",
+    "@types/node": "^26.1.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^10",
-    "eslint-config-next": "^16.2.4",
-    "postcss": "^8.5.10",
-    "tailwindcss": "^4.2.2",
-    "typescript": "^6"
+    "eslint": "^10.7.0",
+    "eslint-config-next": "^16.2.10",
+    "postcss": "^8.5.19",
+    "tailwindcss": "^4.3.2",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "glob": "^13.0.6",
+    "postcss": "^8.5.19",
+    "uuid": "^11.1.1"
+  },
+  "allowScripts": {
+    "@firebase/util@1.15.1": true,
+    "protobufjs@7.6.5": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true
   }
 }

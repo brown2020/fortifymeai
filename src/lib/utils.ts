@@ -19,37 +19,3 @@ export function formatDate(date: Date): string {
     year: "numeric",
   }).format(date);
 }
-
-/**
- * Truncates a string to a specified length and adds an ellipsis
- */
-export function truncateString(str: string, length: number): string {
-  if (str.length <= length) return str;
-  return str.slice(0, length) + "...";
-}
-
-/**
- * Debounces a function to prevent excessive calls
- */
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-
-  return function (...args: Parameters<T>) {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-/**
- * Safely parses JSON with error handling
- */
-export function safeJsonParse<T>(json: string, fallback: T): T {
-  try {
-    return JSON.parse(json) as T;
-  } catch {
-    return fallback;
-  }
-}

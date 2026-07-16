@@ -5,7 +5,6 @@ import {
 import { db } from "../firebase";
 import {
   UserStats,
-  Achievement,
   ACHIEVEMENTS,
 } from "../models/user-stats";
 import { format } from "date-fns";
@@ -13,7 +12,7 @@ import { format } from "date-fns";
 /**
  * Get user stats
  */
-export async function getUserStats(userId: string): Promise<UserStats | null> {
+async function getUserStats(userId: string): Promise<UserStats | null> {
   const docRef = doc(db, `users/${userId}/stats`, "current");
   const docSnap = await getDoc(docRef);
 
@@ -51,14 +50,6 @@ export async function getStreakInfo(userId: string): Promise<{
     lastActiveDate: stats.lastActiveDate,
     isActiveToday: stats.lastActiveDate === today,
   };
-}
-
-/**
- * Get user achievements
- */
-export async function getUserAchievements(userId: string): Promise<Achievement[]> {
-  const stats = await getUserStats(userId);
-  return stats?.achievements ?? [];
 }
 
 /**

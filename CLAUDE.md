@@ -10,12 +10,12 @@ FortifyMeAI is an AI-powered supplement tracking and research application. Users
 
 - **Framework**: Next.js 16 with App Router
 - **Language**: TypeScript (strict mode)
-- **React**: 19.0
+- **React**: 19.2
 - **Auth & Database**: Firebase (Auth + Firestore + Storage)
 - **State Management**: Zustand
 - **AI**: Vercel AI SDK with OpenAI
 - **Forms**: react-hook-form with Zod validation
-- **Styling**: Tailwind CSS 4.0 with @tailwindcss/typography and @tailwindcss/forms
+- **Styling**: Tailwind CSS 4 with the dedicated Tailwind PostCSS plugin
 
 ## Directory Structure
 
@@ -43,7 +43,7 @@ src/
     ├── store/              # Zustand stores
     ├── firebase.ts         # Firebase client config
     ├── firebase-admin.ts   # Firebase Admin SDK config
-    ├── session.ts          # JWT session utilities
+    ├── session.ts          # Firebase Admin session-cookie utilities
     └── utils.ts            # Utility functions (cn for classnames)
 ```
 
@@ -67,7 +67,7 @@ import { Supplement } from "@/lib/models/supplement";
 
 ### Route Groups
 - `(auth)` - Public authentication pages
-- `(protected)` - Pages requiring authentication (uses ProtectedRoute wrapper)
+- `(protected)` - Pages requiring authentication (the route-group layout verifies the server session cookie)
 
 ### Component Conventions
 - UI components in `src/components/ui/` follow a consistent pattern with `cn()` for class merging
@@ -83,9 +83,9 @@ import { Supplement } from "@/lib/models/supplement";
 - Firebase Auth wrapped with AuthProvider context
 
 ### Session Handling
-- JWT-based sessions using jose library
-- HTTP-only cookies for session tokens
-- Session verification in API routes via `verifySession()`
+- Firebase Admin creates and verifies the `fortify_session_v1` HTTP-only session cookie
+- Protected layouts, route handlers, and server actions verify server session state
+- Client Firebase/Zustand auth state is UI state and is not a server authorization boundary
 
 ## Key Types
 
@@ -113,7 +113,6 @@ interface Supplement {
 ## Environment Variables
 
 Required environment variables (see README.md for full list):
-- `JWT_SECRET` - Session signing key
 - `OPENAI_API_KEY` - For AI research feature
 - Firebase client config (`NEXT_PUBLIC_FIREBASE_*`)
 - Firebase Admin config (`FIREBASE_*`)
