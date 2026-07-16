@@ -16,9 +16,9 @@ Review checkpoint `281c78c`; F-011 reproduction; health metric service date conv
 
 - Branch: dev
 - Upstream: origin/dev
-- Commit: 281c78c before stabilization checkpoint
-- Pushed to: Pending stabilization checkpoint
-- Sync status: Clean and synchronized before F-011 fix
+- Commit: 8b92979
+- Pushed to: origin/dev
+- Sync status: Clean and synchronized after stabilization push (`0 0` ahead/behind)
 
 ## Loop
 
@@ -31,10 +31,10 @@ Review checkpoint `281c78c`; F-011 reproduction; health metric service date conv
 
 ## Run State
 
-- Current phase: Stabilization
-- Current task: T-007
-- Last pushed commit: 281c78c
-- Next action: Checkpoint stabilization, then integrate reports and run final remote/sync gate
+- Current phase: Integrate
+- Current task: T-008
+- Last pushed commit: 8b92979
+- Next action: Integrate reports and run final remote/sync gate
 - Blockers: None
 
 ## Commands Run
@@ -104,10 +104,10 @@ rg deferral/finding evidence
 
 - Status inspected: One runtime file plus review/stabilization report/state updates
 - Diff checked: Runtime diff reviewed; whitespace clean before report updates
-- Files staged: Pending
-- Dry-run push: Pending
-- Push: Pending
-- Post-push sync: Pending
+- Files staged: Health comparison fix plus review/stabilization/state reports
+- Dry-run push: Passed
+- Push: Passed (`8b92979` to origin/dev)
+- Post-push sync: Passed (`0 0` ahead/behind; clean tree)
 
 ## Stabilization
 
