@@ -7,7 +7,7 @@ A Next.js App Router project built around **Firebase** (Auth + Firestore), **Zus
 - **Next.js**: `^16.2.10`
 - **React**: `^19.2.5`
 - **Firebase (client)**: `^12.16.0`
-- **Firebase Admin (server)**: `^14.1.0`
+- **Firebase Admin (server)**: `^13.10.0`
 - **Vercel AI SDK**: `ai@^7.0.29`, `@ai-sdk/openai@^4.0.15`, `@ai-sdk/react@^4.0.32`
 - **State**: `zustand@^5.0.12`
 - **Forms**: `react-hook-form@^7.81.0`, `@hookform/resolvers@^5.2.2`
@@ -15,7 +15,7 @@ A Next.js App Router project built around **Firebase** (Auth + Firestore), **Zus
 
 ### Requirements
 
-- **Node.js**: 22+ (required by the current AI SDK and Firebase Admin releases)
+- **Node.js**: 22+ (the version declared by this repository)
 - **npm**: this repo ships with `package-lock.json` (lockfile v3)
 
 ### Getting started
