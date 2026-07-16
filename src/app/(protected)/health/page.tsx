@@ -26,6 +26,7 @@ import { SideEffectEntry, SideEffectFormData } from "@/lib/models/side-effects";
 import { Supplement } from "@/lib/models/supplement";
 import { Activity, AlertTriangle, Plus, Heart } from "lucide-react";
 import { useToast } from "@/components/ui/toaster";
+import { format, subDays } from "date-fns";
 
 export default function HealthPage() {
   const { user } = useAuthStore();
@@ -54,9 +55,9 @@ export default function HealthPage() {
       setSideEffects(effects);
       setSupplements(supps);
 
-      // Results are ascending; select the most recent entry that is not today.
+      const yesterdayDateId = format(subDays(new Date(), 1), "yyyy-MM-dd");
       setYesterdayMetrics(
-        recentMetrics.find((entry) => entry.dateId !== metrics?.dateId) ?? null
+        recentMetrics.find((entry) => entry.dateId === yesterdayDateId) ?? null
       );
     } catch {
       addToast("Failed to load health data", "error");
