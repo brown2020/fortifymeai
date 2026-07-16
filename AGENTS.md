@@ -37,7 +37,7 @@ notes and require both lint and build to pass before committing them.
 - `src/components/providers/AuthProvider.tsx`: Firebase auth observer.
 - `src/lib/store/auth-store.ts`: Zustand auth store and sign-in/sign-out flows.
 - `src/lib/services/`: client Firestore service modules.
-- `src/lib/session.ts`: signed session token creation and verification.
+- `src/lib/session.ts`: Firebase Admin session-cookie creation and verification.
 - `src/lib/firebase.ts`: Firebase client initialization.
 - `src/lib/firebase-admin.ts`: Firebase Admin initialization.
 - `firestore.rules` and `firestore.indexes.json`: Firestore deployment assets.
@@ -63,8 +63,8 @@ notes and require both lint and build to pass before committing them.
   `tsconfig.json`.
 - Do not commit `.env`, `.env.local`, `service_key.json`, `.next/`,
   `node_modules/`, or TypeScript build info.
-- Keep Firebase Admin credentials and JWT secrets server-only. Do not expose
-  them in `NEXT_PUBLIC_*` variables, client components, or logs.
+- Keep Firebase Admin credentials and session-cookie values server-only. Do not
+  expose them in `NEXT_PUBLIC_*` variables, client components, or logs.
 - Prefer small, verified fixes. Run `npm run lint` before committing; run
   `npm run build` for changes that touch routes, auth/session code, or shared
   TypeScript types.

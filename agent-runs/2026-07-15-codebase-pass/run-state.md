@@ -11,26 +11,26 @@
 
 ## Current State
 
-- Phase: Execute Fixes and Improvements
-- Task: T-004
+- Phase: Package and Dead-Code Cleanup
+- Task: T-005
 - Status: Ready for checkpoint
-- Last command: `npm run lint`; `npm run build`; `git diff --check`
-- Last result: F-001 through F-005 fixed; lint/build/whitespace gates passed
-- Last pushed commit: c6c6f52
-- Branch sync: Synced with origin/dev after findings push
-- Working tree: T-004-owned source and run-report updates only
-- Next action: Review and checkpoint the bug-fix batch, then start package/dead-code cleanup
+- Last command: clean `npm ci`; final lint/build/audit/outdated/package-tree/install-script/reference checks
+- Last result: All compatible packages current; audit zero; lint/build/package tree clean; TypeScript 7 incompatibility and one upstream clean-install deprecation classified
+- Last pushed commit: e17601a
+- Branch sync: Synced with origin/dev after bug-fix push
+- Working tree: T-005-owned package, migration, dead-code, docs, and run-report updates only
+- Next action: Review and checkpoint package/dead-code cleanup, then run Judge Loop
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| `src/app/(protected)/research/page.tsx` | In-scope source | F-001 and F-004 |
-| `src/app/(protected)/health/page.tsx` | In-scope source | F-002 |
-| `src/app/api/research/route.ts` | In-scope source | F-003 |
-| `src/components/ui/tabs.tsx` | In-scope source | F-004 |
-| `src/components/dashboard/today-schedule.tsx` | In-scope source | F-005 |
-| `agent-runs/2026-07-15-codebase-pass/{03-findings-backlog.md,04-execute-fixes-and-improvements.md,run-state.md,task-queue.md}` | In-scope report | Close T-003 and record T-004 |
+| `package.json`, `package-lock.json` | In-scope package | F-006/F-007 updates, overrides, engines, and reviewed install-script policy |
+| `src/lib/firebase-admin.ts` | In-scope source | Firebase Admin v14 modular migration |
+| `postcss.config.js`, `postcss.config.mjs`, `src/lib/openai.ts` | In-scope cleanup | F-007 config/files |
+| `src/lib/services/*`, `src/lib/utils.ts`, `src/app/(protected)/research/actions.ts`, `src/app/(protected)/analytics/page.tsx` | In-scope cleanup | F-008 dead exports and redundant read |
+| `README.md`, `CLAUDE.md`, `AGENTS.md`, `SPEC.md` | In-scope docs | Current dependency/session/runtime truth |
+| `agent-runs/2026-07-15-codebase-pass/{03-findings-backlog.md,04-execute-fixes-and-improvements.md,05-package-and-dead-code-cleanup.md,run-state.md,task-queue.md}` | In-scope report | Close T-004 and record T-005 |
 
 ## Blockers
 
@@ -38,4 +38,5 @@
 
 ## Deferred Items
 
-- None.
+- TypeScript 7 is deferred because Next.js 16.2.10 and the current `@typescript-eslint` integration fail before project type/lint analysis. TypeScript 6.0.3 is the newest passing version.
+- A clean `npm ci` emits the upstream `node-domexception@1.0.0` deprecation through Firebase Admin's current Google auth/`node-fetch@3.3.2` chain; no newer stable transitive release removes it.

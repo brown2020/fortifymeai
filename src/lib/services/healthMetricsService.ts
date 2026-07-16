@@ -28,7 +28,7 @@ function getDateId(date: Date = new Date()): string {
 /**
  * Get health metrics for a specific date
  */
-export async function getHealthMetrics(
+async function getHealthMetrics(
   userId: string,
   dateId: string
 ): Promise<HealthMetricEntry | null> {
@@ -54,7 +54,7 @@ export async function getTodayHealthMetrics(
 /**
  * Get health metrics for a date range
  */
-export async function getHealthMetricsRange(
+async function getHealthMetricsRange(
   userId: string,
   startDate: Date,
   endDate: Date
@@ -135,78 +135,4 @@ export async function getHealthMetricsTrend(
     stressLevel: m.stressLevel,
     sleepHours: m.sleepHours,
   }));
-}
-
-/**
- * Calculate average metrics over a period
- */
-export async function getAverageMetrics(
-  userId: string,
-  days: number = 7
-): Promise<Partial<HealthMetricFormData>> {
-  const metrics = await getRecentHealthMetrics(userId, days);
-
-  if (metrics.length === 0) return {};
-
-  const totals = {
-    energyLevel: 0,
-    sleepQuality: 0,
-    mood: 0,
-    focus: 0,
-    stressLevel: 0,
-    sleepHours: 0,
-  };
-
-  const counts = {
-    energyLevel: 0,
-    sleepQuality: 0,
-    mood: 0,
-    focus: 0,
-    stressLevel: 0,
-    sleepHours: 0,
-  };
-
-  metrics.forEach((m) => {
-    if (m.energyLevel !== undefined) {
-      totals.energyLevel += m.energyLevel;
-      counts.energyLevel++;
-    }
-    if (m.sleepQuality !== undefined) {
-      totals.sleepQuality += m.sleepQuality;
-      counts.sleepQuality++;
-    }
-    if (m.mood !== undefined) {
-      totals.mood += m.mood;
-      counts.mood++;
-    }
-    if (m.focus !== undefined) {
-      totals.focus += m.focus;
-      counts.focus++;
-    }
-    if (m.stressLevel !== undefined) {
-      totals.stressLevel += m.stressLevel;
-      counts.stressLevel++;
-    }
-    if (m.sleepHours !== undefined) {
-      totals.sleepHours += m.sleepHours;
-      counts.sleepHours++;
-    }
-  });
-
-  return {
-    energyLevel: counts.energyLevel > 0 ? Math.round(totals.energyLevel / counts.energyLevel) : undefined,
-    sleepQuality: counts.sleepQuality > 0 ? Math.round(totals.sleepQuality / counts.sleepQuality) : undefined,
-    mood: counts.mood > 0 ? Math.round(totals.mood / counts.mood) : undefined,
-    focus: counts.focus > 0 ? Math.round(totals.focus / counts.focus) : undefined,
-    stressLevel: counts.stressLevel > 0 ? Math.round(totals.stressLevel / counts.stressLevel) : undefined,
-    sleepHours: counts.sleepHours > 0 ? Math.round((totals.sleepHours / counts.sleepHours) * 10) / 10 : undefined,
-  };
-}
-
-/**
- * Check if user has logged metrics today
- */
-export async function hasLoggedMetricsToday(userId: string): Promise<boolean> {
-  const today = await getTodayHealthMetrics(userId);
-  return today !== null;
 }

@@ -1,21 +1,21 @@
 ## FortifyMeAI
 
-A Next.js App Router project built around **Firebase** (Auth + Firestore + Storage), **Zustand** state, and **Vercel AI SDK** for AI/streaming features.
+A Next.js App Router project built around **Firebase** (Auth + Firestore), **Zustand** state, and **Vercel AI SDK** for AI/streaming features.
 
 ### Tech stack (from `package-lock.json` / `package.json`)
 
-- **Next.js**: `^16.0.3`
-- **React**: `^19.0.0`
-- **Firebase (client)**: `^12.6.0`
-- **Firebase Admin (server)**: `^13.0.2`
-- **Vercel AI SDK**: `ai@^6.0.3`, `@ai-sdk/openai@^3.0.1`, `@ai-sdk/react@^3.0.3`
-- **State**: `zustand@^5.0.8`
-- **Forms**: `react-hook-form@^7.66.1`, `@hookform/resolvers@^5.2.2`
-- **Styling**: `tailwindcss@^4.0.8`, `@tailwindcss/typography@^0.5.15`, `@tailwindcss/forms@^0.5.9`
+- **Next.js**: `^16.2.10`
+- **React**: `^19.2.5`
+- **Firebase (client)**: `^12.16.0`
+- **Firebase Admin (server)**: `^14.1.0`
+- **Vercel AI SDK**: `ai@^7.0.29`, `@ai-sdk/openai@^4.0.15`, `@ai-sdk/react@^4.0.32`
+- **State**: `zustand@^5.0.12`
+- **Forms**: `react-hook-form@^7.81.0`, `@hookform/resolvers@^5.2.2`
+- **Styling**: `tailwindcss@^4.3.2` with `@tailwindcss/postcss@^4.3.2`
 
 ### Requirements
 
-- **Node.js**: 18+ (many dependencies require `node >= 18`)
+- **Node.js**: 22+ (required by the current AI SDK and Firebase Admin releases)
 - **npm**: this repo ships with `package-lock.json` (lockfile v3)
 
 ### Getting started
@@ -23,7 +23,7 @@ A Next.js App Router project built around **Firebase** (Auth + Firestore + Stora
 Install dependencies:
 
 ```bash
-npm install
+npm ci
 ```
 
 Run the dev server:

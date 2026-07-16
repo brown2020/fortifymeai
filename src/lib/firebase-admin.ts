@@ -1,6 +1,14 @@
-import admin from "firebase-admin";
-import { getApps } from "firebase-admin/app";
+import {
+  cert,
+  getApps,
+  initializeApp,
+  type App,
+  type ServiceAccount,
+} from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 
+let app: App | undefined = getApps()[0];
 try {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY
     ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
@@ -17,21 +25,21 @@ try {
     token_uri: "https://oauth2.googleapis.com/token",
     auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
     client_x509_cert_url: process.env.FIREBASE_CLIENT_CERTS_URL,
-  } as admin.ServiceAccount;
+  } as ServiceAccount;
 
-  if (!getApps().length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+  if (!app) {
+    app = initializeApp({
+      credential: cert(serviceAccount),
     });
   }
 } catch {
   // Firebase admin init failed (e.g. missing credentials at build time)
-  if (!getApps().length) {
-    admin.initializeApp();
+  if (!app) {
+    app = initializeApp();
   }
 }
 
-const adminDb = admin.firestore();
-const adminAuth = admin.auth();
+const adminDb = getFirestore(app);
+const adminAuth = getAuth(app);
 
 export { adminDb, adminAuth };
