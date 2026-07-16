@@ -29,6 +29,11 @@
 
 - The hosting platform must redeploy from the updated lockfile; no local blocker remains.
 
+## Commits Pushed
+
+- `f41333c` - `fix: restore Firebase Admin runtime compatibility`
+- A final closure commit records the completed Git gate.
+
 ## Final Gate
 
 | Gate | Result | Evidence |
@@ -37,5 +42,5 @@
 | Module compatibility | Pass | Package and built-external probes pass without `require(esm)` support |
 | Auth provider/session policy | Pass, unchanged | Existing Firebase client/Admin architecture retained |
 | Lint/build/audit | Pass | All required commands succeeded |
-| Working tree and origin sync | Pending closure commit | Verified after commit/push |
+| Working tree and origin sync | Pass before closure update | `f41333c` pushed to `origin/dev`; closure report commit follows |
 | QA recorded | Pass | `10-validation.md` and `11-auth-qa.md` |
