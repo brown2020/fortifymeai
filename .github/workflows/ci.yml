@@ -7,6 +7,10 @@ jobs:
   check:
     runs-on: ubuntu-latest
     env:
+      # Public Firebase client config required at import/build time.
+      # Prefer Actions secrets when a secrets-capable token is available:
+      #   NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+      # Current PAT cannot manage repository secrets (API 403), so values stay in job env.
       NEXT_PUBLIC_FIREBASE_API_KEY: "REDACTED_BY_HISTORY_PURGE"
       NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "fortifymeai.firebaseapp.com"
       NEXT_PUBLIC_FIREBASE_PROJECT_ID: "fortifymeai"
@@ -25,3 +29,26 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - name: Smoke production server /api/health
+        run: |
+          set -euo pipefail
+          npm run start -- --port 3000 > /tmp/next-start.log 2>&1 &
+          pid=$!
+          cleanup() { kill "$pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          for i in $(seq 1 45); do
+            if curl -fsS "http://127.0.0.1:3000/api/health" -o /tmp/health.json; then
+              break
+            fi
+            sleep 1
+          done
+          test -s /tmp/health.json
+          python3 - <<'PY'
+          import json, sys
+          data = json.load(open("/tmp/health.json"))
+          print(json.dumps(data, indent=2))
+          if data.get("ok") is not True or data.get("service") != "fortifymeai":
+              sys.exit("health smoke failed")
+          if not data.get("checks", {}).get("firebase_public"):
+              sys.exit("firebase_public check false")
+          PY
