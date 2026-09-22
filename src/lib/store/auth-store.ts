@@ -50,15 +50,30 @@ function getActionCodeSettings() {
   };
 }
 
+const SESSION_REQUEST_TIMEOUT_MS = 15_000;
+
 export async function createServerSession(user: User) {
   const idToken = await user.getIdToken(true);
-  const res = await fetch(API_ROUTES.auth.session, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ idToken }),
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SESSION_REQUEST_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(API_ROUTES.auth.session, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ idToken }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("Secure session timed out. Please try signing in again.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!res.ok) {
     let message = "Failed to create server session.";
@@ -75,7 +90,16 @@ export async function createServerSession(user: User) {
 }
 
 export async function clearServerSession() {
-  await fetch(API_ROUTES.auth.session, { method: "DELETE" });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SESSION_REQUEST_TIMEOUT_MS);
+  try {
+    await fetch(API_ROUTES.auth.session, {
+      method: "DELETE",
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function clearAuthStorage() {
@@ -164,7 +188,26 @@ export const useAuthStore = create<AuthState>((set) => ({
     return userCredential.user;
   },
   sendPasswordReset: async (email) => {
-    await sendPasswordResetEmail(auth, email, getActionCodeSettings());
+    try {
+      await sendPasswordResetEmail(auth, email, getActionCodeSettings());
+    } catch (err) {
+      // Custom continue URL can fail when the origin is not allowlisted in
+      // Firebase Action Code Settings; fall back to the default reset email.
+      const code =
+        typeof err === "object" && err && "code" in err
+          ? String((err as { code?: unknown }).code || "")
+          : "";
+      if (
+        code === "auth/unauthorized-continue-uri" ||
+        code === "auth/invalid-continue-uri" ||
+        code === "auth/missing-continue-uri" ||
+        code === "auth/argument-error"
+      ) {
+        await sendPasswordResetEmail(auth, email);
+        return;
+      }
+      throw err;
+    }
   },
   sendEmailSignInLink: async (email) => {
     await sendSignInLinkToEmail(auth, email, getActionCodeSettings());

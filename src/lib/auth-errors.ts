@@ -1,5 +1,6 @@
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   "auth/invalid-credential": "Email or password did not match.",
+  "auth/invalid-login-credentials": "Email or password did not match.",
   "auth/user-not-found": "Email or password did not match.",
   "auth/wrong-password": "Email or password did not match.",
   "auth/invalid-email": "Enter a valid email address.",
@@ -19,6 +20,8 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   "auth/invalid-action-code": "This link is invalid or has already been used.",
   "auth/expired-action-code": "This link has expired. Request a new one.",
   "auth/missing-email": "Enter your email address.",
+  "auth/unauthorized-continue-uri": "Password reset is temporarily unavailable. Try again later or contact support.",
+  "auth/invalid-continue-uri": "Password reset is temporarily unavailable. Try again later or contact support.",
 };
 
 export function getAuthErrorMessage(

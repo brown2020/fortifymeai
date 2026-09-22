@@ -13,6 +13,23 @@ describe("isSameOriginRequest", () => {
     expect(isSameOriginRequest(url, "http://localhost:3100", "same-origin")).toBe(true);
   });
 
+  it("treats 127.0.0.1 and localhost as the same local origin", () => {
+    expect(
+      isSameOriginRequest(
+        "http://localhost:3100/api/auth/session",
+        "http://127.0.0.1:3100",
+        "same-origin"
+      )
+    ).toBe(true);
+    expect(
+      isSameOriginRequest(
+        "http://127.0.0.1:3100/api/auth/session",
+        "http://localhost:3100",
+        "same-origin"
+      )
+    ).toBe(true);
+  });
+
   it("denies cross-origin attackers", () => {
     expect(isSameOriginRequest(url, "https://evil.example", "cross-site")).toBe(false);
   });

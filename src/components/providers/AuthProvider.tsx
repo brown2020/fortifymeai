@@ -9,6 +9,9 @@ import {
   useAuthStore,
 } from '../../lib/store/auth-store';
 
+/** Clears navbar/auth loading if Firebase settle or session POST hangs. */
+const AUTH_SETTLE_TIMEOUT_MS = 15_000;
+
 /**
  * Syncs Firebase client auth → server session cookie.
  * Important: a null client user must NOT clear the HTTP-only session cookie.
@@ -20,6 +23,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let active = true;
+
+    const settleTimeout = window.setTimeout(() => {
+      if (active) {
+        setLoading(false);
+      }
+    }, AUTH_SETTLE_TIMEOUT_MS);
 
     const unsubscribe = onIdTokenChanged(auth, async (user) => {
       if (!active) return;
@@ -53,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       active = false;
+      window.clearTimeout(settleTimeout);
       unsubscribe();
       unsubscribeBroadcast();
     };
