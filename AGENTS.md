@@ -76,7 +76,7 @@ notes and require both lint and build to pass before committing them.
 
 ## Operations / monitoring
 
-- **Hosted CI**: `.github/workflows/ci.yml` on `origin/dev` — lint, typecheck, test, build, and post-build `/api/health` smoke (Node 22). Green on HEAD `dfc339d`: https://github.com/brown2020/fortifymeai/actions/runs/35694681510 (health-smoke `3e8f3c1`: https://github.com/brown2020/fortifymeai/actions/runs/35694532207).
+- **Hosted CI**: `.github/workflows/ci.yml` on `origin/dev` — lint, typecheck, test, build, and post-build `/api/health` smoke (Node 22). Green on HEAD `7acb0c2`: https://github.com/brown2020/fortifymeai/actions/runs/35694797532 (health-smoke `3e8f3c1`: https://github.com/brown2020/fortifymeai/actions/runs/35694532207).
 - **CI env**: Firebase **public** `NEXT_PUBLIC_*` values are set in the workflow job `env` (client SDK init at import). Repository Actions secrets cannot be managed with the current PAT (`secrets` API 403); when a secrets-capable token is available, prefer `${{ secrets.NEXT_PUBLIC_FIREBASE_* }}` wired into the same job `env` names. Never put Admin/private keys in `NEXT_PUBLIC_*` or the workflow YAML.
 - **Local CI gate**: `scripts/ci-gate.sh` mirrors the Actions gate before pushing.
 - **Production probe**: `GET /api/health` on https://fortifymeai.vercel.app (or local `npm run start`). Returns `{ ok, service, checks }` without secrets. Manual: `scripts/probe-production.sh`.
