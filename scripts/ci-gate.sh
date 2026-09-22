@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Local stand-in for GitHub Actions ci.yml until a workflow-scoped token can land
-# .github/workflows/ci.yml on origin/dev. Failures should block merges to dev and
-# be reported via repo watchers / Slack #eng (see AGENTS.md App-eval holds).
+# Local mirror of .github/workflows/ci.yml. Prefer hosted Actions on push;
+# still run this before discretionary pushes. Failures block merges and alert
+# via GitHub watchers / Slack #eng (see AGENTS.md Operations / monitoring).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 npm ci

@@ -16,7 +16,7 @@ Zustand for auth state, and the Vercel AI SDK/OpenAI for the research API.
 - `npm run lint`: run ESLint across the repository.
 - `npm run typecheck`: run `tsc --noEmit`.
 - `npm test`: run Vitest unit tests.
-- Recommended CI gate (add when token has workflow scope): lint, typecheck, test, build on Node 22.
+- Hosted CI: `.github/workflows/ci.yml` runs lint, typecheck, test, build on Node 22 (push to `dev`/`main`).
 - `npm outdated --long`: compare direct dependency ranges with the npm registry.
 - `npm audit --audit-level=low`: inspect known dependency vulnerabilities.
 
@@ -74,13 +74,19 @@ notes and require both lint and build to pass before committing them.
   meaningful risk, add a focused test setup or document why local validation is
   limited.
 
-## App-eval holds (currency / ops)
+## Operations / monitoring
 
-- **Local CI gate**: `scripts/ci-gate.sh` runs lint, typecheck, test, and production build. Use before pushing `dev`.
-- **Rollback**: revert the breaking commit on `dev` (`git revert <sha> && git push origin dev`) and re-run `scripts/ci-gate.sh`.
-- **CI workflow file**: defined under `/workspace/app-eval-runs/fortifymeai/ci.yml` and documented below; landing `.github/workflows/ci.yml` on `origin/dev` requires a GitHub token with the `workflow` scope (current token lacks it). Until then, run the same gates locally: `npm run lint && npm run typecheck && npm test && npm run build`.
-- **Failure alert path**: treat CI/local gate failures as blocking for `dev` merges; notify the maintaining engineer via the repo watchers / Slack `#eng` when gates fail. No pager integration yet (hold).
-- **Dependency advisories**: production audit is clean as of batch 3; hold major upgrades `firebase-admin@14` and `typescript@7` until a dedicated review window.
+- **Hosted CI**: `.github/workflows/ci.yml` on `origin/dev` — lint, typecheck, test, build (Node 22). Example green run (a11y batch): https://github.com/brown2020/fortifymeai/actions/runs/35693955894 (also re-check after each push).
+- **CI env**: Firebase **public** `NEXT_PUBLIC_*` values are set in the workflow job `env` (client SDK init at import). Repository Actions secrets cannot be managed with the current PAT (`secrets` API 403); when a secrets-capable token is available, prefer `${{ secrets.NEXT_PUBLIC_FIREBASE_* }}` wired into the same job `env` names. Never put Admin/private keys in `NEXT_PUBLIC_*` or the workflow YAML.
+- **Local CI gate**: `scripts/ci-gate.sh` mirrors the Actions gate before pushing.
+- **Production probe**: `GET /api/health` on https://fortifymeai.vercel.app (or local `npm run start`). Returns `{ ok, service, checks }` without secrets. Manual: `scripts/probe-production.sh`.
+- **Scheduled monitoring**: `.github/workflows/production-health.yml` probes production every 6 hours and on `workflow_dispatch`. Failures email GitHub watchers — treat as actionable; also notify Slack `#eng`.
+- **Alert / response**:
+  1. CI red → do not merge; fix or revert; re-run until green.
+  2. Health probe red → check Vercel deployment + Firebase Auth/Admin env; restore last good deploy or `git revert` on `dev` and push.
+  3. Research/API 429/5xx → sanitize logs already omit secrets; rate limit is in-memory per instance (`src/app/api/research/route.ts`).
+- **Rollback / restore**: `git revert <sha> && git push origin dev`, confirm CI green, confirm `scripts/probe-production.sh` passes after Vercel picks up the commit.
+- **Dependency advisories**: keep production `npm audit` clean; hold majors `firebase-admin@14` and `typescript@7` until a dedicated review window (see review triggers below). Review triggers: firebase-admin 14 migration guide or 13.x advisory; Next release notes claiming TypeScript 7 support.
 
 ## Auth session note
 
