@@ -39,25 +39,29 @@ async function getTodaysSchedule(userId: string): Promise<GroupedDoseEntries> {
   };
 
   try {
+    // Avoid composite index requirement: filter by userId, sort in memory.
     const snapshot = await adminDb
       .collection("supplements")
       .where("userId", "==", userId)
-      .orderBy("createdAt", "desc")
       .limit(50)
       .get();
 
-    const supplements = snapshot.docs.map((doc) => {
-      const data = doc.data() as Record<string, unknown>;
-      return {
-        id: doc.id,
-        name: typeof data.name === "string" ? data.name : "Untitled",
-        dosage: typeof data.dosage === "string" ? data.dosage : undefined,
-        frequency: typeof data.frequency === "string" ? data.frequency : undefined,
-        scheduleTimes: Array.isArray(data.scheduleTimes)
-          ? (data.scheduleTimes.filter((t) => typeof t === "string") as string[])
-          : undefined,
-      };
-    });
+    const supplements = snapshot.docs
+      .map((doc) => {
+        const data = doc.data() as Record<string, unknown>;
+        const createdAt = data.createdAt as { toMillis?: () => number } | undefined;
+        return {
+          id: doc.id,
+          name: typeof data.name === "string" ? data.name : "Untitled",
+          dosage: typeof data.dosage === "string" ? data.dosage : undefined,
+          frequency: typeof data.frequency === "string" ? data.frequency : undefined,
+          scheduleTimes: Array.isArray(data.scheduleTimes)
+            ? (data.scheduleTimes.filter((t) => typeof t === "string") as string[])
+            : undefined,
+          createdAtMs: createdAt?.toMillis?.() ?? 0,
+        };
+      })
+      .sort((a, b) => b.createdAtMs - a.createdAtMs);
 
     for (const supplement of supplements) {
       const times = supplement.scheduleTimes?.length

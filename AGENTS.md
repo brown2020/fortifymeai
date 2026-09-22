@@ -73,3 +73,13 @@ notes and require both lint and build to pass before committing them.
 - There is no configured unit/E2E test harness yet. When adding behavior with
   meaningful risk, add a focused test setup or document why local validation is
   limited.
+
+## App-eval holds (currency / ops)
+
+- **CI workflow file**: defined under `/workspace/app-eval-runs/fortifymeai/ci.yml` and documented below; landing `.github/workflows/ci.yml` on `origin/dev` requires a GitHub token with the `workflow` scope (current token lacks it). Until then, run the same gates locally: `npm run lint && npm run typecheck && npm test && npm run build`.
+- **Failure alert path**: treat CI/local gate failures as blocking for `dev` merges; notify the maintaining engineer via the repo watchers / Slack `#eng` when gates fail. No pager integration yet (hold).
+- **Dependency advisories**: production audit is clean as of batch 3; hold major upgrades `firebase-admin@14` and `typescript@7` until a dedicated review window.
+
+## Auth session note
+
+`AuthProvider` syncs Firebase client → server session cookie when a user is present. It does **not** clear the HTTP-only session when the client user is null (cold start / persistence lag). Explicit `logout()` still clears the cookie via `DELETE /api/auth/session`.

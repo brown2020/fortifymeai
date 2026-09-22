@@ -167,6 +167,7 @@ export function TodaySchedule({
                         isTaken && "border border-emerald-500/30"
                       )}
                       aria-pressed={isTaken}
+                      aria-label={isTaken ? `Mark ${entry.name} as not taken` : `Mark ${entry.name} as taken`}
                     >
                       {isTaken ? (
                         <CheckCircle2 className="h-4 w-4 text-emerald-400" />

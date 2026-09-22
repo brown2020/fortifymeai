@@ -242,12 +242,15 @@ export default function Research() {
                     <BookOpen className="h-12 w-12 text-slate-500" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-2">
-                    Start Your Research
+                    No research started yet
                   </h3>
-                  <p className="text-slate-400 max-w-md mx-auto">
+                  <p className="text-slate-400 max-w-md mx-auto mb-2">
                     Search for any supplement to discover benefits, optimal
                     dosing, potential interactions, and the latest scientific
                     evidence.
+                  </p>
+                  <p className="text-slate-500 text-sm">
+                    Try a quick query below or type your own question above.
                   </p>
                 </div>
               )}
