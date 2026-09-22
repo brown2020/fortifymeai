@@ -53,6 +53,7 @@ export const API_ROUTES = {
   auth: {
     session: "/api/auth/session",
   },
+  me: "/api/me",
   research: "/api/research",
 };
 

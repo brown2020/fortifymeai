@@ -52,7 +52,11 @@ export default function SignUp() {
 
   useEffect(() => {
     const redirectCookie = getCookieValue("redirect_url");
-    callbackUrlRef.current = getSafeRedirectPath(redirectCookie, ROUTES.dashboard);
+    const callbackParam = new URLSearchParams(window.location.search).get("callbackUrl");
+    callbackUrlRef.current = getSafeRedirectPath(
+      redirectCookie || callbackParam,
+      ROUTES.dashboard
+    );
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

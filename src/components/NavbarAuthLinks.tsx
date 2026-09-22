@@ -38,7 +38,7 @@ export function NavbarAuthLinks({
         const active = pathname === link.href;
         if (variant === "desktop") {
           return (
-            <Link key={link.href} href={link.href}>
+            <Link key={link.href} href={link.href} prefetch={false}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -55,6 +55,7 @@ export function NavbarAuthLinks({
         }
         return (
           <Link
+            prefetch={false}
             key={link.href}
             href={link.href}
             onClick={onNavigate}

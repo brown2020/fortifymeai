@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { useToast } from "@/components/ui/toaster";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
@@ -18,12 +18,80 @@ import {
   ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/lib/constants";
+import { API_ROUTES, ROUTES } from "@/lib/constants";
+
+type SessionMe = { uid: string; email: string | null; emailVerified: boolean };
+
+/** If client auth is slow/cleared, fall back to session cookie via /api/me. */
+const PROFILE_ME_WATCHDOG_MS = 8_000;
 
 export default function Profile() {
-  const { user, logout, sendPasswordReset } = useAuthStore();
+  const { user, loading: authLoading, logout, sendPasswordReset } = useAuthStore();
   const { addToast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [sessionMe, setSessionMe] = useState<SessionMe | null>(null);
+  const [meLoading, setMeLoading] = useState(false);
+  const [meTimedOut, setMeTimedOut] = useState(false);
+
+  useEffect(() => {
+    if (user?.email) {
+      setSessionMe(null);
+      setMeLoading(false);
+      setMeTimedOut(false);
+      return;
+    }
+
+    let cancelled = false;
+    const controller = new AbortController();
+    setMeLoading(true);
+    setMeTimedOut(false);
+
+    const watchdog = window.setTimeout(() => {
+      if (!cancelled) {
+        setMeTimedOut(true);
+        setMeLoading(false);
+        controller.abort();
+      }
+    }, PROFILE_ME_WATCHDOG_MS);
+
+    void (async () => {
+      try {
+        const res = await fetch(API_ROUTES.me, {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (cancelled) return;
+        if (!res.ok) {
+          setSessionMe(null);
+          return;
+        }
+        const data = (await res.json()) as { user?: SessionMe | null };
+        if (!cancelled) {
+          setSessionMe(data.user ?? null);
+        }
+      } catch {
+        if (!cancelled && !controller.signal.aborted) {
+          setSessionMe(null);
+        }
+      } finally {
+        window.clearTimeout(watchdog);
+        if (!cancelled) {
+          setMeLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(watchdog);
+      controller.abort();
+    };
+  }, [user?.email]);
+
+  const displayEmail = user?.email || sessionMe?.email || null;
+  const identityLoading = !displayEmail && (authLoading || meLoading) && !meTimedOut;
 
   const handleLogout = async () => {
     try {
@@ -35,13 +103,13 @@ export default function Profile() {
   };
 
   const handlePasswordReset = async () => {
-    if (!user?.email) {
+    if (!displayEmail) {
       addToast("No email address is available for this account.", "error");
       return;
     }
 
     try {
-      await sendPasswordReset(user.email);
+      await sendPasswordReset(displayEmail);
       addToast("Password reset email sent.", "success");
     } catch (err: unknown) {
       addToast(getAuthErrorMessage(err, "Failed to send reset email."), "error");
@@ -123,7 +191,7 @@ export default function Profile() {
                   </div>
                   <div>
                     <p className="text-sm text-slate-400 mb-0.5">Email address</p>
-                    <p className="text-white font-medium">{user?.email || "Not available"}</p>
+                    <p className="text-white font-medium">{identityLoading ? "Loading…" : displayEmail || "Not available"}</p>
                   </div>
                 </div>
               </div>

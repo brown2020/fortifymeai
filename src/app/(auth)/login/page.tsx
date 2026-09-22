@@ -42,11 +42,15 @@ export default function Login() {
   const router = useRouter();
   const { signIn, signInWithGoogle, sendEmailSignInLink } = useAuthStore();
 
-  // Prefer server-set redirect cookie over URL param to avoid privileged URL prefill.
+  // Prefer redirect_url cookie (set by proxy); fall back to safe callbackUrl query.
   const callbackUrlRef = useRef(ROUTES.dashboard);
   useEffect(() => {
     const redirectCookie = getCookieValue("redirect_url");
-    callbackUrlRef.current = getSafeRedirectPath(redirectCookie, ROUTES.dashboard);
+    const callbackParam = new URLSearchParams(window.location.search).get("callbackUrl");
+    callbackUrlRef.current = getSafeRedirectPath(
+      redirectCookie || callbackParam,
+      ROUTES.dashboard
+    );
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
