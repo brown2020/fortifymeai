@@ -28,12 +28,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en"
+      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
+      style={{ colorScheme: "dark" }}
+    >
       <body className="min-h-screen antialiased font-display">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg bg-emerald-800 text-white focus:px-4 focus:py-2.5 focus:text-base focus:font-bold focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:ring-offset-2 focus:ring-offset-slate-900"
+        >
+          Skip to main content
+        </a>
         <Toaster>
           <AuthProvider>
             <Navbar />
-            <main>{children}</main>
+            <main id="main-content">{children}</main>
           </AuthProvider>
         </Toaster>
       </body>

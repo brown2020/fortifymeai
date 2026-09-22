@@ -334,7 +334,7 @@ body {
 
 /* Button hover glow effect */
 .glow-on-hover {
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .glow-on-hover:hover {
@@ -350,7 +350,7 @@ body {
 
 /* Card hover lift */
 .card-hover {
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card-hover:hover {
@@ -375,4 +375,25 @@ body {
   );
   background-size: 200% 100%;
   animation: shimmer 2s linear infinite;
+}
+
+
+/* Honor prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .floating-orb,
+  .floating-orb-1,
+  .floating-orb-2,
+  .shimmer,
+  .page-transition {
+    animation: none !important;
+  }
 }

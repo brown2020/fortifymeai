@@ -16,7 +16,7 @@ export function ResearchQuickPanel({
       <div className="glass-card p-6">
         <div className="flex items-center gap-2 mb-4">
           <Lightbulb className="h-5 w-5 text-amber-400" />
-          <h3 className="text-lg font-semibold text-white">Quick Queries</h3>
+          <h2 className="text-lg font-semibold text-white">Quick Queries</h2>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           {QUICK_QUERIES[activeCategory].map((query) => (

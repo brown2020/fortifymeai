@@ -74,17 +74,18 @@ export default function SupplementCalendar({
     <div className={cn("glass-card p-6", className)}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold text-white">
           {format(currentMonth, "MMMM yyyy")}
-        </h3>
+        </h2>
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
             className="h-8 w-8"
+            aria-label="Previous month"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
           <Button
             variant="ghost"
@@ -99,8 +100,9 @@ export default function SupplementCalendar({
             size="icon"
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
             className="h-8 w-8"
+            aria-label="Next month"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </div>
@@ -129,7 +131,10 @@ export default function SupplementCalendar({
           return (
             <button
               key={dateId}
+              type="button"
               onClick={() => handleDateClick(dayDate)}
+              aria-label={format(dayDate, "MMMM d, yyyy")}
+              aria-pressed={Boolean(isSelected)}
               className={cn(
                 "relative aspect-square p-1 rounded-lg transition-[color,background-color,border-color,transform,box-shadow,opacity]",
                 "flex flex-col items-center justify-center",

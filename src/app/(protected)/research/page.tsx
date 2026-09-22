@@ -136,7 +136,7 @@ export default function Research() {
                             activeCategory
                           ).label.toLowerCase()})...`}
                           className="w-full h-14 pl-12 pr-4 bg-transparent text-white placeholder-slate-400 
-                            focus:outline-none text-lg rounded-xl"
+                            focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-lg rounded-xl"
                         />
                         <Search className="absolute left-4 top-4 h-6 w-6 text-slate-400" />
                       </div>
@@ -209,11 +209,12 @@ export default function Research() {
                         onClick={handleCopyResult}
                         className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-700"
                         title="Copy response"
+                        aria-label="Copy response"
                       >
                         {copied ? (
-                          <Check className="h-4 w-4 text-emerald-400" />
+                          <Check className="h-4 w-4 text-emerald-400" aria-hidden="true" />
                         ) : (
-                          <Copy className="h-4 w-4" />
+                          <Copy className="h-4 w-4" aria-hidden="true" />
                         )}
                       </Button>
                     </div>
@@ -241,9 +242,9 @@ export default function Research() {
                   <div className="p-4 rounded-2xl bg-slate-800/50 w-fit mx-auto mb-4">
                     <BookOpen className="h-12 w-12 text-slate-500" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-2">
+                  <h2 className="text-xl font-semibold text-white mb-2">
                     No research started yet
-                  </h3>
+                  </h2>
                   <p className="text-slate-400 max-w-md mx-auto mb-2">
                     Search for any supplement to discover benefits, optimal
                     dosing, potential interactions, and the latest scientific

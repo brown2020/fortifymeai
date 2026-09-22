@@ -94,14 +94,20 @@ function RenderSupplements({
                   placeholder="Search supplements..."
                   aria-label="Search supplements"
                   className="w-full h-12 pl-12 pr-4 bg-transparent text-white placeholder-slate-400 
-                    focus:outline-none text-base rounded-xl"
+                    focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-base rounded-xl"
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />
-                <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
+                <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" aria-hidden="true" />
               </div>
-              <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400">
-                <Filter className="h-5 w-5" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 text-slate-400"
+                aria-label="Filter supplements"
+              >
+                <Filter className="h-5 w-5" aria-hidden="true" />
               </Button>
             </div>
           </div>

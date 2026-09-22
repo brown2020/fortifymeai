@@ -66,14 +66,14 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: () => void }) 
       )}
       role="alert"
     >
-      <Icon className={cn("h-5 w-5 shrink-0", iconStyles[toast.type])} />
+      <Icon className={cn("h-5 w-5 shrink-0", iconStyles[toast.type])} aria-hidden="true" />
       <p className="text-sm font-medium flex-1">{toast.message}</p>
       <button
         onClick={onRemove}
         className="p-1 rounded-lg hover:bg-white/10 transition-colors"
         aria-label="Close"
       >
-        <X className="h-4 w-4" />
+        <X className="h-4 w-4" aria-hidden="true" />
       </button>
     </div>
   );
@@ -85,7 +85,11 @@ function ToasterDisplay() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div
+      className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"
+      aria-live="polite"
+      aria-relevant="additions text"
+    >
       {toasts.map((toast) => (
         <div key={toast.id} className="pointer-events-auto">
           <ToastItem toast={toast} onRemove={() => removeToast(toast.id)} />

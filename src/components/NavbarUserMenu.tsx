@@ -27,7 +27,7 @@ export function NavbarUserMenu({
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className="inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-slate-300 hover:bg-slate-800/50 hover:text-white"
+        className="inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-slate-300 hover:bg-slate-800/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
         aria-expanded={isOpen}
         aria-label="Open account menu"
       >
@@ -44,7 +44,7 @@ export function NavbarUserMenu({
             initial
           )}
         </span>
-        <ChevronDown className="h-4 w-4 text-slate-500" />
+        <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden="true" />
       </button>
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-slate-700/70 bg-slate-900/95 p-2 shadow-xl shadow-black/30 backdrop-blur-xl">

@@ -68,9 +68,11 @@ export default function SupplementCard({
             variant="ghost"
             size="icon"
             onClick={() => setShowActions(!showActions)}
-            className="h-8 w-8 text-slate-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            aria-label={`Actions for ${supplement.name}`}
+            aria-expanded={showActions}
+            className="h-8 w-8 text-slate-400 hover:text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 transition-opacity"
           >
-            <MoreVertical className="h-4 w-4" />
+            <MoreVertical className="h-4 w-4" aria-hidden="true" />
           </Button>
           
           {showActions && (

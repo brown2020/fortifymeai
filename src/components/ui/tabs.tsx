@@ -84,10 +84,30 @@ export function TabsTrigger({ value, className, children, ...props }: TabsTrigge
   return (
     <button
       role="tab"
+      type="button"
+      id={`tab-${value}`}
       aria-selected={isActive}
+      aria-controls={`tabpanel-${value}`}
+      tabIndex={isActive ? 0 : -1}
       onClick={() => setActiveTab(value)}
+      onKeyDown={(event) => {
+        const list = event.currentTarget.closest('[role="tablist"]');
+        if (!list) return;
+        const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+        const index = tabs.indexOf(event.currentTarget);
+        if (index < 0) return;
+        let next = -1;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % tabs.length;
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "Home") next = 0;
+        if (event.key === "End") next = tabs.length - 1;
+        if (next < 0) return;
+        event.preventDefault();
+        tabs[next]?.focus();
+        tabs[next]?.click();
+      }}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-[color,background-color,border-color,transform,box-shadow,opacity] duration-200",
+        "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-[color,background-color,border-color,transform,box-shadow,opacity] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
         isActive
           ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25"
           : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50",
@@ -112,6 +132,9 @@ export function TabsContent({ value, className, children, ...props }: TabsConten
   return (
     <div
       role="tabpanel"
+      id={`tabpanel-${value}`}
+      aria-labelledby={`tab-${value}`}
+      tabIndex={0}
       className={cn("mt-4 animate-in fade-in-50 duration-200", className)}
       {...props}
     >

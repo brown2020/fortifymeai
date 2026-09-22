@@ -73,11 +73,11 @@ export function SupplementContent({
         <div className="p-4 rounded-2xl bg-slate-800/50 w-fit mx-auto mb-4">
           <Package className="h-12 w-12 text-slate-500" />
         </div>
-        <h3 className="text-xl font-semibold text-white mb-2">
+        <h2 className="text-xl font-semibold text-white mb-2">
           {searching
             ? "No supplements match your search"
             : "No supplements added yet"}
-        </h3>
+        </h2>
         <p className="text-slate-400 mb-6 max-w-md mx-auto">
           {searching
             ? "Try a different search term or add a new supplement"
