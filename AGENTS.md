@@ -76,6 +76,8 @@ notes and require both lint and build to pass before committing them.
 
 ## App-eval holds (currency / ops)
 
+- **Local CI gate**: `scripts/ci-gate.sh` runs lint, typecheck, test, and production build. Use before pushing `dev`.
+- **Rollback**: revert the breaking commit on `dev` (`git revert <sha> && git push origin dev`) and re-run `scripts/ci-gate.sh`.
 - **CI workflow file**: defined under `/workspace/app-eval-runs/fortifymeai/ci.yml` and documented below; landing `.github/workflows/ci.yml` on `origin/dev` requires a GitHub token with the `workflow` scope (current token lacks it). Until then, run the same gates locally: `npm run lint && npm run typecheck && npm test && npm run build`.
 - **Failure alert path**: treat CI/local gate failures as blocking for `dev` merges; notify the maintaining engineer via the repo watchers / Slack `#eng` when gates fail. No pager integration yet (hold).
 - **Dependency advisories**: production audit is clean as of batch 3; hold major upgrades `firebase-admin@14` and `typescript@7` until a dedicated review window.
