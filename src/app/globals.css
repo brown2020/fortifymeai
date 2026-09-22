@@ -121,6 +121,12 @@ body {
   pointer-events: none;
 }
 
+/* Account dropdown is position:absolute below the trigger; glass-card's
+   overflow-hidden would clip it so the menu appears not to open. */
+nav.glass-card {
+  overflow: visible;
+}
+
 /* Gradient text */
 .gradient-text {
   @apply bg-clip-text text-transparent;

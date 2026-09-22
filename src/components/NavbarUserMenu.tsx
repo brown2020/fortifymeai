@@ -47,7 +47,7 @@ export function NavbarUserMenu({
         <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden="true" />
       </button>
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-slate-700/70 bg-slate-900/95 p-2 shadow-xl shadow-black/30 backdrop-blur-xl">
+        <div className="absolute right-0 top-full z-[60] mt-2 w-64 rounded-lg border border-slate-700/70 bg-slate-900/95 p-2 shadow-xl shadow-black/30 backdrop-blur-xl">
           <div className="px-3 py-2">
             <p className="truncate text-sm font-medium text-white">{displayName}</p>
             {email ? <p className="truncate text-xs text-slate-500">{email}</p> : null}
