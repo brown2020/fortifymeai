@@ -14,12 +14,14 @@ Zustand for auth state, and the Vercel AI SDK/OpenAI for the research API.
 - `npm run build`: run a production build.
 - `npm run start`: run the production server after a build.
 - `npm run lint`: run ESLint across the repository.
+- `npm run typecheck`: run `tsc --noEmit`.
+- `npm test`: run Vitest unit tests.
+- Recommended CI gate (add when token has workflow scope): lint, typecheck, test, build on Node 22.
 - `npm outdated --long`: compare direct dependency ranges with the npm registry.
 - `npm audit --audit-level=low`: inspect known dependency vulnerabilities.
 
-There is no dedicated test script currently configured in `package.json`.
-Use `npm run lint` as the first quality gate, then `npm run build` when the
-change can affect runtime, route, or type behavior.
+Use `npm run lint`, `npm run typecheck`, and `npm test` as the first quality gates,
+then `npm run build` when the change can affect runtime, route, or type behavior.
 
 For dependency maintenance, keep `package.json` and `package-lock.json` in the
 same change. Treat major upgrades as runtime/type changes: review their migration

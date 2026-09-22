@@ -1,6 +1,7 @@
 "use client";
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { useEffect, useState } from "react";
+
 import { cn } from "@/lib/utils";
 
 interface SupplementBreakdownProps {
@@ -20,12 +21,34 @@ const COLORS = [
 ];
 
 export default function SupplementBreakdown({ data, className }: SupplementBreakdownProps) {
+  const [recharts, setRecharts] = useState<typeof import("recharts") | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    import("recharts")
+      .then((mod) => {
+        if (active) setRecharts(mod);
+      })
+      .catch(() => {
+        if (active) setRecharts(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const chartData = data.map((item, index) => ({
     ...item,
     color: item.color || COLORS[index % COLORS.length],
   }));
 
   const totalDoses = data.reduce((sum, item) => sum + item.doses, 0);
+
+  if (!recharts) {
+    return <div className="h-64 animate-pulse rounded-xl bg-slate-800/50" aria-hidden />;
+  }
+  const { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } = recharts;
+
 
   return (
     <div className={cn("glass-card p-6", className)}>

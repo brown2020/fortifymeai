@@ -1,18 +1,9 @@
 "use client";
 
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { HealthMetricsTrend } from "@/lib/models/health-metrics";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface MetricsTrendChartProps {
   data: HealthMetricsTrend[];
@@ -30,6 +21,22 @@ const METRICS_CONFIG = {
 type MetricKey = keyof typeof METRICS_CONFIG;
 
 export default function MetricsTrendChart({ data, className }: MetricsTrendChartProps) {
+  const [recharts, setRecharts] = useState<typeof import("recharts") | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    import("recharts")
+      .then((mod) => {
+        if (active) setRecharts(mod);
+      })
+      .catch(() => {
+        if (active) setRecharts(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const [visibleMetrics, setVisibleMetrics] = useState<Set<MetricKey>>(
     new Set(["energyLevel", "mood", "sleepQuality"])
   );
@@ -50,6 +57,12 @@ export default function MetricsTrendChart({ data, className }: MetricsTrendChart
       return next;
     });
   };
+
+  if (!recharts) {
+    return <div className="h-64 animate-pulse rounded-xl bg-slate-800/50" aria-hidden />;
+  }
+  const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = recharts;
+
 
   return (
     <div className={cn("glass-card p-6", className)}>

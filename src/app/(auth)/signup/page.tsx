@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { Mail, ArrowLeft, Sparkles, Pill, CheckCircle2 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
@@ -11,6 +10,7 @@ import { getSafeRedirectPath } from "@/lib/safe-redirect";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
+import { AuthDivider, GoogleSignInButton } from "@/components/auth/auth-social";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -202,32 +202,12 @@ export default function SignUp() {
                 Create account
               </Button>
 
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-700" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-transparent text-slate-500">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
+              <AuthDivider />
+              <GoogleSignInButton
                 onClick={handleGoogleSignIn}
-                variant="outline"
                 disabled={loading}
-                className="w-full gap-2"
-              >
-                <Image
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                  alt="Google"
-                  width={20}
-                  height={20}
-                />
-                Sign up with Google
-              </Button>
+                label="Sign up with Google"
+              />
             </div>
           </form>
 

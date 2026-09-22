@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, Pill, RotateCcw } from "lucide-react";
+import { ArrowLeft, Pill, RotateCcw } from "lucide-react";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AuthAlert, AuthEmailField } from "@/components/auth/auth-fields";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -63,36 +62,9 @@ export default function ForgotPassword() {
 
         <div className="glass-card p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {status && (
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm">
-                {status}
-              </div>
-            )}
-            {error && (
-              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <Label htmlFor="email">Email address</Label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-500" />
-                </div>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-10"
-                />
-              </div>
-            </div>
+            {status ? <AuthAlert tone="success">{status}</AuthAlert> : null}
+            {error ? <AuthAlert tone="error">{error}</AuthAlert> : null}
+            <AuthEmailField value={email} onChange={setEmail} />
 
             <Button type="submit" isLoading={loading} className="w-full gap-2">
               <RotateCcw className="h-4 w-4" />

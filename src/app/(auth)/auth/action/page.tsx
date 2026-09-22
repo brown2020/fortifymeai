@@ -9,7 +9,7 @@ import {
   isSignInWithEmailLink,
   verifyPasswordResetCode,
 } from "firebase/auth";
-import { CheckCircle2, Mail, ShieldAlert } from "lucide-react";
+import { CheckCircle2, ShieldAlert } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import {
   EMAIL_LINK_STORAGE_KEY,
@@ -18,9 +18,9 @@ import {
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { PasswordField } from "@/components/auth/password-field";
+import { PageBackground } from "@/components/layout/page-background";
+import { AuthAlert, AuthEmailField } from "@/components/auth/auth-fields";
 
 function AuthActionForm() {
   const searchParams = useSearchParams();
@@ -152,10 +152,7 @@ function AuthActionForm() {
 
   return (
     <div className="min-h-screen pt-20 pb-12 page-transition">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="floating-orb floating-orb-1" />
-        <div className="floating-orb floating-orb-2" />
-      </div>
+      <PageBackground />
 
       <div className="relative max-w-md w-full mx-auto px-4 pt-16">
         <div className="glass-card p-8">
@@ -171,33 +168,11 @@ function AuthActionForm() {
             {status && <p className="text-slate-400">{status}</p>}
           </div>
 
-          {error && (
-            <div className="mb-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
-              {error}
-            </div>
-          )}
+          {error ? <div className="mb-4"><AuthAlert tone="error">{error}</AuthAlert></div> : null}
 
           {needsEmail && (
             <form onSubmit={handleEmailLinkSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="email">Email address</Label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="you@example.com"
-                    className="pl-10"
-                  />
-                </div>
-              </div>
+              <AuthEmailField value={email} onChange={setEmail} />
               <Button type="submit" isLoading={loading} className="w-full">
                 Finish sign in
               </Button>

@@ -8,33 +8,17 @@ import {
   Pill,
   Menu,
   X,
-  LayoutDashboard,
-  FlaskConical,
-  BookOpen,
   User,
   LogOut,
   Sparkles,
-  Heart,
-  BarChart3,
-  Calendar,
   ChevronDown,
 } from "lucide-react";
+import { NavbarAuthLinks } from "./NavbarAuthLinks";
+import { NavbarMobilePanel } from "./NavbarMobilePanel";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { APP_NAME, ROUTES } from "../lib/constants";
-import { cn } from "@/lib/utils";
 
-// Navigation links configuration
-const navLinks = {
-  authenticated: [
-    { href: ROUTES.dashboard, label: "Dashboard", icon: LayoutDashboard },
-    { href: ROUTES.supplements, label: "Supplements", icon: FlaskConical },
-    { href: ROUTES.health, label: "Health", icon: Heart },
-    { href: ROUTES.analytics, label: "Analytics", icon: BarChart3 },
-    { href: ROUTES.calendar, label: "Calendar", icon: Calendar },
-    { href: ROUTES.research, label: "Research", icon: BookOpen },
-  ],
-};
 
 export default function Navbar() {
   const { user, loading, logout } = useAuthStore();
@@ -53,7 +37,6 @@ export default function Navbar() {
     }
   };
 
-  const isActive = (href: string) => pathname === href;
   const displayName = user?.displayName || user?.email || "Account";
   const initial = displayName.trim().charAt(0).toUpperCase() || "U";
   const safePhotoUrl = user?.photoURL?.startsWith("https://lh3.googleusercontent.com/")
@@ -81,25 +64,7 @@ export default function Navbar() {
           <div className="hidden md:flex md:items-center md:gap-1">
             {!loading && user ? (
               <>
-                {navLinks.authenticated.map((link) => {
-                  const Icon = link.icon;
-                  const active = isActive(link.href);
-                  return (
-                    <Link key={link.href} href={link.href}>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className={cn(
-                          "gap-2 text-slate-400 hover:text-white hover:bg-slate-800/50",
-                          active && "bg-slate-800/80 text-white"
-                        )}
-                      >
-                        <Icon className={cn("h-4 w-4", active && "text-emerald-400")} />
-                        {link.label}
-                      </Button>
-                    </Link>
-                  );
-                })}
+                <NavbarAuthLinks pathname={pathname} variant="desktop" />
                 <div className="relative ml-2 pl-2 border-l border-slate-700/50">
                   <button
                     type="button"
@@ -201,80 +166,13 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-slate-700/50 bg-slate-900/95 backdrop-blur-xl">
-          <div className="px-4 py-4 space-y-1">
-            {!loading && user ? (
-              <>
-                {navLinks.authenticated.map((link) => {
-                  const Icon = link.icon;
-                  const active = isActive(link.href);
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors",
-                        active 
-                          ? "bg-slate-800/80 text-white" 
-                          : "text-slate-300 hover:text-white hover:bg-slate-800/50"
-                      )}
-                    >
-                      <Icon className={cn("h-5 w-5", active && "text-emerald-400")} />
-                      {link.label}
-                    </Link>
-                  );
-                })}
-                <div className="pt-2 mt-2 border-t border-slate-700/50">
-                  <Link
-                    href={ROUTES.profile}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors",
-                      isActive(ROUTES.profile)
-                        ? "bg-slate-800/80 text-white"
-                        : "text-slate-300 hover:text-white hover:bg-slate-800/50"
-                    )}
-                  >
-                    <User className="h-5 w-5" />
-                    Account
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      handleLogout();
-                    }}
-                    className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-base font-medium 
-                      text-slate-300 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    Sign out
-                  </button>
-                </div>
-              </>
-            ) : !loading ? (
-              <div className="space-y-2">
-                <Link
-                  href={ROUTES.login}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block px-4 py-3 rounded-lg text-base font-medium 
-                    text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href={ROUTES.signup}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-base font-medium 
-                    bg-gradient-to-r from-emerald-500 to-teal-500 text-white transition-colors"
-                >
-                  <Sparkles className="h-5 w-5" />
-                  Get Started
-                </Link>
-              </div>
-            ) : null}
-          </div>
-        </div>
+        <NavbarMobilePanel
+          user={user}
+          loading={loading}
+          pathname={pathname}
+          onClose={() => setIsMenuOpen(false)}
+          onLogout={handleLogout}
+        />
       )}
     </nav>
   );

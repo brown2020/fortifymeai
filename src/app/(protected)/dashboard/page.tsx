@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { verifySessionToken } from "@/lib/session";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { SESSION_COOKIE_NAME } from "@/lib/constants";
-import { type GroupedDoseEntries } from "@/components/dashboard/today-schedule";
+import { type GroupedDoseEntries, type ScheduleTime } from "@/components/dashboard/today-schedule";
 import { getDoseLogTakenEntryIds } from "./actions";
 import { DashboardView } from "./dashboard-view";
 

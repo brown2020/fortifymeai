@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-} from "recharts";
+import { useEffect, useState } from "react";
+
 import { cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
 
@@ -19,6 +11,22 @@ interface AdherenceChartProps {
 }
 
 export default function AdherenceChart({ data, className }: AdherenceChartProps) {
+  const [recharts, setRecharts] = useState<typeof import("recharts") | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    import("recharts")
+      .then((mod) => {
+        if (active) setRecharts(mod);
+      })
+      .catch(() => {
+        if (active) setRecharts(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const chartData = data.map((d) => ({
     ...d,
     date: format(parseISO(d.dateId), "MMM d"),
@@ -27,6 +35,12 @@ export default function AdherenceChart({ data, className }: AdherenceChartProps)
   const average = data.length > 0
     ? Math.round(data.reduce((sum, d) => sum + d.adherence, 0) / data.length)
     : 0;
+
+  if (!recharts) {
+    return <div className="h-64 animate-pulse rounded-xl bg-slate-800/50" aria-hidden />;
+  }
+  const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } = recharts;
+
 
   return (
     <div className={cn("glass-card p-6", className)}>
