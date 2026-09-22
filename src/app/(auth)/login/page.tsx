@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuthStore } from "@/lib/store/auth-store";
@@ -40,21 +40,14 @@ export default function Login() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [callbackUrl, setCallbackUrl] = useState(ROUTES.dashboard);
   const { signIn, signInWithGoogle, sendEmailSignInLink } = useAuthStore();
 
-  const searchParamCallbackUrl = useMemo(
-    () => searchParams.get("callbackUrl"),
-    [searchParams]
-  );
-
+  // Prefer server-set redirect cookie over URL param to avoid privileged URL prefill.
+  const callbackUrlRef = useRef(ROUTES.dashboard);
   useEffect(() => {
     const redirectCookie = getCookieValue("redirect_url");
-    setCallbackUrl(
-      getSafeRedirectPath(searchParamCallbackUrl || redirectCookie, ROUTES.dashboard)
-    );
-  }, [searchParamCallbackUrl]);
+    callbackUrlRef.current = getSafeRedirectPath(redirectCookie, ROUTES.dashboard);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +58,7 @@ export default function Login() {
       setLoading(true);
       const user = await signIn(email, password);
       clearCookie("redirect_url");
-      router.push(user.emailVerified ? callbackUrl : ROUTES.verifyEmail);
+      router.push(user.emailVerified ? callbackUrlRef.current : ROUTES.verifyEmail);
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not sign you in."));
     } finally {
@@ -80,7 +73,7 @@ export default function Login() {
       setLoading(true);
       await signInWithGoogle();
       clearCookie("redirect_url");
-      router.push(callbackUrl);
+      router.push(callbackUrlRef.current);
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not sign you in with Google."));
     } finally {
@@ -257,3 +250,4 @@ export default function Login() {
     </div>
   );
 }
+

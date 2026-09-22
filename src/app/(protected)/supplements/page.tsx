@@ -200,8 +200,9 @@ export default function Supplements() {
             <div className="relative flex items-center gap-3">
               <div className="relative flex-1">
                 <input
-                  type="text"
+                  type="search"
                   placeholder="Search supplements..."
+                  aria-label="Search supplements"
                   className="w-full h-12 pl-12 pr-4 bg-transparent text-white placeholder-slate-400 
                     focus:outline-none text-base rounded-xl"
                   value={searchQuery}

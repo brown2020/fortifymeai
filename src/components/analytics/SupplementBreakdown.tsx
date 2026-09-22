@@ -50,8 +50,8 @@ export default function SupplementBreakdown({ data, className }: SupplementBreak
                   dataKey="doses"
                   nameKey="name"
                 >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  {chartData.map((entry) => (
+                    <Cell key={`cell-${entry.name}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip

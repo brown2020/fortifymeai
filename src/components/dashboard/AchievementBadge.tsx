@@ -76,7 +76,7 @@ export default function AchievementBadge({
     <div className={cn("flex flex-col items-center gap-2", className)}>
       <div
         className={cn(
-          "relative rounded-full flex items-center justify-center transition-all",
+          "relative rounded-full flex items-center justify-center transition-[color,background-color,border-color,transform,box-shadow,opacity]",
           sizeClasses[size],
           earned
             ? "bg-gradient-to-br from-amber-500/30 to-yellow-500/30 border-2 border-amber-500/50"

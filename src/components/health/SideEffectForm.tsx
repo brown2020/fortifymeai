@@ -67,6 +67,8 @@ export default function SideEffectForm({
 
   const commonSymptoms = COMMON_SIDE_EFFECTS[category] || [];
 
+  const selectedSupplementSet = new Set(selectedSupplements);
+
   return (
     <div className={cn("glass-card overflow-hidden", className)}>
       {/* Header */}
@@ -109,7 +111,7 @@ export default function SideEffectForm({
                 onClick={() => handleSupplementToggle(supp.id)}
                 className={cn(
                   "px-3 py-1.5 rounded-full text-sm transition-colors border",
-                  selectedSupplements.includes(supp.id)
+                  selectedSupplementSet.has(supp.id)
                     ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400"
                     : "bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-800"
                 )}
@@ -171,11 +173,14 @@ export default function SideEffectForm({
               ))}
             </div>
           )}
+          <label className="sr-only" htmlFor="side-effect-symptom">Symptom description</label>
           <input
+            id="side-effect-symptom"
             type="text"
             value={symptom}
             onChange={(e) => setSymptom(e.target.value)}
             placeholder="Describe the symptom..."
+            aria-label="Symptom description"
             className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
           />
         </div>
@@ -210,7 +215,7 @@ export default function SideEffectForm({
             type="text"
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
-            placeholder="e.g., 2 hours, ongoing..."
+            aria-label="Duration" placeholder="e.g., 2 hours, ongoing..."
             className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
           />
         </div>
@@ -225,7 +230,7 @@ export default function SideEffectForm({
             rows={3}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Any additional details..."
+            aria-label="Additional details" placeholder="Any additional details..."
             className="bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 resize-none"
           />
         </div>

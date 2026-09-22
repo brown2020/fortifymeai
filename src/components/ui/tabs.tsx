@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, HTMLAttributes, ButtonHTMLAttributes } from "react";
+import { createContext, useContext, useState, useMemo, useCallback, HTMLAttributes, ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 interface TabsContextValue {
@@ -35,15 +35,20 @@ export function Tabs({
   const [internalActiveTab, setInternalActiveTab] = useState(defaultValue ?? "");
   const activeTab = value ?? internalActiveTab;
 
-  const handleTabChange = (nextValue: string) => {
+  const handleTabChange = useCallback((nextValue: string) => {
     if (value === undefined) {
       setInternalActiveTab(nextValue);
     }
     onValueChange?.(nextValue);
-  };
+  }, [value, onValueChange]);
+
+  const contextValue = useMemo(
+    () => ({ activeTab, setActiveTab: handleTabChange }),
+    [activeTab, handleTabChange]
+  );
 
   return (
-    <TabsContext.Provider value={{ activeTab, setActiveTab: handleTabChange }}>
+    <TabsContext.Provider value={contextValue}>
       <div className={cn("w-full", className)} {...props}>
         {children}
       </div>
@@ -82,7 +87,7 @@ export function TabsTrigger({ value, className, children, ...props }: TabsTrigge
       aria-selected={isActive}
       onClick={() => setActiveTab(value)}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200",
+        "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-[color,background-color,border-color,transform,box-shadow,opacity] duration-200",
         isActive
           ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25"
           : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50",

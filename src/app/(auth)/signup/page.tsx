@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -48,11 +48,11 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { signUp, signInWithGoogle } = useAuthStore();
-  const [callbackUrl, setCallbackUrl] = useState(ROUTES.dashboard);
+  const callbackUrlRef = useRef(ROUTES.dashboard);
 
   useEffect(() => {
     const redirectCookie = getCookieValue("redirect_url");
-    setCallbackUrl(getSafeRedirectPath(redirectCookie, ROUTES.dashboard));
+    callbackUrlRef.current = getSafeRedirectPath(redirectCookie, ROUTES.dashboard);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,7 +73,7 @@ export default function SignUp() {
       setLoading(true);
       const user = await signUp(email, password);
       clearCookie("redirect_url");
-      router.push(user.emailVerified ? callbackUrl : ROUTES.verifyEmail);
+      router.push(user.emailVerified ? callbackUrlRef.current : ROUTES.verifyEmail);
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not create your account."));
     } finally {
@@ -87,7 +87,7 @@ export default function SignUp() {
       setLoading(true);
       await signInWithGoogle();
       clearCookie("redirect_url");
-      router.push(callbackUrl);
+      router.push(callbackUrlRef.current);
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not sign you in with Google."));
     } finally {

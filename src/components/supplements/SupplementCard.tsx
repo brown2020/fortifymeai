@@ -75,9 +75,17 @@ export default function SupplementCard({
           
           {showActions && (
             <>
-              <div 
-                className="fixed inset-0 z-10" 
-                onClick={() => setShowActions(false)} 
+              <button
+                type="button"
+                className="fixed inset-0 z-10 cursor-default"
+                aria-label="Close actions menu"
+                onClick={() => setShowActions(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setShowActions(false);
+                  }
+                }}
               />
               <div className="absolute right-0 top-full mt-1 z-20 glass-card p-2 min-w-[140px]">
                 <button

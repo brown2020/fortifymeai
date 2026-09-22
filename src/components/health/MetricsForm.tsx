@@ -74,6 +74,7 @@ export default function MetricsForm({
             max="10"
             value={value ?? 5}
             onChange={(e) => handleSliderChange(key, parseInt(e.target.value))}
+            aria-label={`${metricInfo.label} rating from 1 to 10`}
             className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
           />
         </div>
@@ -147,6 +148,7 @@ export default function MetricsForm({
                     weightUnit: e.target.value as "kg" | "lbs",
                   }))
                 }
+                aria-label="Weight unit"
                 className="px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white"
               >
                 <option value="lbs">lbs</option>

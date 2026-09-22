@@ -131,7 +131,7 @@ export default function SupplementCalendar({
               key={dateId}
               onClick={() => handleDateClick(dayDate)}
               className={cn(
-                "relative aspect-square p-1 rounded-lg transition-all",
+                "relative aspect-square p-1 rounded-lg transition-[color,background-color,border-color,transform,box-shadow,opacity]",
                 "flex flex-col items-center justify-center",
                 inCurrentMonth
                   ? "text-white hover:bg-slate-700/50"

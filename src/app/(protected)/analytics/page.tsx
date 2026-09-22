@@ -3,9 +3,9 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import AdherenceChart from "@/components/analytics/AdherenceChart";
-import MetricsTrendChart from "@/components/analytics/MetricsTrendChart";
-import SupplementBreakdown from "@/components/analytics/SupplementBreakdown";
+import AdherenceChart from "@/components/analytics/AdherenceChartDynamic";
+import MetricsTrendChart from "@/components/analytics/MetricsTrendChartDynamic";
+import SupplementBreakdown from "@/components/analytics/SupplementBreakdownDynamic";
 import StreakCard from "@/components/dashboard/StreakCard";
 import AdherenceRing from "@/components/dashboard/AdherenceRing";
 import AchievementBadge from "@/components/dashboard/AchievementBadge";

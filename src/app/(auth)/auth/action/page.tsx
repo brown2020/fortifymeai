@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   applyActionCode,
   confirmPasswordReset,
@@ -22,9 +22,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordField } from "@/components/auth/password-field";
 
-export default function AuthAction() {
+function AuthActionForm() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const mode = searchParams.get("mode");
   const oobCode = searchParams.get("oobCode");
   const [email, setEmail] = useState("");
@@ -86,7 +85,7 @@ export default function AuthAction() {
           await completeEmailLinkSignIn(storedEmail, currentLink);
           if (active) {
             setStatus("Signed in. Taking you to your dashboard.");
-            router.replace(ROUTES.dashboard);
+            window.location.assign(ROUTES.dashboard);
           }
           return;
         }
@@ -108,7 +107,7 @@ export default function AuthAction() {
     return () => {
       active = false;
     };
-  }, [completeEmailLinkSignIn, currentLink, mode, oobCode, router]);
+  }, [completeEmailLinkSignIn, currentLink, mode, oobCode]);
 
   const handleEmailLinkSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -116,7 +115,7 @@ export default function AuthAction() {
       setError("");
       setLoading(true);
       await completeEmailLinkSignIn(email, currentLink);
-      router.replace(ROUTES.dashboard);
+      window.location.assign(ROUTES.dashboard);
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not complete email-link sign-in."));
     } finally {
@@ -249,5 +248,20 @@ export default function AuthAction() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function AuthAction() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen pt-20 flex items-center justify-center text-slate-400">
+          Checking your secure link...
+        </div>
+      }
+    >
+      <AuthActionForm />
+    </Suspense>
   );
 }

@@ -68,7 +68,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href={ROUTES.home} className="flex items-center gap-2 group">
               <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 
-                border border-emerald-500/20 group-hover:border-emerald-500/40 transition-all">
+                border border-emerald-500/20 group-hover:border-emerald-500/40 transition-[color,background-color,border-color,transform,box-shadow,opacity]">
                 <Pill className="h-5 w-5 text-emerald-400" />
               </div>
               <span className="text-xl font-bold gradient-text">

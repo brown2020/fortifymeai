@@ -176,6 +176,7 @@ export default function SideEffectList({
                   value={resolution}
                   onChange={(e) => setResolution(e.target.value)}
                   placeholder="What helped resolve this? (optional)"
+                  aria-label="What helped resolve this side effect"
                   className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 />
                 <div className="flex justify-end gap-2">

@@ -6,31 +6,11 @@ import {
   SESSION_DURATION_MS,
 } from "../../../../lib/constants";
 import { z } from "zod";
+import { isSameOriginRequest as checkSameOrigin } from "@/lib/same-origin";
 
 const createSessionSchema = z.object({
   idToken: z.string().min(1),
 });
-
-function isSameOriginRequest(request: Request) {
-  const requestUrl = new URL(request.url);
-  const origin = request.headers.get("origin");
-  const secFetchSite = request.headers.get("sec-fetch-site");
-
-  if (origin && origin !== requestUrl.origin) {
-    return false;
-  }
-
-  if (
-    secFetchSite &&
-    secFetchSite !== "same-origin" &&
-    secFetchSite !== "same-site" &&
-    secFetchSite !== "none"
-  ) {
-    return false;
-  }
-
-  return true;
-}
 
 async function clearSessionCookie() {
   const cookieStore = await cookies();
@@ -45,7 +25,7 @@ async function clearSessionCookie() {
 
 export async function POST(request: Request) {
   try {
-    if (!isSameOriginRequest(request)) {
+    if (!checkSameOrigin(request.url, request.headers.get("origin"), request.headers.get("sec-fetch-site"))) {
       return NextResponse.json(
         { error: "Session requests must come from this app." },
         { status: 403 }
@@ -97,7 +77,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!isSameOriginRequest(request)) {
+  if (!checkSameOrigin(request.url, request.headers.get("origin"), request.headers.get("sec-fetch-site"))) {
     return NextResponse.json(
       { error: "Session requests must come from this app." },
       { status: 403 }

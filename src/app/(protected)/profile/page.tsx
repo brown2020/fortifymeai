@@ -165,7 +165,7 @@ export default function Profile() {
                   key={section.title}
                   className="w-full flex items-center gap-4 p-4 rounded-xl bg-slate-800/30 
                     border border-slate-700/50 hover:border-slate-600/50 
-                    hover:bg-slate-800/50 transition-all text-left group"
+                    hover:bg-slate-800/50 transition-[color,background-color,border-color,transform,box-shadow,opacity] text-left group"
                   onClick={() => addToast("This feature is coming soon!", "info")}
                 >
                   <div className={`p-2.5 rounded-xl bg-gradient-to-br ${section.bgColor}`}>
@@ -183,7 +183,7 @@ export default function Profile() {
                     <p className="text-sm text-slate-400">{section.description}</p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-slate-300 
-                    group-hover:translate-x-1 transition-all" />
+                    group-hover:translate-x-1 transition-[color,background-color,border-color,transform,box-shadow,opacity]" />
                 </button>
               );
             })}
