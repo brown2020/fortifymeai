@@ -76,11 +76,11 @@ notes and require both lint and build to pass before committing them.
 
 ## Operations / monitoring
 
-- **Hosted CI**: `.github/workflows/ci.yml` on `origin/dev` — lint, typecheck, test, build (Node 22). Example green run (a11y batch): https://github.com/brown2020/fortifymeai/actions/runs/35693955894 (also re-check after each push).
+- **Hosted CI**: `.github/workflows/ci.yml` on `origin/dev` — lint, typecheck, test, build, and post-build `/api/health` smoke (Node 22). Green evidence on `3e8f3c1`: https://github.com/brown2020/fortifymeai/actions/runs/35694532207 (prior: `5e48e38` https://github.com/brown2020/fortifymeai/actions/runs/35693955894).
 - **CI env**: Firebase **public** `NEXT_PUBLIC_*` values are set in the workflow job `env` (client SDK init at import). Repository Actions secrets cannot be managed with the current PAT (`secrets` API 403); when a secrets-capable token is available, prefer `${{ secrets.NEXT_PUBLIC_FIREBASE_* }}` wired into the same job `env` names. Never put Admin/private keys in `NEXT_PUBLIC_*` or the workflow YAML.
 - **Local CI gate**: `scripts/ci-gate.sh` mirrors the Actions gate before pushing.
 - **Production probe**: `GET /api/health` on https://fortifymeai.vercel.app (or local `npm run start`). Returns `{ ok, service, checks }` without secrets. Manual: `scripts/probe-production.sh`.
-- **Scheduled monitoring**: `.github/workflows/production-health.yml` probes production every 6 hours and on `workflow_dispatch`. Failures email GitHub watchers — treat as actionable; also notify Slack `#eng`.
+- **Scheduled monitoring**: `.github/workflows/production-health.yml` (on `dev`) probes https://fortifymeai.vercel.app/api/health every 6h / `workflow_dispatch`. GitHub only runs `schedule` from the **default branch** (`main`); promote this workflow to `main` when ready. Until then, CI health smoke + `scripts/probe-production.sh` are the active monitors. Failures → GitHub watcher email + Slack `#eng`.
 - **Alert / response**:
   1. CI red → do not merge; fix or revert; re-run until green.
   2. Health probe red → check Vercel deployment + Firebase Auth/Admin env; restore last good deploy or `git revert` on `dev` and push.
