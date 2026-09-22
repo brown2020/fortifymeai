@@ -6,6 +6,14 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_FIREBASE_API_KEY: "REDACTED_BY_HISTORY_PURGE"
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "fortifymeai.firebaseapp.com"
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: "fortifymeai"
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "fortifymeai.firebasestorage.app"
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "20349443125"
+      NEXT_PUBLIC_FIREBASE_APP_ID: "1:20349443125:web:a9ce6055e47f6ca4b6257c"
+      NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: "G-P0X1DRKG2H"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
