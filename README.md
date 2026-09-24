@@ -1,103 +1,136 @@
-## FortifyMeAI
+# FortifyMeAI
 
-A Next.js App Router project built around **Firebase** (Auth + Firestore), **Zustand** state, and **Vercel AI SDK** for AI/streaming features.
+Supplement tracking and research app: manage supplements and doses, log health metrics and side effects, review calendar and analytics, and ask an authenticated AI research assistant. Demo: [https://fortifymeai.vercel.app](https://fortifymeai.vercel.app)
 
-### Tech stack (from `package-lock.json` / `package.json`)
+## Features
 
-- **Next.js**: `^16.2.10`
-- **React**: `^19.2.5`
-- **Firebase (client)**: `^12.16.0`
-- **Firebase Admin (server)**: `^13.10.0`
-- **Vercel AI SDK**: `ai@^7.0.29`, `@ai-sdk/openai@^4.0.15`, `@ai-sdk/react@^4.0.32`
-- **State**: `zustand@^5.0.12`
-- **Forms**: `react-hook-form@^7.81.0`, `@hookform/resolvers@^5.2.2`
-- **Styling**: `tailwindcss@^4.3.2` with `@tailwindcss/postcss@^4.3.2`
+Verified from the current codebase:
 
-### Requirements
+- **Dashboard** — summaries of supplement and health activity
+- **Supplements & doses** — CRUD-style management and dose logging (Firestore)
+- **Health metrics & side effects** — logging surfaces under `/health`
+- **Calendar & analytics** — review history; charts via Recharts
+- **AI research** — authenticated streaming research at `/research` → `/api/research` (OpenAI `gpt-4o` via Vercel AI SDK)
+- **Auth** — Firebase email/password + Google; HttpOnly session cookie `fortify_session_v1`; login, signup, forgot password, verify email, logout
+- **Profile** — protected profile page
+- **Health API** — `GET /api/health` (also probed in CI and a scheduled production workflow)
 
-- **Node.js**: 22+ (the version declared by this repository)
-- **npm**: this repo ships with `package-lock.json` (lockfile v3)
+## Tech stack
 
-### Getting started
+| Area | Choice |
+|------|--------|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19, Tailwind CSS 4, Lucide, Recharts, react-markdown |
+| Language | TypeScript 6 |
+| Forms | react-hook-form + Zod resolvers |
+| State | Zustand 5 |
+| Backend | Firebase 12 + firebase-admin 13 (Auth, Firestore) |
+| AI | Vercel AI SDK 7 (`ai`, `@ai-sdk/openai`, `@ai-sdk/react`) |
+| Dates | date-fns 4 |
+| Tests | Vitest 4 |
+| Deploy | Vercel (`vercel.json` maxDuration 300s) |
+| Node | `>=22` |
 
-Install dependencies:
+`.npmrc` sets `legacy-peer-deps=true`.
 
-```bash
-npm ci
+## Project structure
+
+```
+fortifymeai/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/          # login, signup, forgot-password, verify-email
+│   │   ├── (protected)/     # dashboard, supplements, health, analytics, calendar, research, profile
+│   │   └── api/             # auth/session, health, me, research
+│   ├── components/          # domain UI + providers
+│   └── lib/                 # firebase, firebase-admin, services, store, models
+├── firestore.rules
+├── firestore.indexes.json
+├── firebase.json
+├── vercel.json
+├── scripts/                 # ci-gate, production probe helpers
+└── .github/workflows/       # ci.yml, production-health.yml
 ```
 
-Run the dev server:
+## Getting started
+
+### Prerequisites
+
+- Node.js 22+
+- npm
+- Firebase project (Auth + Firestore)
+- OpenAI API key (for research)
+
+### Install
 
 ```bash
+git clone https://github.com/brown2020/fortifymeai.git
+cd fortifymeai
+git checkout dev
+npm ci
+# create .env.local with the variables below — never commit secrets
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000). There is no `.env.example` in-repo; use the table below.
 
-### Environment variables
+## Environment variables
 
-This app expects Firebase env vars for both **client** and **server** code.
+| Name | Purpose | Where to get it |
+|------|---------|-----------------|
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase web API key | Firebase Console → Your apps |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Auth domain | Same |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Project ID | Same |
+| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Storage bucket | Same |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Messaging sender ID | Same |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | App ID | Same |
+| `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` | Analytics ID | Optional |
+| `NEXT_PUBLIC_APP_URL` | Public app URL | You (e.g. `http://localhost:3000`) |
+| `FIREBASE_PROJECT_ID` | Admin SDK project ID | Service account JSON |
+| `FIREBASE_PRIVATE_KEY_ID` | Key ID | Same |
+| `FIREBASE_PRIVATE_KEY` | Private key (`\n` escaped) | Same |
+| `FIREBASE_CLIENT_EMAIL` | Client email | Same |
+| `FIREBASE_CLIENT_ID` | Client ID | Same |
+| `FIREBASE_CLIENT_CERTS_URL` | Client certs URL | Same |
+| `OPENAI_API_KEY` | OpenAI key for `/api/research` (AI SDK default) | [platform.openai.com](https://platform.openai.com) |
 
-**Client (public) Firebase config** (used by `src/lib/firebase.ts`):
+## Firebase
 
-- `NEXT_PUBLIC_FIREBASE_API_KEY`
-- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
-- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
-- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
-- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
-- `NEXT_PUBLIC_FIREBASE_APP_ID`
-- `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` (optional; only needed if you use Analytics)
+```bash
+firebase deploy --only firestore:rules,firestore:indexes
+```
 
-**Server (Firebase Admin) credentials** (used by `src/lib/firebase-admin.ts`):
+Rules and indexes: `firestore.rules`, `firestore.indexes.json` (wired in `firebase.json`).
 
-- `FIREBASE_PROJECT_ID`
-- `FIREBASE_PRIVATE_KEY_ID`
-- `FIREBASE_PRIVATE_KEY` (must preserve newlines; commonly stored with `\n`)
-- `FIREBASE_CLIENT_EMAIL`
-- `FIREBASE_CLIENT_ID`
-- `FIREBASE_CLIENT_CERTS_URL`
+## Scripts
 
-Firebase Admin is also used to create and verify the app's HTTP-only auth
-session cookie.
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Next.js dev server |
+| `npm run build` | Production build |
+| `npm start` | Serve production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitest |
 
-**AI**
+## Testing and CI
 
-- `OPENAI_API_KEY` (required for `/api/research`)
+Vitest covers health/me route helpers, session/research gates, same-origin, safe redirects, and auth errors.
 
-### Firestore Security Rules
+- **CI** (`.github/workflows/ci.yml`): lint → typecheck → test → build → smoke `/api/health` on `next start`. Needs `NEXT_PUBLIC_FIREBASE_*` secrets.
+- **Production health** (`.github/workflows/production-health.yml`): cron every 6 hours probes `https://fortifymeai.vercel.app/api/health`.
 
-This app includes Firestore security rules in `firestore.rules`. To deploy them:
+## Deployment
 
-1. Install Firebase CLI if you haven't:
-   ```bash
-   npm install -g firebase-tools
-   ```
+Vercel production tracks the live demo URL above. Set all env vars in the Vercel project. Function `maxDuration` is 300s under `src/app/**/*`.
 
-2. Login and select your project:
-   ```bash
-   firebase login
-   firebase use YOUR_PROJECT_ID
-   ```
+## Contributing
 
-3. Deploy the rules:
-   ```bash
-   firebase deploy --only firestore:rules
-   ```
+- `main` — production
+- `dev` — integration
 
-4. (Optional) Deploy indexes for better query performance:
-   ```bash
-   firebase deploy --only firestore:indexes
-   ```
+See [AGENTS.md](./AGENTS.md) and [SPEC.md](./SPEC.md).
 
-### Scripts
+## License
 
-- `npm run dev`: start Next.js in development
-- `npm run build`: production build
-- `npm run start`: run the production server
-- `npm run lint`: run ESLint
-
-### License
-
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)** — see `LICENSE.md`.
-
-If you deploy a modified version and users interact with it over a network, the AGPL generally requires you to offer those users access to the corresponding source code of your modified version (see the license for details).
+[GNU Affero General Public License v3](./LICENSE.md) (AGPL-3.0).
