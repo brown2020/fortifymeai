@@ -33,6 +33,20 @@ describe("dashboard server action auth gate", () => {
     );
   });
 
+  it("denies toggleDoseEntry when email is not verified", async () => {
+    vi.mocked(cookies).mockResolvedValue({
+      get: () => ({ value: "session" }),
+    } as never);
+    vi.mocked(verifySessionToken).mockResolvedValue({
+      uid: "user-1",
+      emailVerified: false,
+      claims: {} as never,
+    });
+    await expect(toggleDoseEntry("2026-09-21", "entry-1")).rejects.toThrow(
+      /Email not verified/
+    );
+  });
+
   it("denies getDoseLogTakenEntryIds with invalid session", async () => {
     vi.mocked(cookies).mockResolvedValue({
       get: () => ({ value: "bad" }),

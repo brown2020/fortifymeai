@@ -67,7 +67,7 @@ export default function SupplementForm({
       brand: values.brand,
       dosage: values.dosage,
       frequency: values.frequency,
-      scheduleTimes: values.scheduleTimes?.length ? values.scheduleTimes : undefined,
+      scheduleTimes: values.scheduleTimes ?? [],
       notes: values.notes,
       startDate: values.startDate ? new Date(values.startDate) : undefined,
     });

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
+import { ClientSessionNotice } from "@/components/auth/client-session-notice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import MetricsForm from "@/components/health/MetricsForm";
@@ -29,7 +30,7 @@ import { useToast } from "@/components/ui/toaster";
 import { format, subDays } from "date-fns";
 
 export default function HealthPage() {
-  const { user } = useAuthStore();
+  const { user, loading: authLoading } = useAuthStore();
   const { addToast } = useToast();
 
   const [todayMetrics, setTodayMetrics] = useState<HealthMetricEntry | null>(null);
@@ -67,10 +68,13 @@ export default function HealthPage() {
   }, [user, addToast]);
 
   useEffect(() => {
-    if (user) {
-      loadData();
+    if (authLoading) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
     }
-  }, [user, loadData]);
+    void loadData();
+  }, [user, authLoading, loadData]);
 
   const handleSaveMetrics = async (data: HealthMetricFormData) => {
     if (!user) return;
@@ -129,6 +133,10 @@ export default function HealthPage() {
       addToast("Failed to delete side effect", "error");
     }
   };
+
+  if (!authLoading && !user) {
+    return <ClientSessionNotice />;
+  }
 
   if (isLoading) {
     return (

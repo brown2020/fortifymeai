@@ -5,8 +5,9 @@ import { getSafeRedirectPath } from "../safe-redirect";
 describe("isSameOriginRequest", () => {
   const url = "http://localhost:3100/api/auth/session";
 
-  it("allows missing origin (non-browser or same-origin navigation)", () => {
-    expect(isSameOriginRequest(url, null, null)).toBe(true);
+  it("rejects cookie requests that omit Origin", () => {
+    expect(isSameOriginRequest(url, null, null)).toBe(false);
+    expect(isSameOriginRequest(url, null, "same-origin")).toBe(false);
   });
 
   it("allows matching origin", () => {

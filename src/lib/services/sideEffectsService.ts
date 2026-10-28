@@ -16,13 +16,12 @@ import {
   SideEffectEntry,
   SideEffectFormData,
 } from "../models/side-effects";
-import { format, subDays } from "date-fns";
+import { subDays } from "date-fns";
+import { getLocalDateId } from "../date-id";
+import { omitUndefined } from "../omit-undefined";
 
-/**
- * Get date ID in YYYY-MM-DD format
- */
 function getDateId(date: Date = new Date()): string {
-  return format(date, "yyyy-MM-dd");
+  return getLocalDateId(date);
 }
 
 /**
@@ -57,7 +56,7 @@ export async function logSideEffect(
 ): Promise<string> {
   const dateId = getDateId();
 
-  const sideEffectData: Omit<SideEffectEntry, "id"> = {
+  const sideEffectData = omitUndefined({
     userId,
     date: Timestamp.fromDate(new Date()),
     dateId,
@@ -70,9 +69,9 @@ export async function logSideEffect(
     duration: data.duration,
     notes: data.notes,
     resolved: false,
-    createdAt: serverTimestamp() as Timestamp,
-    updatedAt: serverTimestamp() as Timestamp,
-  };
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
 
   const docRef = await addDoc(
     collection(db, `users/${userId}/sideEffects`),
@@ -91,12 +90,15 @@ export async function resolveSideEffect(
   resolution?: string
 ): Promise<void> {
   const docRef = doc(db, `users/${userId}/sideEffects`, sideEffectId);
-  await updateDoc(docRef, {
-    resolved: true,
-    resolvedAt: serverTimestamp(),
-    resolution,
-    updatedAt: serverTimestamp(),
-  });
+  await updateDoc(
+    docRef,
+    omitUndefined({
+      resolved: true,
+      resolvedAt: serverTimestamp(),
+      resolution,
+      updatedAt: serverTimestamp(),
+    })
+  );
 }
 
 /**

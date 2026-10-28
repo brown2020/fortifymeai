@@ -5,15 +5,14 @@ import {
   where,
   orderBy,
 } from "firebase/firestore";
+import { subDays } from "date-fns";
+import { getLocalDateId } from "../date-id";
+import { normalizeDoseLog } from "../dose-log-record";
 import { db } from "../firebase";
 import { DoseLog } from "../models/dose-log";
-import { format, subDays } from "date-fns";
 
-/**
- * Get date ID in YYYY-MM-DD format
- */
 function getDateId(date: Date = new Date()): string {
-  return format(date, "yyyy-MM-dd");
+  return getLocalDateId(date);
 }
 
 /**
@@ -35,10 +34,9 @@ async function getDoseLogsRange(
   );
 
   const querySnapshot = await getDocs(logsQuery);
-  return querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as DoseLog[];
+  return querySnapshot.docs.map((entry) =>
+    normalizeDoseLog(entry.id, entry.data() as Record<string, unknown>)
+  );
 }
 
 /**

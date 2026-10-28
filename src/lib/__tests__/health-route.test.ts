@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { evaluateHealth } from "@/app/api/health/route";
 
 describe("GET /api/health readiness", () => {
-  it("is ok when public Firebase config is present", () => {
+  it("is ok only when public and admin Firebase config are present", () => {
     const result = evaluateHealth({
       NEXT_PUBLIC_FIREBASE_API_KEY: "test-key",
       NEXT_PUBLIC_FIREBASE_PROJECT_ID: "fortifymeai",
@@ -16,6 +16,16 @@ describe("GET /api/health readiness", () => {
     expect(result.service).toBe("fortifymeai");
     expect(result.checks.firebase_public).toBe(true);
     expect(result.checks.firebase_admin).toBe(true);
+  });
+
+  it("is not ok when admin credentials are missing", () => {
+    const result = evaluateHealth({
+      NEXT_PUBLIC_FIREBASE_API_KEY: "test-key",
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: "fortifymeai",
+    });
+    expect(result.ok).toBe(false);
+    expect(result.checks.firebase_public).toBe(true);
+    expect(result.checks.firebase_admin).toBe(false);
   });
 
   it("returns not-ok without public Firebase config", () => {

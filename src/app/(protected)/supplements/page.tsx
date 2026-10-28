@@ -2,6 +2,7 @@
 
 import { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
+import { ClientSessionNotice } from "@/components/auth/client-session-notice";
 import { useToast } from "@/components/ui/toaster";
 import { 
   Plus, 
@@ -147,7 +148,7 @@ function RenderSupplements({
 
 export default function Supplements() {
 
-  const { user } = useAuthStore();
+  const { user, loading: authLoading } = useAuthStore();
   const { addToast } = useToast();
   const [supplements, setSupplements] = useState<Supplement[]>([]);
   const [filteredSupplements, setFilteredSupplements] = useState<Supplement[]>([]);
@@ -177,10 +178,13 @@ export default function Supplements() {
   }, [user, addToast]);
 
   useEffect(() => {
-    if (user) {
-      fetchSupplements();
+    if (authLoading) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
     }
-  }, [user, fetchSupplements]);
+    void fetchSupplements();
+  }, [user, authLoading, fetchSupplements]);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -277,6 +281,10 @@ export default function Supplements() {
       imageUrl: supplement.imageUrl,
     };
   };
+
+  if (!authLoading && !user) {
+    return <ClientSessionNotice />;
+  }
 
   return (
     <RenderSupplements

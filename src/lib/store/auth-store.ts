@@ -13,6 +13,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { API_ROUTES, ROUTES } from '../constants';
+import { LOGOUT_AT_KEY, markLoggedOut, readLogoutAt, shouldDiscardSession } from '../session-sync';
 
 type SessionResponse =
   | { status: "success"; uid: string }
@@ -53,7 +54,9 @@ function getActionCodeSettings() {
 const SESSION_REQUEST_TIMEOUT_MS = 15_000;
 
 export async function createServerSession(user: User) {
+  const startedAt = Date.now();
   const idToken = await user.getIdToken(true);
+  if (shouldDiscardSession(startedAt, readLogoutAt())) return;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), SESSION_REQUEST_TIMEOUT_MS);
   let res: Response;
@@ -87,6 +90,10 @@ export async function createServerSession(user: User) {
     }
     throw new Error(message);
   }
+
+  if (shouldDiscardSession(startedAt, readLogoutAt())) {
+    await clearServerSession();
+  }
 }
 
 export async function clearServerSession() {
@@ -110,10 +117,11 @@ function clearAuthStorage() {
   for (const key of Object.keys(localStorage)) {
     const lower = key.toLowerCase();
     if (
-      lower.includes("firebase") ||
-      lower.includes("auth") ||
-      lower.includes("session") ||
-      key === EMAIL_LINK_STORAGE_KEY
+      key !== LOGOUT_AT_KEY &&
+      (lower.includes("firebase") ||
+        lower.includes("auth") ||
+        lower.includes("session") ||
+        key === EMAIL_LINK_STORAGE_KEY)
     ) {
       localStorage.removeItem(key);
     }
@@ -235,12 +243,18 @@ export const useAuthStore = create<AuthState>((set) => ({
       return null;
     }
     await auth.currentUser.reload();
-    set({ user: auth.currentUser });
-    return auth.currentUser;
+    const current = auth.currentUser;
+    if (current?.emailVerified) {
+      await createServerSession(current);
+    }
+    set({ user: current });
+    return current;
   },
   logout: async () => {
+    markLoggedOut();
     await clearServerSession().catch(() => undefined);
     await signOut(auth).catch(() => undefined);
+    await clearServerSession().catch(() => undefined);
 
     try {
       set({ user: null, loading: false });

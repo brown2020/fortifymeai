@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SESSION_COOKIE_NAME, ROUTES } from "@/lib/constants";
 import { verifySessionToken } from "@/lib/session";
+import { sessionAccess } from "@/lib/session-access";
 
 export default async function ProtectedLayout({
   children,
@@ -16,9 +17,14 @@ export default async function ProtectedLayout({
   }
 
   const session = await verifySessionToken(sessionToken);
-  
-  if (!session) {
+  const access = sessionAccess(session);
+
+  if (access === "unauthorized") {
     redirect(ROUTES.login);
+  }
+
+  if (access === "unverified") {
+    redirect(ROUTES.verifyEmail);
   }
 
   return <>{children}</>;

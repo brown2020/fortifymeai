@@ -59,7 +59,7 @@ export async function getAchievementProgress(
   userId: string
 ): Promise<{ achievement: typeof ACHIEVEMENTS[number]; progress: number; earned: boolean }[]> {
   const stats = await getUserStats(userId);
-  const earnedIds = stats?.achievements.map((a) => a.id) ?? [];
+  const earnedIds = stats?.achievements?.map((a) => a.id) ?? [];
 
   return ACHIEVEMENTS.map((achievement) => {
     const earned = earnedIds.includes(achievement.id);
@@ -68,23 +68,23 @@ export async function getAchievementProgress(
     if (stats) {
       switch (achievement.type) {
         case "streak":
-          progress = Math.min((stats.currentStreak / achievement.requirement) * 100, 100);
+          progress = Math.min(((stats.currentStreak ?? 0) / achievement.requirement) * 100, 100);
           break;
         case "milestone":
-          progress = Math.min((stats.totalDosesTaken / achievement.requirement) * 100, 100);
+          progress = Math.min(((stats.totalDosesTaken ?? 0) / achievement.requirement) * 100, 100);
           break;
         case "consistency":
-          progress = Math.min((stats.adherenceRate / achievement.requirement) * 100, 100);
+          progress = Math.min(((stats.adherenceRate ?? 0) / achievement.requirement) * 100, 100);
           break;
         case "explorer":
           progress = Math.min(
-            (stats.totalSupplementsTracked / achievement.requirement) * 100,
+            ((stats.totalSupplementsTracked ?? 0) / achievement.requirement) * 100,
             100
           );
           break;
         case "researcher":
           progress = Math.min(
-            (stats.totalResearchQueries / achievement.requirement) * 100,
+            ((stats.totalResearchQueries ?? 0) / achievement.requirement) * 100,
             100
           );
           break;

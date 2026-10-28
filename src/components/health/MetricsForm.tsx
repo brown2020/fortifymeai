@@ -31,13 +31,14 @@ export default function MetricsForm({
   className,
 }: MetricsFormProps) {
   const [formData, setFormData] = useState<HealthMetricFormData>({
-    energyLevel: initialData?.energyLevel,
-    sleepQuality: initialData?.sleepQuality,
-    mood: initialData?.mood,
-    focus: initialData?.focus,
-    stressLevel: initialData?.stressLevel,
+    energyLevel: initialData?.energyLevel ?? 5,
+    sleepQuality: initialData?.sleepQuality ?? 5,
+    mood: initialData?.mood ?? 5,
+    focus: initialData?.focus ?? 5,
+    stressLevel: initialData?.stressLevel ?? 5,
     sleepHours: initialData?.sleepHours,
-    notes: initialData?.notes,
+    weightUnit: initialData?.weightUnit ?? "lbs",
+    notes: initialData?.notes ?? "",
   });
 
   const handleSliderChange = (key: keyof HealthMetricFormData, value: number) => {

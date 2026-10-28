@@ -26,7 +26,6 @@ import { PageBackground } from "@/components/layout/page-background";
 
 export default function Research() {
   const {
-    user,
     input,
     handleInputChange,
     inputRef,
@@ -50,10 +49,6 @@ export default function Research() {
     stop,
     resultRef,
   } = useResearchPage();
-
-  if (!user) {
-    return null;
-  }
 
   return (
 
@@ -182,6 +177,15 @@ export default function Research() {
                 />
               )}
 
+              {error && (
+                <div
+                  role="alert"
+                  className="glass-card p-4 text-sm text-rose-300 border border-rose-500/30"
+                >
+                  {error.message || "Research failed. Please try again."}
+                </div>
+              )}
+
               {displayedResult && (
                 <div ref={resultRef} className="glass-card overflow-hidden">
                   {/* Result Header */}
@@ -227,7 +231,9 @@ export default function Research() {
                         isLoading ? "typing-cursor" : ""
                       }`}
                     >
-                      <ReactMarkdown>{displayedResult}</ReactMarkdown>
+                      <ReactMarkdown components={{ img: () => null }}>
+                        {displayedResult}
+                      </ReactMarkdown>
                     </div>
                   </CardContent>
                 </div>

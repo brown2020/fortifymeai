@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Calendar,
@@ -12,8 +15,10 @@ import {
   Zap,
 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
+import { getLocalDateId, recentLocalDateIds } from "@/lib/date-id";
 import { Button } from "@/components/ui/button";
 import { TodaySchedule, type GroupedDoseEntries } from "@/components/dashboard/today-schedule";
+import { getDoseLogTakenEntryIds } from "./actions";
 
 export type DashboardViewProps = {
   userName: string;
@@ -34,6 +39,29 @@ export function DashboardView({
   daysActiveLast7,
   dateId,
 }: DashboardViewProps) {
+  const [activeDateId, setActiveDateId] = useState(dateId);
+  const [activeTakenIds, setActiveTakenIds] = useState(takenEntryIds);
+  const [activeDays, setActiveDays] = useState(daysActiveLast7);
+
+  useEffect(() => {
+    let cancelled = false;
+    const today = getLocalDateId();
+    const days = recentLocalDateIds(7);
+    void (async () => {
+      try {
+        const logs = await Promise.all(days.map((day) => getDoseLogTakenEntryIds(day)));
+        if (cancelled) return;
+        setActiveDateId(today);
+        setActiveTakenIds(logs[0] ?? []);
+        setActiveDays(logs.filter((ids) => ids.length > 0).length);
+      } catch {
+        // Keep the server-rendered snapshot when the follow-up read fails.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const stats = [
     {
@@ -52,7 +80,7 @@ export function DashboardView({
     },
     {
       title: "Days Active",
-      value: daysActiveLast7,
+      value: activeDays,
       icon: Activity,
       color: "text-amber-400",
       bgColor: "from-amber-500/20 to-orange-500/20",
@@ -157,9 +185,9 @@ export function DashboardView({
                 </div>
               ) : (
                 <TodaySchedule
-                  dateId={dateId}
+                  dateId={activeDateId}
                   groups={todaysSchedule}
-                  initialTakenEntryIds={takenEntryIds}
+                  initialTakenEntryIds={activeTakenIds}
                 />
               )}
             </div>

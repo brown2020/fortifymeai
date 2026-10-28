@@ -8,6 +8,7 @@ import {
   subscribeToAuthBroadcast,
   useAuthStore,
 } from "../../lib/store/auth-store";
+import { readLogoutAt, shouldDiscardSession } from "../../lib/session-sync";
 
 /** Clears navbar/auth loading if Firebase settle or session POST hangs. */
 const AUTH_SETTLE_TIMEOUT_MS = 15_000;
@@ -48,14 +49,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       try {
         if (user) {
+          const startedAt = Date.now();
           try {
             await createServerSession(user);
           } catch {
             // Keep going — cookie may already be valid from the login path.
           }
-          if (active) {
-            setUser(user);
+          if (!active || shouldDiscardSession(startedAt, readLogoutAt())) {
+            return;
           }
+          setUser(user);
         } else if (active) {
           setUser(null);
         }

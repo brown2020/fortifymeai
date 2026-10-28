@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
+import { ClientSessionNotice } from "@/components/auth/client-session-notice";
 import SupplementCalendar from "@/components/calendar/SupplementCalendar";
 import DayDetail from "@/components/calendar/DayDetail";
 import { getRecentDoseLogs } from "@/lib/services/doseLogService";
@@ -9,7 +10,7 @@ import { DoseLog } from "@/lib/models/dose-log";
 import { useToast } from "@/components/ui/toaster";
 
 export default function CalendarPage() {
-  const { user } = useAuthStore();
+  const { user, loading: authLoading } = useAuthStore();
   const { addToast } = useToast();
 
   const [doseLogs, setDoseLogs] = useState<DoseLog[]>([]);
@@ -31,15 +32,22 @@ export default function CalendarPage() {
   }, [user, addToast]);
 
   useEffect(() => {
-    if (user) {
-      loadData();
+    if (authLoading) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
     }
-  }, [user, loadData]);
+    void loadData();
+  }, [user, authLoading, loadData]);
 
   const handleDateSelect = (date: Date, log?: DoseLog) => {
     setSelectedDate(date);
     setSelectedLog(log);
   };
+
+  if (!authLoading && !user) {
+    return <ClientSessionNotice />;
+  }
 
   if (isLoading) {
     return (
@@ -58,10 +66,10 @@ export default function CalendarPage() {
   }
 
   // Calculate stats
-  const logsWithData = doseLogs.filter((log) => log.entries.length > 0);
-  const perfectDays = doseLogs.filter((log) => log.completionRate === 100).length;
+  const logsWithData = doseLogs.filter((log) => (log.entries?.length ?? 0) > 0);
+  const perfectDays = doseLogs.filter((log) => (log.completionRate ?? 0) === 100).length;
   const averageAdherence = logsWithData.length > 0
-    ? Math.round(logsWithData.reduce((sum, log) => sum + log.completionRate, 0) / logsWithData.length)
+    ? Math.round(logsWithData.reduce((sum, log) => sum + (log.completionRate ?? 0), 0) / logsWithData.length)
     : 0;
 
   return (

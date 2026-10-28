@@ -3,7 +3,9 @@ import { cookies } from "next/headers";
 import { verifySessionToken } from "@/lib/session";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { SESSION_COOKIE_NAME } from "@/lib/constants";
-import { type GroupedDoseEntries, type ScheduleTime } from "@/components/dashboard/today-schedule";
+import { type GroupedDoseEntries } from "@/components/dashboard/today-schedule";
+import { getLocalDateId, recentLocalDateIds } from "@/lib/date-id";
+import { groupPlannedDoses, plannedDoses } from "@/lib/dose-log-record";
 import { getDoseLogTakenEntryIds } from "./actions";
 import { DashboardView } from "./dashboard-view";
 
@@ -25,12 +27,8 @@ async function getSupplementCount(userId: string): Promise<number> {
   }
 }
 
-function getUtcDateId(date: Date = new Date()): string {
-  return date.toISOString().slice(0, 10);
-}
-
 async function getTodaysSchedule(userId: string): Promise<GroupedDoseEntries> {
-  const grouped: GroupedDoseEntries = {
+  const empty: GroupedDoseEntries = {
     morning: [],
     midday: [],
     evening: [],
@@ -39,11 +37,10 @@ async function getTodaysSchedule(userId: string): Promise<GroupedDoseEntries> {
   };
 
   try {
-    // Avoid composite index requirement: filter by userId, sort in memory.
+    // Filter by userId and sort in memory so this does not need a composite index.
     const snapshot = await adminDb
       .collection("supplements")
       .where("userId", "==", userId)
-      .limit(50)
       .get();
 
     const supplements = snapshot.docs
@@ -55,44 +52,15 @@ async function getTodaysSchedule(userId: string): Promise<GroupedDoseEntries> {
           name: typeof data.name === "string" ? data.name : "Untitled",
           dosage: typeof data.dosage === "string" ? data.dosage : undefined,
           frequency: typeof data.frequency === "string" ? data.frequency : undefined,
-          scheduleTimes: Array.isArray(data.scheduleTimes)
-            ? (data.scheduleTimes.filter((t) => typeof t === "string") as string[])
-            : undefined,
+          scheduleTimes: data.scheduleTimes,
           createdAtMs: createdAt?.toMillis?.() ?? 0,
         };
       })
       .sort((a, b) => b.createdAtMs - a.createdAtMs);
 
-    for (const supplement of supplements) {
-      const times = supplement.scheduleTimes?.length
-        ? supplement.scheduleTimes
-        : ["anytime"];
-
-      for (const time of times) {
-        const normalized: ScheduleTime =
-          time === "morning" ||
-          time === "midday" ||
-          time === "evening" ||
-          time === "bedtime"
-            ? time
-            : "anytime";
-
-        const entryId = `${supplement.id}:${normalized}`;
-
-        grouped[normalized].push({
-          supplementId: supplement.id,
-          entryId,
-          time: normalized,
-          name: supplement.name,
-          dosage: supplement.dosage,
-          frequency: supplement.frequency,
-        });
-      }
-    }
-
-    return grouped;
+    return groupPlannedDoses(plannedDoses(supplements));
   } catch {
-    return grouped;
+    return empty;
   }
 }
 
@@ -113,13 +81,8 @@ async function getSearchCount(userId: string): Promise<number> {
 export default async function Dashboard() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  const now = new Date();
-  const dateId = getUtcDateId(now);
-  const last7DateIds = Array.from({ length: 7 }).map((_, i) => {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    return getUtcDateId(date);
-  });
+  const dateId = getLocalDateId();
+  const last7DateIds = recentLocalDateIds(7);
   
   let userName = "User";
   let userEmail = "";

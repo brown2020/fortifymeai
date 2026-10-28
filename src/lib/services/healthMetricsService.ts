@@ -11,18 +11,17 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { omitUndefined } from "../omit-undefined";
 import {
   HealthMetricEntry,
   HealthMetricFormData,
   HealthMetricsTrend,
 } from "../models/health-metrics";
-import { format, subDays, parseISO } from "date-fns";
+import { subDays, parseISO } from "date-fns";
+import { getLocalDateId } from "../date-id";
 
-/**
- * Get date ID in YYYY-MM-DD format
- */
 function getDateId(date: Date = new Date()): string {
-  return format(date, "yyyy-MM-dd");
+  return getLocalDateId(date);
 }
 
 /**
@@ -99,10 +98,7 @@ export async function saveHealthMetrics(
   const docRef = doc(db, `users/${userId}/healthMetrics`, dateId);
   const existingMetrics = await getDoc(docRef);
 
-  const metricsData: Omit<HealthMetricEntry, "id" | "createdAt" | "updatedAt"> & {
-    createdAt: ReturnType<typeof serverTimestamp> | Timestamp;
-    updatedAt: ReturnType<typeof serverTimestamp>;
-  } = {
+  const metricsData = omitUndefined({
     userId,
     dateId,
     date: Timestamp.fromDate(new Date()),
@@ -111,7 +107,7 @@ export async function saveHealthMetrics(
       ? (existingMetrics.data() as HealthMetricEntry).createdAt
       : serverTimestamp(),
     updatedAt: serverTimestamp(),
-  };
+  });
 
   await setDoc(docRef, metricsData);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toaster";
@@ -42,6 +42,10 @@ export function TodaySchedule({
   const [takenEntryIds, setTakenEntryIds] = useState<Set<string>>(
     () => new Set(initialTakenEntryIds)
   );
+
+  useEffect(() => {
+    setTakenEntryIds(new Set(initialTakenEntryIds));
+  }, [dateId, initialTakenEntryIds]);
 
   const allEntries = useMemo(() => {
     return (Object.keys(groups) as ScheduleTime[])

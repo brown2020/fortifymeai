@@ -37,7 +37,7 @@ export default function DayDetail({ date, doseLog, className }: DayDetailProps) 
     return <X className="h-4 w-4 text-rose-400" />;
   };
 
-  const groupedEntries = doseLog?.entries.reduce((acc, entry) => {
+  const groupedEntries = (doseLog?.entries ?? []).reduce((acc, entry) => {
     const time = entry.scheduledTime;
     if (!acc[time]) acc[time] = [];
     acc[time].push(entry);
@@ -64,14 +64,14 @@ export default function DayDetail({ date, doseLog, className }: DayDetailProps) 
         )}
       </div>
 
-      {!doseLog || doseLog.entries.length === 0 ? (
+      {!doseLog || (doseLog.entries?.length ?? 0) === 0 ? (
         <div className="text-center py-8 text-slate-400">
           <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
           <p>No supplements logged for this day</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {["morning", "midday", "evening", "bedtime"].map((timeSlot) => {
+          {["morning", "midday", "evening", "bedtime", "anytime"].map((timeSlot) => {
             const entries = groupedEntries?.[timeSlot];
             if (!entries || entries.length === 0) return null;
 

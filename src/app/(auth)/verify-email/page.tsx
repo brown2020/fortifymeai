@@ -2,17 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { MailCheck, RefreshCcw, Send, ShieldCheck } from "lucide-react";
 import { useAuthStore } from "@/lib/store/auth-store";
+import { deleteAccount } from "@/app/(protected)/profile/actions";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 
 export default function VerifyEmail() {
-  const { user, sendVerificationEmail, refreshUser } = useAuthStore();
+  const router = useRouter();
+  const { user, sendVerificationEmail, refreshUser, logout } = useAuthStore();
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState<"resend" | "refresh" | null>(null);
+  const [loading, setLoading] = useState<"resend" | "refresh" | "delete" | null>(null);
 
   const handleResend = async () => {
     try {
@@ -36,12 +39,35 @@ export default function VerifyEmail() {
       const refreshed = await refreshUser();
       if (refreshed?.emailVerified) {
         setStatus("Email verified. You can continue to your dashboard.");
+        router.push(ROUTES.dashboard);
       } else {
         setStatus("Still waiting on verification. Open the link from your email first.");
       }
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not refresh your verification status."));
     } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await logout();
+    router.push(ROUTES.home);
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this unverified account and its data? This cannot be undone.")) {
+      return;
+    }
+    try {
+      setError("");
+      setLoading("delete");
+      await deleteAccount();
+      const { logout } = useAuthStore.getState();
+      await logout();
+      router.push(ROUTES.home);
+    } catch (err: unknown) {
+      setError(getAuthErrorMessage(err, "We could not delete this account."));
       setLoading(null);
     }
   };
@@ -104,6 +130,24 @@ export default function VerifyEmail() {
                 Continue to dashboard
               </Button>
             </Link>
+            <Button
+              type="button"
+              onClick={handleSignOut}
+              variant="ghost"
+              className="w-full"
+            >
+              Sign out
+            </Button>
+            <Button
+              type="button"
+              onClick={handleDelete}
+              isLoading={loading === "delete"}
+              disabled={!user || loading !== null}
+              variant="danger"
+              className="w-full"
+            >
+              Delete unverified account
+            </Button>
           </div>
         </div>
       </div>

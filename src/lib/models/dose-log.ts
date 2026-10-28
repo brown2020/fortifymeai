@@ -1,6 +1,8 @@
 import { Timestamp } from "firebase/firestore";
 import { ScheduleTime } from "./supplement";
 
+export type DoseSlot = ScheduleTime | "anytime";
+
 /**
  * Individual dose log entry with detailed tracking
  */
@@ -8,7 +10,7 @@ export interface DoseLogEntry {
   id: string;
   supplementId: string;
   supplementName: string;
-  scheduledTime: ScheduleTime;
+  scheduledTime: DoseSlot;
   actualTime?: Timestamp;
   dosageAmount?: number;
   dosageUnit?: string;

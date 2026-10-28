@@ -26,7 +26,7 @@ export function evaluateHealth(env: EnvLike = process.env): HealthPayload {
   );
 
   return {
-    ok: firebase_public,
+    ok: firebase_public && firebase_admin,
     service: "fortifymeai",
     timestamp: new Date().toISOString(),
     checks: { firebase_public, firebase_admin },

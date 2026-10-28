@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, ROUTES } from "@/lib/constants";
 import { verifySessionToken } from "@/lib/session";
 import { getSafeRedirectPath } from "@/lib/safe-redirect";
+import { sessionAccess } from "@/lib/session-access";
 
 const protectedRoutes = [
   ROUTES.dashboard,
@@ -48,8 +49,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(dest, request.url));
   }
 
-  if (matchesRoute(pathname, protectedRoutes) && !session) {
-    return redirectToLogin(request);
+  if (matchesRoute(pathname, protectedRoutes)) {
+    const access = sessionAccess(session);
+    if (access === "unauthorized") {
+      return redirectToLogin(request);
+    }
+    if (access === "unverified") {
+      return NextResponse.redirect(new URL(ROUTES.verifyEmail, request.url));
+    }
   }
 
   return NextResponse.next();

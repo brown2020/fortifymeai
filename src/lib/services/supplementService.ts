@@ -12,6 +12,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { omitUndefined } from "../omit-undefined";
 import { Supplement, SupplementFormData } from "../models/supplement";
 
 const COLLECTION_NAME = "supplements";
@@ -42,13 +43,13 @@ export async function createSupplement(
   userId: string,
   data: SupplementFormData
 ): Promise<string> {
-  const supplementData = {
+  const supplementData = omitUndefined({
     ...data,
     userId,
     startDate: data.startDate ? Timestamp.fromDate(data.startDate) : null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-  };
+  });
 
   const docRef = await addDoc(collection(db, COLLECTION_NAME), supplementData);
   return docRef.id;
@@ -61,11 +62,11 @@ export async function updateSupplement(
   id: string,
   data: Partial<SupplementFormData>
 ): Promise<void> {
-  const updateData = {
+  const updateData = omitUndefined({
     ...data,
-    startDate: data.startDate ? Timestamp.fromDate(data.startDate) : undefined,
+    startDate: data.startDate ? Timestamp.fromDate(data.startDate) : null,
     updatedAt: serverTimestamp(),
-  };
+  });
 
   const docRef = doc(db, COLLECTION_NAME, id);
   await updateDoc(docRef, updateData);

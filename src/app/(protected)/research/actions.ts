@@ -1,18 +1,18 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase-admin";
-import { cookies } from "next/headers";
 import { FieldValue } from "firebase-admin/firestore";
-import { SESSION_COOKIE_NAME } from "@/lib/constants";
-import { verifySessionToken } from "@/lib/session";
+import { z } from "zod";
+import { adminDb } from "@/lib/firebase-admin";
+import { AuthzError, requireVerifiedSession } from "@/lib/require-user";
+import { recordResearchQuery } from "@/lib/stats-store";
+import { clampHistoryLimit } from "@/lib/history-limit";
 
-// Types
-export type ResearchCategory = 
-  | "general" 
-  | "benefits" 
-  | "dosing" 
-  | "interactions" 
-  | "stacking" 
+export type ResearchCategory =
+  | "general"
+  | "benefits"
+  | "dosing"
+  | "interactions"
+  | "stacking"
   | "evidence";
 
 export interface SearchHistoryItem {
@@ -24,45 +24,60 @@ export interface SearchHistoryItem {
   isBookmarked: boolean;
 }
 
-// Session verification helper
-async function verifySession(): Promise<string> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+const CATEGORIES = [
+  "general",
+  "benefits",
+  "dosing",
+  "interactions",
+  "stacking",
+  "evidence",
+] as const;
 
-  if (!sessionCookie) {
-    throw new Error("Please sign in to use the research feature");
+const saveSearchSchema = z.object({
+  query: z.string().trim().min(1).max(8_000),
+  response: z.string().max(100_000),
+  category: z.enum(CATEGORIES),
+});
+
+async function verifiedUserId(): Promise<string | null> {
+  try {
+    const session = await requireVerifiedSession();
+    return session.uid;
+  } catch (error) {
+    if (error instanceof AuthzError) return null;
+    return null;
   }
-
-  const session = await verifySessionToken(sessionCookie);
-  if (!session?.uid) {
-    throw new Error("Invalid session. Please sign in again.");
-  }
-
-  return session.uid as string;
 }
 
-/**
- * Save a new search to history
- */
 export async function saveSearch(
-  query: string, 
-  response: string, 
+  query: string,
+  response: string,
   category: ResearchCategory = "general"
 ): Promise<{ success: boolean; id?: string }> {
-  try {
-    const userId = await verifySession();
+  const userId = await verifiedUserId();
+  if (!userId) return { success: false };
 
+  const parsed = saveSearchSchema.safeParse({ query, response, category });
+  if (!parsed.success) return { success: false };
+
+  try {
     const docRef = await adminDb
       .collection("users")
       .doc(userId)
       .collection("searches")
       .add({
-        query,
-        response,
-        category,
+        query: parsed.data.query,
+        response: parsed.data.response,
+        category: parsed.data.category,
         timestamp: FieldValue.serverTimestamp(),
         isBookmarked: false,
       });
+
+    try {
+      await recordResearchQuery(userId);
+    } catch {
+      // History is saved even if the derived stats document cannot be updated.
+    }
 
     return { success: true, id: docRef.id };
   } catch {
@@ -70,31 +85,30 @@ export async function saveSearch(
   }
 }
 
-/**
- * Get search history with optional limit
- */
 export async function getSearchHistory(
   limit: number = 20
 ): Promise<SearchHistoryItem[]> {
   try {
-    const userId = await verifySession();
+    const userId = await verifiedUserId();
+    if (!userId) return [];
     const searchesSnapshot = await adminDb
       .collection("users")
       .doc(userId)
       .collection("searches")
       .orderBy("timestamp", "desc")
-      .limit(limit)
+      .limit(clampHistoryLimit(limit))
       .get();
 
     return searchesSnapshot.docs.map((doc) => {
       const data = doc.data();
+      const category = CATEGORIES.includes(data.category) ? data.category : "general";
       return {
         id: doc.id,
-        query: data.query || "",
-        response: data.response || "",
-        category: data.category || "general",
-        timestamp: data.timestamp?.toDate() || new Date(),
-        isBookmarked: data.isBookmarked || false,
+        query: typeof data.query === "string" ? data.query : "",
+        response: typeof data.response === "string" ? data.response : "",
+        category,
+        timestamp: data.timestamp?.toDate?.() || new Date(),
+        isBookmarked: data.isBookmarked === true,
       };
     });
   } catch {
@@ -102,14 +116,13 @@ export async function getSearchHistory(
   }
 }
 
-/**
- * Delete a search from history
- */
-export async function deleteSearch(
-  searchId: string
-): Promise<{ success: boolean }> {
+export async function deleteSearch(searchId: string): Promise<{ success: boolean }> {
+  if (!searchId || searchId.length > 200 || searchId.includes("/")) {
+    return { success: false };
+  }
   try {
-    const userId = await verifySession();
+    const userId = await verifiedUserId();
+    if (!userId) return { success: false };
     await adminDb
       .collection("users")
       .doc(userId)
@@ -122,13 +135,14 @@ export async function deleteSearch(
   }
 }
 
-/**
- * Toggle bookmark status on a search
- */
 export async function toggleBookmark(
   searchId: string
 ): Promise<{ success: boolean; isBookmarked: boolean }> {
-  const userId = await verifySession();
+  if (!searchId || searchId.length > 200 || searchId.includes("/")) {
+    throw new Error("Invalid search");
+  }
+  const session = await requireVerifiedSession();
+  const userId = session.uid;
 
   const searchRef = adminDb
     .collection("users")
@@ -143,7 +157,7 @@ export async function toggleBookmark(
       throw new Error("Search not found");
     }
 
-    const currentBookmarked = searchDoc.data()?.isBookmarked || false;
+    const currentBookmarked = searchDoc.data()?.isBookmarked === true;
     const toggled = !currentBookmarked;
 
     tx.update(searchRef, {

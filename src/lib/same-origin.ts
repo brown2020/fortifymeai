@@ -16,18 +16,18 @@ function originKey(originOrUrl: string): string | null {
   }
 }
 
-/** Return true when a request should be treated as same-app for cookie session endpoints. */
+/** Return true when a cookie-setting request includes a matching Origin. */
 export function isSameOriginRequest(
   requestUrl: string,
   origin: string | null,
   secFetchSite: string | null
 ): boolean {
-  if (origin) {
-    const reqKey = originKey(requestUrl);
-    const originKeyValue = originKey(origin);
-    if (!reqKey || !originKeyValue || reqKey !== originKeyValue) {
-      return false;
-    }
+  if (!origin) return false;
+
+  const reqKey = originKey(requestUrl);
+  const originKeyValue = originKey(origin);
+  if (!reqKey || !originKeyValue || reqKey !== originKeyValue) {
+    return false;
   }
   if (
     secFetchSite &&

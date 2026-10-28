@@ -37,7 +37,7 @@ jobs:
           cleanup() { kill "$pid" 2>/dev/null || true; }
           trap cleanup EXIT
           for i in $(seq 1 45); do
-            if curl -fsS "http://127.0.0.1:3000/api/health" -o /tmp/health.json; then
+            if curl -sS "http://127.0.0.1:3000/api/health" -o /tmp/health.json -w "%{http_code}" | grep -qE '200|503'; then
               break
             fi
             sleep 1
@@ -47,8 +47,15 @@ jobs:
           import json, sys
           data = json.load(open("/tmp/health.json"))
           print(json.dumps(data, indent=2))
-          if data.get("ok") is not True or data.get("service") != "fortifymeai":
+          if data.get("service") != "fortifymeai":
               sys.exit("health smoke failed")
-          if not data.get("checks", {}).get("firebase_public"):
+          checks = data.get("checks") or {}
+          if not checks.get("firebase_public"):
               sys.exit("firebase_public check false")
+          # CI does not receive Firebase Admin secrets. ok requires both.
+          if checks.get("firebase_admin"):
+              if data.get("ok") is not True:
+                  sys.exit("expected ok when admin config is present")
+          elif data.get("ok") is not False:
+              sys.exit("expected not-ok when admin config is absent")
           PY

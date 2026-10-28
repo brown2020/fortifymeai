@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { API_ROUTES, ROUTES } from "@/lib/constants";
+import { deleteAccount } from "./actions";
 
 type SessionMe = { uid: string; email: string | null; emailVerified: boolean };
 
@@ -29,6 +30,7 @@ export default function Profile() {
   const { user, loading: authLoading, logout, sendPasswordReset } = useAuthStore();
   const { addToast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [sessionMe, setSessionMe] = useState<SessionMe | null>(null);
   const [meLoading, setMeLoading] = useState(false);
   const [meTimedOut, setMeTimedOut] = useState(false);
@@ -117,9 +119,15 @@ export default function Profile() {
   };
 
   const handleDeleteAccount = async () => {
-    // This would need to be implemented with Firebase Admin
-    addToast("Account deletion is not yet implemented.", "info");
-    setShowDeleteConfirm(false);
+    try {
+      setIsDeleting(true);
+      await deleteAccount();
+      await logout();
+      window.location.href = ROUTES.home;
+    } catch {
+      addToast("Failed to delete your account. Please try again.", "error");
+      setIsDeleting(false);
+    }
   };
 
   const settingsSections = [
@@ -339,6 +347,8 @@ export default function Profile() {
                   variant="danger"
                   size="sm"
                   onClick={handleDeleteAccount}
+                  isLoading={isDeleting}
+                  disabled={isDeleting}
                   className="gap-2"
                 >
                   <Trash2 className="h-4 w-4" />

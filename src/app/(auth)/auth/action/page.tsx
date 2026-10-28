@@ -20,7 +20,7 @@ import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { PasswordField } from "@/components/auth/password-field";
 import { PageBackground } from "@/components/layout/page-background";
-import { AuthAlert, AuthEmailField } from "@/components/auth/auth-fields";
+import { AuthAlert } from "@/components/auth/auth-fields";
 
 function AuthActionForm() {
   const searchParams = useSearchParams();
@@ -32,9 +32,8 @@ function AuthActionForm() {
   const [status, setStatus] = useState("Checking your secure link...");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [needsEmail, setNeedsEmail] = useState(false);
   const [resetReady, setResetReady] = useState(false);
-  const { completeEmailLinkSignIn } = useAuthStore();
+  const { completeEmailLinkSignIn, refreshUser } = useAuthStore();
 
   const currentLink = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -53,6 +52,9 @@ function AuthActionForm() {
         if (mode === "verifyEmail") {
           if (!oobCode) throw new Error("Missing verification code.");
           await applyActionCode(auth, oobCode);
+          if (auth.currentUser) {
+            await refreshUser();
+          }
           if (active) {
             setStatus("Email verified. You can continue to your dashboard.");
           }
@@ -77,8 +79,10 @@ function AuthActionForm() {
               : "";
           if (!storedEmail) {
             if (active) {
-              setNeedsEmail(true);
-              setStatus("Confirm your email to finish signing in.");
+              setError(
+                "Open this link in the same browser where you requested it, or send yourself a new sign-in link."
+              );
+              setStatus("");
             }
             return;
           }
@@ -107,21 +111,7 @@ function AuthActionForm() {
     return () => {
       active = false;
     };
-  }, [completeEmailLinkSignIn, currentLink, mode, oobCode]);
-
-  const handleEmailLinkSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    try {
-      setError("");
-      setLoading(true);
-      await completeEmailLinkSignIn(email, currentLink);
-      window.location.assign(ROUTES.dashboard);
-    } catch (err: unknown) {
-      setError(getAuthErrorMessage(err, "We could not complete email-link sign-in."));
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [completeEmailLinkSignIn, currentLink, mode, oobCode, refreshUser]);
 
   const handlePasswordReset = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -170,15 +160,6 @@ function AuthActionForm() {
 
           {error ? <div className="mb-4"><AuthAlert tone="error">{error}</AuthAlert></div> : null}
 
-          {needsEmail && (
-            <form onSubmit={handleEmailLinkSubmit} className="space-y-4">
-              <AuthEmailField value={email} onChange={setEmail} />
-              <Button type="submit" isLoading={loading} className="w-full">
-                Finish sign in
-              </Button>
-            </form>
-          )}
-
           {resetReady && (
             <form onSubmit={handlePasswordReset} className="space-y-4">
               <p className="text-sm text-slate-400">Resetting password for {email}</p>
@@ -206,7 +187,7 @@ function AuthActionForm() {
             </form>
           )}
 
-          {!needsEmail && !resetReady && !loading && (
+          {!resetReady && !loading && (
             <div className="space-y-3">
               <Link href={ROUTES.login}>
                 <Button variant="outline" className="w-full">

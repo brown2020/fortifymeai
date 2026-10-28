@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuthStore } from "@/lib/store/auth-store";
+import { ClientSessionNotice } from "@/components/auth/client-session-notice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AdherenceChart from "@/components/analytics/AdherenceChartDynamic";
 import MetricsTrendChart from "@/components/analytics/MetricsTrendChartDynamic";
@@ -21,7 +22,7 @@ import { TrendingUp, Award, Calendar } from "lucide-react";
 import { useToast } from "@/components/ui/toaster";
 
 export default function AnalyticsPage() {
-  const { user } = useAuthStore();
+  const { user, loading: authLoading } = useAuthStore();
   const { addToast } = useToast();
 
   const [doseLogs, setDoseLogs] = useState<DoseLog[]>([]);
@@ -64,10 +65,13 @@ export default function AnalyticsPage() {
   }, [user, timeRange, addToast]);
 
   useEffect(() => {
-    if (user) {
-      loadData();
+    if (authLoading) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
     }
-  }, [user, loadData]);
+    void loadData();
+  }, [user, authLoading, loadData]);
 
   // Calculate adherence chart data
   const adherenceData = useMemo(() => {
@@ -81,7 +85,7 @@ export default function AnalyticsPage() {
   const supplementBreakdown = useMemo(() => {
     const counts: Record<string, number> = {};
     doseLogs.forEach((log) => {
-      log.entries.forEach((entry) => {
+      (log.entries ?? []).forEach((entry) => {
         if (entry.taken) {
           counts[entry.supplementName] = (counts[entry.supplementName] || 0) + 1;
         }
@@ -92,6 +96,10 @@ export default function AnalyticsPage() {
       .map(([name, doses]) => ({ name, doses }))
       .sort((a, b) => b.doses - a.doses);
   }, [doseLogs]);
+
+  if (!authLoading && !user) {
+    return <ClientSessionNotice />;
+  }
 
   if (isLoading) {
     return (
@@ -112,8 +120,8 @@ export default function AnalyticsPage() {
   }
 
   const doseStats = {
-    totalTaken: doseLogs.reduce((sum, log) => sum + log.entries.filter((e) => e.taken).length, 0),
-    totalScheduled: doseLogs.reduce((sum, log) => sum + log.entries.length, 0),
+    totalTaken: doseLogs.reduce((sum, log) => sum + (log.entries ?? []).filter((e) => e.taken).length, 0),
+    totalScheduled: doseLogs.reduce((sum, log) => sum + (log.entries ?? []).length, 0),
   };
   const overallAdherence = doseStats.totalScheduled > 0
     ? Math.round((doseStats.totalTaken / doseStats.totalScheduled) * 100)

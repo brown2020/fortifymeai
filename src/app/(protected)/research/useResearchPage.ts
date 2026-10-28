@@ -64,17 +64,13 @@ export function useResearchPage() {
   }, [completion]);
 
   const loadSearchHistory = useCallback(async () => {
-    if (!user) return;
     const history = await getSearchHistory(15);
     setSearchHistory(history);
-  }, [user]);
+  }, []);
 
-  // Load history on mount
   useEffect(() => {
-    if (user) {
-      loadSearchHistory();
-    }
-  }, [user, loadSearchHistory]);
+    void loadSearchHistory();
+  }, [loadSearchHistory]);
 
   // Save search when loading completes
   useEffect(() => {

@@ -4,6 +4,8 @@ import { z } from "zod";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE_NAME } from "@/lib/constants";
 import { verifySessionToken } from "@/lib/session";
+import { sessionAccess } from "@/lib/session-access";
+import { consumeResearchQuota } from "@/lib/research-quota";
 
 // Research category-specific system prompts
 const RESEARCH_PROMPTS = {
@@ -90,11 +92,6 @@ const researchRequestSchema = z.object({
     .default("general"),
 });
 
-type RateLimitState = { windowStartMs: number; count: number };
-const rateLimitByUser = new Map<string, RateLimitState>();
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REQUESTS = 20;
-
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
@@ -107,9 +104,16 @@ export async function POST(request: Request) {
     }
 
     const session = await verifySessionToken(sessionToken);
-    if (!session?.uid) {
+    const access = sessionAccess(session);
+    if (access === "unauthorized") {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (access === "unverified") {
+      return new Response(JSON.stringify({ error: "Email not verified" }), {
+        status: 403,
         headers: { "Content-Type": "application/json" },
       });
     }
@@ -132,35 +136,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Best-effort in-memory rate limiting (per server instance)
-    const now = Date.now();
-
-    // Periodically clean up stale rate-limit entries to prevent memory growth
-    if (rateLimitByUser.size > 1000) {
-      for (const [key, val] of rateLimitByUser) {
-        if (now - val.windowStartMs >= RATE_LIMIT_WINDOW_MS) {
-          rateLimitByUser.delete(key);
-        }
-      }
-    }
-
-    const existing = rateLimitByUser.get(session.uid);
-    if (!existing || now - existing.windowStartMs >= RATE_LIMIT_WINDOW_MS) {
-      rateLimitByUser.set(session.uid, { windowStartMs: now, count: 1 });
-    } else {
-      existing.count += 1;
-      if (existing.count > RATE_LIMIT_MAX_REQUESTS) {
-        const retryAfterSeconds = Math.ceil(
-          (existing.windowStartMs + RATE_LIMIT_WINDOW_MS - now) / 1000
-        );
-        return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
-          status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            "Retry-After": String(retryAfterSeconds),
-          },
-        });
-      }
+    const quota = await consumeResearchQuota(session!.uid);
+    if (!quota.allowed) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": String(quota.retryAfterSeconds),
+        },
+      });
     }
 
     const { prompt, category } = parsed.data;

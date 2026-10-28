@@ -13,10 +13,6 @@ jobs:
           URL="${PRODUCTION_HEALTH_URL:-https://fortifymeai.vercel.app/api/health}"
           code=$(curl -sS -o /tmp/fortifymeai-health.json -w "%{http_code}" --max-time 30 "$URL" || true)
           echo "HTTP $code"
-          if [ "$code" = "404" ]; then
-            echo "WARN: /api/health not on production yet (deploy from branch that serves vercel.app). Not failing cron."
-            exit 0
-          fi
           if [ "$code" != "200" ]; then
             echo "Unexpected status $code"
             cat /tmp/fortifymeai-health.json || true
