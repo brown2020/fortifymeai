@@ -20,8 +20,9 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   "auth/invalid-action-code": "This link is invalid or has already been used.",
   "auth/expired-action-code": "This link has expired. Request a new one.",
   "auth/missing-email": "Enter your email address.",
-  "auth/unauthorized-continue-uri": "Password reset is temporarily unavailable. Try again later or contact support.",
-  "auth/invalid-continue-uri": "Password reset is temporarily unavailable. Try again later or contact support.",
+  "auth/unauthorized-continue-uri":
+    "This site is not authorized to send email links.",
+  "auth/invalid-continue-uri": "This site is not authorized to send email links.",
 };
 
 export function getAuthErrorMessage(

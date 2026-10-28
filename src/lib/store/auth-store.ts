@@ -14,6 +14,10 @@ import {
 import { auth } from '../firebase';
 import { API_ROUTES, ROUTES } from '../constants';
 import { LOGOUT_AT_KEY, markLoggedOut, readLogoutAt, shouldDiscardSession } from '../session-sync';
+import {
+  formatVerificationError,
+  sendWithContinueFallback,
+} from '../verification-email';
 
 type SessionResponse =
   | { status: "success"; uid: string }
@@ -26,8 +30,10 @@ const AUTH_BROADCAST_CHANNEL = "fortify-auth";
 interface AuthState {
   user: User | null;
   loading: boolean;
+  verificationNotice: string | null;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
+  clearVerificationNotice: () => void;
   signIn: (email: string, password: string) => Promise<User>;
   signUp: (email: string, password: string) => Promise<User>;
   signInWithGoogle: () => Promise<User>;
@@ -52,6 +58,14 @@ function getActionCodeSettings() {
 }
 
 const SESSION_REQUEST_TIMEOUT_MS = 15_000;
+
+async function sendAccountVerification(user: User): Promise<void> {
+  const settings = getActionCodeSettings();
+  await sendWithContinueFallback(
+    () => sendEmailVerification(user, settings),
+    () => sendEmailVerification(user)
+  );
+}
 
 export async function createServerSession(user: User) {
   const startedAt = Date.now();
@@ -172,20 +186,24 @@ export function subscribeToAuthBroadcast(onLogout: () => void) {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: true,
+  verificationNotice: null,
   setUser: (user) => set({ user }),
   setLoading: (loading) => set({ loading }),
+  clearVerificationNotice: () => set({ verificationNotice: null }),
   signIn: async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     await createServerSession(userCredential.user);
+    set({ user: userCredential.user, loading: false });
     return userCredential.user;
   },
   signUp: async (email, password) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     await createServerSession(userCredential.user);
+    set({ user: userCredential.user, loading: false, verificationNotice: null });
     try {
-      await sendEmailVerification(userCredential.user, getActionCodeSettings());
-    } catch {
-      // The verify-email page can retry if provider/action settings are not ready.
+      await sendAccountVerification(userCredential.user);
+    } catch (error) {
+      set({ verificationNotice: formatVerificationError(error) });
     }
     return userCredential.user;
   },
@@ -232,10 +250,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     return userCredential.user;
   },
   sendVerificationEmail: async () => {
-    if (!auth.currentUser) {
+    const current = auth.currentUser;
+    if (!current) {
       throw new Error("Please sign in before requesting a verification email.");
     }
-    await sendEmailVerification(auth.currentUser, getActionCodeSettings());
+    await sendAccountVerification(current);
   },
   refreshUser: async () => {
     if (!auth.currentUser) {

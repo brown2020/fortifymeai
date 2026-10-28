@@ -1,31 +1,92 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
 import { MailCheck, RefreshCcw, Send, ShieldCheck } from "lucide-react";
 import { useAuthStore } from "@/lib/store/auth-store";
+import { auth } from "@/lib/firebase";
 import { deleteAccount } from "@/app/(protected)/profile/actions";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { ROUTES } from "@/lib/constants";
+import {
+  RESEND_COOLDOWN_MS,
+  canResendVerification,
+  formatVerificationError,
+  resendCooldownSeconds,
+} from "@/lib/verification-email";
 import { Button } from "@/components/ui/button";
+
+const ACCOUNT_SETTLE_MS = 1_500;
 
 export default function VerifyEmail() {
   const router = useRouter();
-  const { user, sendVerificationEmail, refreshUser, logout } = useAuthStore();
+  const {
+    user,
+    sendVerificationEmail,
+    refreshUser,
+    logout,
+    verificationNotice,
+    clearVerificationNotice,
+  } = useAuthStore();
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState<"resend" | "refresh" | "delete" | null>(null);
+  const [accountReady, setAccountReady] = useState(false);
+  const [accountEmail, setAccountEmail] = useState<string | null>(null);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const syncAccount = () => {
+      const current = auth.currentUser;
+      setAccountReady(Boolean(current));
+      setAccountEmail(current?.email ?? null);
+    };
+    syncAccount();
+    const unsubscribe = onAuthStateChanged(auth, () => syncAccount());
+    const settle = window.setTimeout(syncAccount, ACCOUNT_SETTLE_MS);
+    return () => {
+      unsubscribe();
+      window.clearTimeout(settle);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!verificationNotice) return;
+    setError(verificationNotice);
+    setStatus("");
+    clearVerificationNotice();
+  }, [verificationNotice, clearVerificationNotice]);
+
+  useEffect(() => {
+    if (cooldownUntil <= Date.now()) return;
+    const timer = window.setInterval(() => {
+      const next = Date.now();
+      setNow(next);
+      if (next >= cooldownUntil) window.clearInterval(timer);
+    }, 250);
+    return () => window.clearInterval(timer);
+  }, [cooldownUntil]);
+
+  const emailAddress = user?.email || accountEmail;
+  const hasAccount = Boolean(user) || accountReady;
+  const cooldownSeconds = resendCooldownSeconds(now, cooldownUntil);
+  const resendEnabled = canResendVerification(hasAccount, now, cooldownUntil);
 
   const handleResend = async () => {
+    if (!resendEnabled) return;
     try {
       setError("");
       setStatus("");
       setLoading("resend");
       await sendVerificationEmail();
+      setCooldownUntil(Date.now() + RESEND_COOLDOWN_MS);
+      setNow(Date.now());
       setStatus("Verification email sent. Check your inbox for the secure link.");
     } catch (err: unknown) {
-      setError(getAuthErrorMessage(err, "We could not send a verification email."));
+      setError(formatVerificationError(err));
     } finally {
       setLoading(null);
     }
@@ -86,8 +147,10 @@ export default function VerifyEmail() {
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Verify your email</h1>
           <p className="text-slate-400 mb-6">
-            {user?.email
-              ? `We sent a verification link to ${user.email}.`
+            {emailAddress
+              ? error
+                ? `A verification email for ${emailAddress} was not sent.`
+                : `We sent a verification link to ${emailAddress}.`
               : "Sign in, then request a new verification link."}
           </p>
 
@@ -107,17 +170,19 @@ export default function VerifyEmail() {
               type="button"
               onClick={handleResend}
               isLoading={loading === "resend"}
-              disabled={!user}
+              disabled={!resendEnabled}
               className="w-full gap-2"
             >
               <Send className="h-4 w-4" />
-              Resend verification email
+              {cooldownSeconds > 0
+                ? `Resend available in ${cooldownSeconds}s`
+                : "Resend verification email"}
             </Button>
             <Button
               type="button"
               onClick={handleRefresh}
               isLoading={loading === "refresh"}
-              disabled={!user}
+              disabled={!hasAccount}
               variant="outline"
               className="w-full gap-2"
             >
@@ -142,7 +207,7 @@ export default function VerifyEmail() {
               type="button"
               onClick={handleDelete}
               isLoading={loading === "delete"}
-              disabled={!user || loading !== null}
+              disabled={!hasAccount || loading !== null}
               variant="danger"
               className="w-full"
             >
