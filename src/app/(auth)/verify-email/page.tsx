@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
@@ -37,21 +37,44 @@ export default function VerifyEmail() {
   const [accountEmail, setAccountEmail] = useState<string | null>(null);
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [now, setNow] = useState(() => Date.now());
+  const [checkingVerification, setCheckingVerification] = useState(true);
+  const verifiedCheckStarted = useRef(false);
 
   useEffect(() => {
-    const syncAccount = () => {
-      const current = auth.currentUser;
+    let active = true;
+
+    const unsubscribe = onAuthStateChanged(auth, async (current) => {
+      if (!active) return;
       setAccountReady(Boolean(current));
       setAccountEmail(current?.email ?? null);
-    };
-    syncAccount();
-    const unsubscribe = onAuthStateChanged(auth, () => syncAccount());
-    const settle = window.setTimeout(syncAccount, ACCOUNT_SETTLE_MS);
+      if (!current) return;
+      if (verifiedCheckStarted.current) return;
+      verifiedCheckStarted.current = true;
+      try {
+        const refreshed = await refreshUser();
+        if (!active) return;
+        if (refreshed?.emailVerified) {
+          window.location.assign(ROUTES.dashboard);
+          return;
+        }
+      } catch {
+        // Keep the verify screen so the user can resend or try again.
+      }
+      if (active) setCheckingVerification(false);
+    });
+
+    const settle = window.setTimeout(() => {
+      if (!active || auth.currentUser) return;
+      setAccountReady(false);
+      setCheckingVerification(false);
+    }, ACCOUNT_SETTLE_MS);
+
     return () => {
+      active = false;
       unsubscribe();
       window.clearTimeout(settle);
     };
-  }, []);
+  }, [refreshUser]);
 
   useEffect(() => {
     if (!verificationNotice) return;
@@ -145,13 +168,17 @@ export default function VerifyEmail() {
           <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
             <MailCheck className="h-7 w-7 text-emerald-400" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Verify your email</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            {checkingVerification ? "Checking verification" : "Verify your email"}
+          </h1>
           <p className="text-slate-400 mb-6">
-            {emailAddress
-              ? error
-                ? `A verification email for ${emailAddress} was not sent.`
-                : `We sent a verification link to ${emailAddress}.`
-              : "Sign in, then request a new verification link."}
+            {checkingVerification
+              ? "Confirming whether this email is already verified."
+              : emailAddress
+                ? error
+                  ? `A verification email for ${emailAddress} was not sent.`
+                  : `We sent a verification link to ${emailAddress}.`
+                : "Sign in, then request a new verification link."}
           </p>
 
           {status && (
@@ -165,6 +192,7 @@ export default function VerifyEmail() {
             </div>
           )}
 
+          {!checkingVerification && (
           <div className="space-y-3">
             <Button
               type="button"
@@ -214,6 +242,7 @@ export default function VerifyEmail() {
               Delete unverified account
             </Button>
           </div>
+          )}
         </div>
       </div>
     </div>
