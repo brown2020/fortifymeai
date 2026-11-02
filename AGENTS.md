@@ -16,7 +16,7 @@ Zustand for auth state, and the Vercel AI SDK/OpenAI for the research API.
 - `npm run lint`: run ESLint across the repository.
 - `npm run typecheck`: run `tsc --noEmit`.
 - `npm test`: run Vitest unit tests.
-- Hosted CI: `.github/workflows/ci.yml` runs lint, typecheck, test, build on Node 22 (push to `dev`/`main`).
+- Hosted CI: `.github/workflows/ci.yml` runs lint, typecheck, test, build on Node 24 (push to `dev`/`main`).
 - `npm outdated --long`: compare direct dependency ranges with the npm registry.
 - `npm audit --audit-level=low`: inspect known dependency vulnerabilities.
 
@@ -76,7 +76,7 @@ notes and require both lint and build to pass before committing them.
 
 ## Operations / monitoring
 
-- **Hosted CI**: `.github/workflows/ci.yml` on `origin/dev` — lint, typecheck, test, build, and post-build `/api/health` smoke (Node 22). Green on HEAD `7acb0c2`: https://github.com/brown2020/fortifymeai/actions/runs/35694797532 (health-smoke `3e8f3c1`: https://github.com/brown2020/fortifymeai/actions/runs/35694532207).
+- **Hosted CI**: `.github/workflows/ci.yml` on `origin/dev` — lint, typecheck, test, build, and post-build `/api/health` smoke (Node 24).
 - **CI env**: Firebase **public** `NEXT_PUBLIC_*` values are set in the workflow job `env` (client SDK init at import). Repository Actions secrets cannot be managed with the current PAT (`secrets` API 403); when a secrets-capable token is available, prefer `${{ secrets.NEXT_PUBLIC_FIREBASE_* }}` wired into the same job `env` names. Never put Admin/private keys in `NEXT_PUBLIC_*` or the workflow YAML.
 - **Local CI gate**: `scripts/ci-gate.sh` mirrors the Actions gate before pushing.
 - **Production probe**: `GET /api/health` on https://fortifymeai.vercel.app (or local `npm run start`). Returns `{ ok, service, checks }` without secrets. Manual: `scripts/probe-production.sh`.
@@ -86,7 +86,7 @@ notes and require both lint and build to pass before committing them.
   2. Health probe red → check Vercel deployment + Firebase Auth/Admin env; restore last good deploy or `git revert` on `dev` and push.
   3. Research/API 429/5xx → sanitize logs already omit secrets; rate limit is in-memory per instance (`src/app/api/research/route.ts`).
 - **Rollback / restore**: `git revert <sha> && git push origin dev`, confirm CI green, confirm `scripts/probe-production.sh` passes after Vercel picks up the commit.
-- **Dependency advisories**: keep production `npm audit` clean; hold majors `firebase-admin@14` and `typescript@7` until a dedicated review window (see review triggers below). Review triggers: firebase-admin 14 migration guide or 13.x advisory; Next release notes claiming TypeScript 7 support.
+- **Dependency advisories**: `firebase-admin@14` is current. Hold `typescript@7` until `typescript-eslint` (via `eslint-config-next`) can load it; TypeScript 7.0 has no compiler API. See `roadmap.md`. `npm audit` may still report moderate `minimatch@3.1.5` inside ESLint plugins; do not `npm audit fix --force` (it downgrades `eslint-config-next`).
 
 ## Auth session note
 

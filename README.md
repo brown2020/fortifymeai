@@ -22,14 +22,14 @@ Verified from the current codebase:
 | Framework | Next.js 16 (App Router) |
 | UI | React 19, Tailwind CSS 4, Lucide, Recharts, react-markdown |
 | Language | TypeScript 6 |
-| Forms | react-hook-form + Zod resolvers |
+| Forms | react-hook-form 7 + Zod 4 + `@hookform/resolvers` 7 |
 | State | Zustand 5 |
-| Backend | Firebase 12 + firebase-admin 13 (Auth, Firestore) |
-| AI | Vercel AI SDK 7 (`ai`, `@ai-sdk/openai`, `@ai-sdk/react`) |
+| Backend | Firebase 13 + firebase-admin 14 (Auth, Firestore) |
+| AI | Vercel AI SDK 7 (`ai`, `@ai-sdk/openai`, `@ai-sdk/react`), model `gpt-4o` |
 | Dates | date-fns 4 |
-| Tests | Vitest 4 |
+| Tests | Vitest 5 |
 | Deploy | Vercel (`vercel.json` maxDuration 300s) |
-| Node | `>=22` |
+| Node | `>=24` |
 
 `.npmrc` sets `legacy-peer-deps=true`.
 
@@ -56,7 +56,7 @@ fortifymeai/
 
 ### Prerequisites
 
-- Node.js 22+
+- Node.js 24+
 - npm
 - Firebase project (Auth + Firestore)
 - OpenAI API key (for research)
@@ -115,7 +115,7 @@ Rules and indexes: `firestore.rules`, `firestore.indexes.json` (wired in `fireba
 
 ## Testing and CI
 
-Vitest covers health/me route helpers, session/research gates, same-origin, safe redirects, and auth errors.
+Vitest covers the session cookie exchange, health/me routes, session/research gates, same-origin, safe redirects, and auth errors.
 
 - **CI** (`.github/workflows/ci.yml`): lint → typecheck → test → build → smoke `/api/health` on `next start`. Needs `NEXT_PUBLIC_FIREBASE_*` secrets.
 - **Production health** (`.github/workflows/production-health.yml`): cron every 6 hours probes `https://fortifymeai.vercel.app/api/health`.
