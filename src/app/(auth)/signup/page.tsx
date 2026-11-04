@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { Mail, ArrowLeft, Sparkles, Pill, CheckCircle2 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { getSafeRedirectPath } from "@/lib/safe-redirect";
+import { safeAuthCallbackUrl } from "@/lib/safe-redirect";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
@@ -51,10 +51,9 @@ export default function SignUp() {
   const callbackUrlRef = useRef(ROUTES.dashboard);
 
   useEffect(() => {
-    const redirectCookie = getCookieValue("redirect_url");
-    const callbackParam = new URLSearchParams(window.location.search).get("callbackUrl");
-    callbackUrlRef.current = getSafeRedirectPath(
-      redirectCookie || callbackParam,
+    callbackUrlRef.current = safeAuthCallbackUrl(
+      getCookieValue("redirect_url"),
+      window.location.search,
       ROUTES.dashboard
     );
   }, []);

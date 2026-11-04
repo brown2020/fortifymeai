@@ -117,20 +117,20 @@ export async function getSearchHistory(
 }
 
 export async function deleteSearch(searchId: string): Promise<{ success: boolean }> {
+  const session = await requireVerifiedSession();
   if (!searchId || searchId.length > 200 || searchId.includes("/")) {
     return { success: false };
   }
   try {
-    const userId = await verifiedUserId();
-    if (!userId) return { success: false };
     await adminDb
       .collection("users")
-      .doc(userId)
+      .doc(session.uid)
       .collection("searches")
       .doc(searchId)
       .delete();
     return { success: true };
-  } catch {
+  } catch (error) {
+    if (error instanceof AuthzError) return { success: false };
     return { success: false };
   }
 }

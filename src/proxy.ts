@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, ROUTES } from "@/lib/constants";
 import { verifySessionToken } from "@/lib/session";
-import { getSafeRedirectPath } from "@/lib/safe-redirect";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import { sessionAccess } from "@/lib/session-access";
 
 const protectedRoutes = [
@@ -44,8 +44,10 @@ export async function proxy(request: NextRequest) {
   const session = sessionCookie ? await verifySessionToken(sessionCookie) : null;
 
   if (matchesRoute(pathname, authOnlyRoutes) && session) {
-    const callback = request.nextUrl.searchParams.get("callbackUrl");
-    const dest = getSafeRedirectPath(callback, ROUTES.dashboard);
+    const dest = safeRedirectPath(
+      request.nextUrl.searchParams.get("callbackUrl"),
+      ROUTES.dashboard
+    );
     return NextResponse.redirect(new URL(dest, request.url));
   }
 

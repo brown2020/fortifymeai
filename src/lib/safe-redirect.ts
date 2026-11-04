@@ -1,3 +1,28 @@
+export function safeRedirectPath(
+  candidate: string | null | undefined,
+  fallback: string
+): string {
+  return getSafeRedirectPath(candidate, fallback);
+}
+
+/**
+ * Prefer the proxy's redirect cookie, then a callback query param.
+ * Both values are reduced to an internal path before navigation.
+ */
+export function safeAuthCallbackUrl(
+  redirectCookie: string | null,
+  search: string,
+  fallback: string
+): string {
+  if (redirectCookie) {
+    return safeRedirectPath(redirectCookie, fallback);
+  }
+  return safeRedirectPath(
+    new URLSearchParams(search).get("callbackUrl"),
+    fallback
+  );
+}
+
 export function getSafeRedirectPath(
   candidate: string | null | undefined,
   fallback: string
