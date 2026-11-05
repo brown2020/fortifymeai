@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { ArrowLeft, Sparkles, Send } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { safeAuthCallbackUrl } from "@/lib/safe-redirect";
+import { safeAuthCallbackUrl, signInDestination } from "@/lib/safe-redirect";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
@@ -33,13 +32,17 @@ function clearCookie(name: string) {
   document.cookie = `${name}=; Max-Age=0; path=/; samesite=lax`;
 }
 
+/** Full navigation so the new session cookie is on the next request. */
+function leaveLogin(path: string) {
+  window.location.assign(path);
+}
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const { signIn, signInWithGoogle, sendEmailSignInLink } = useAuthStore();
 
   // Prefer redirect_url cookie (set by proxy); fall back to safe callbackUrl query.
@@ -61,7 +64,14 @@ export default function Login() {
       setLoading(true);
       const user = await signIn(email, password);
       clearCookie("redirect_url");
-      router.push(user.emailVerified ? callbackUrlRef.current : ROUTES.verifyEmail);
+      leaveLogin(
+        signInDestination(
+          user.emailVerified,
+          callbackUrlRef.current,
+          ROUTES.dashboard,
+          ROUTES.verifyEmail
+        )
+      );
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not sign you in."));
     } finally {
@@ -74,9 +84,16 @@ export default function Login() {
       setError("");
       setStatus("");
       setLoading(true);
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
       clearCookie("redirect_url");
-      router.push(callbackUrlRef.current);
+      leaveLogin(
+        signInDestination(
+          user.emailVerified,
+          callbackUrlRef.current,
+          ROUTES.dashboard,
+          ROUTES.verifyEmail
+        )
+      );
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not sign you in with Google."));
     } finally {

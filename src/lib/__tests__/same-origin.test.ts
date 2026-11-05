@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isSameOriginRequest } from "../same-origin";
-import { getSafeRedirectPath } from "../safe-redirect";
+import { getSafeRedirectPath, safeAuthCallbackUrl, signInDestination } from "../safe-redirect";
 
 describe("isSameOriginRequest", () => {
   const url = "http://localhost:3100/api/auth/session";
@@ -44,5 +44,29 @@ describe("getSafeRedirectPath", () => {
 
   it("allows internal paths", () => {
     expect(getSafeRedirectPath("/supplements", "/dashboard")).toBe("/supplements");
+  });
+});
+
+describe("signInDestination", () => {
+  it("uses the callback path after a verified sign-in", () => {
+    expect(signInDestination(true, "/profile", "/dashboard", "/verify-email")).toBe(
+      "/profile"
+    );
+    expect(
+      safeAuthCallbackUrl(null, "?callbackUrl=%2Fprofile", "/dashboard")
+    ).toBe("/profile");
+  });
+
+  it("defaults to the dashboard when the callback is missing", () => {
+    expect(signInDestination(true, "", "/dashboard", "/verify-email")).toBe(
+      "/dashboard"
+    );
+    expect(safeAuthCallbackUrl(null, "", "/dashboard")).toBe("/dashboard");
+  });
+
+  it("sends unverified accounts to the verification page", () => {
+    expect(signInDestination(false, "/profile", "/dashboard", "/verify-email")).toBe(
+      "/verify-email"
+    );
   });
 });

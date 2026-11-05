@@ -6,6 +6,21 @@ export function safeRedirectPath(
 }
 
 /**
+ * Destination after the session cookie exists.
+ * Unverified accounts go to the verification page. Everyone else goes to the
+ * sanitized callback, or `fallback` (dashboard) when that callback is empty.
+ */
+export function signInDestination(
+  emailVerified: boolean,
+  callbackUrl: string,
+  fallback: string,
+  unverifiedPath: string
+): string {
+  if (!emailVerified) return unverifiedPath;
+  return safeRedirectPath(callbackUrl, fallback);
+}
+
+/**
  * Prefer the proxy's redirect cookie, then a callback query param.
  * Both values are reduced to an internal path before navigation.
  */
