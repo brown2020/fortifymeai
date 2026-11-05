@@ -126,7 +126,7 @@ export default function Home() {
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </Link>
-              <Link href={ROUTES.research}>
+              <Link href={ROUTES.research} prefetch={false}>
                 <Button variant="outline" size="lg" className="gap-2 text-base px-8">
                   <BookOpen className="h-5 w-5" />
                   Try AI Research

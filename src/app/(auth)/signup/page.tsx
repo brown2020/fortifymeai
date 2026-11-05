@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { Mail, ArrowLeft, Sparkles, Pill, CheckCircle2 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { safeAuthCallbackUrl } from "@/lib/safe-redirect";
+import { hrefWithAuthCallback, safeAuthCallbackUrl } from "@/lib/safe-redirect";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
@@ -14,23 +14,13 @@ import { AuthDivider, GoogleSignInButton } from "@/components/auth/auth-social";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-function getCookieValue(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const raw = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${name}=`))
-    ?.split("=")[1];
-  if (!raw) return null;
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
-}
-
 function clearCookie(name: string) {
   if (typeof document === "undefined") return;
   document.cookie = `${name}=; Max-Age=0; path=/; samesite=lax`;
+}
+
+function continuePath(): string {
+  return safeAuthCallbackUrl(null, window.location.search, ROUTES.dashboard);
 }
 
 const benefits = [
@@ -48,15 +38,6 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { signUp, signInWithGoogle } = useAuthStore();
-  const callbackUrlRef = useRef(ROUTES.dashboard);
-
-  useEffect(() => {
-    callbackUrlRef.current = safeAuthCallbackUrl(
-      getCookieValue("redirect_url"),
-      window.location.search,
-      ROUTES.dashboard
-    );
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +57,7 @@ export default function SignUp() {
       setLoading(true);
       const user = await signUp(email, password);
       clearCookie("redirect_url");
-      router.push(user.emailVerified ? callbackUrlRef.current : ROUTES.verifyEmail);
+      router.push(user.emailVerified ? continuePath() : ROUTES.verifyEmail);
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not create your account."));
     } finally {
@@ -90,7 +71,7 @@ export default function SignUp() {
       setLoading(true);
       await signInWithGoogle();
       clearCookie("redirect_url");
-      router.push(callbackUrlRef.current);
+      router.push(continuePath());
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, "We could not sign you in with Google."));
     } finally {
@@ -219,6 +200,12 @@ export default function SignUp() {
             <Link
               href={ROUTES.login}
               className="text-emerald-400 hover:text-emerald-300 font-medium"
+              onClick={(event) => {
+                const next = hrefWithAuthCallback(ROUTES.login, window.location.search);
+                if (next === ROUTES.login) return;
+                event.preventDefault();
+                window.location.assign(next);
+              }}
             >
               Sign in
             </Link>

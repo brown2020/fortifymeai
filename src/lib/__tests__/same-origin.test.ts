@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { isSameOriginRequest } from "../same-origin";
-import { getSafeRedirectPath, safeAuthCallbackUrl, signInDestination } from "../safe-redirect";
+import {
+  getSafeRedirectPath,
+  hrefWithAuthCallback,
+  safeAuthCallbackUrl,
+  signInDestination,
+} from "../safe-redirect";
 
 describe("isSameOriginRequest", () => {
   const url = "http://localhost:3100/api/auth/session";
@@ -57,11 +62,50 @@ describe("signInDestination", () => {
     ).toBe("/profile");
   });
 
-  it("defaults to the dashboard when the callback is missing", () => {
+  it("uses an explicit same-origin callback and ignores a conflicting redirect cookie", () => {
+    expect(
+      safeAuthCallbackUrl("/research", "?callbackUrl=%2Fsupplements", "/dashboard")
+    ).toBe("/supplements");
+    expect(
+      safeAuthCallbackUrl(null, "?callbackUrl=%2Fresearch", "/dashboard")
+    ).toBe("/research");
+  });
+
+  it("defaults to the dashboard when callbackUrl is missing", () => {
     expect(signInDestination(true, "", "/dashboard", "/verify-email")).toBe(
       "/dashboard"
     );
     expect(safeAuthCallbackUrl(null, "", "/dashboard")).toBe("/dashboard");
+    expect(safeAuthCallbackUrl(null, "?", "/dashboard")).toBe("/dashboard");
+    // A prefetch of /research can plant this cookie while /login has no query.
+    expect(safeAuthCallbackUrl("/research", "", "/dashboard")).toBe("/dashboard");
+    expect(hrefWithAuthCallback("/signup", "")).toBe("/signup");
+    expect(hrefWithAuthCallback("/signup", "?callbackUrl=%2Fprofile")).toBe(
+      "/signup?callbackUrl=%2Fprofile"
+    );
+    expect(hrefWithAuthCallback("/login", "?callbackUrl=https%3A%2F%2Fevil.example")).toBe(
+      "/login"
+    );
+    expect(
+      signInDestination(
+        true,
+        safeAuthCallbackUrl("/research", "", "/dashboard"),
+        "/dashboard",
+        "/verify-email"
+      )
+    ).toBe("/dashboard");
+  });
+
+  it("sends external and invalid callbacks to the dashboard", () => {
+    expect(
+      safeAuthCallbackUrl(null, "?callbackUrl=https%3A%2F%2Fevil.example", "/dashboard")
+    ).toBe("/dashboard");
+    expect(
+      safeAuthCallbackUrl(null, "?callbackUrl=%2F%2Fevil.example", "/dashboard")
+    ).toBe("/dashboard");
+    expect(signInDestination(true, "https://evil.example", "/dashboard", "/verify-email")).toBe(
+      "/dashboard"
+    );
   });
 
   it("sends unverified accounts to the verification page", () => {

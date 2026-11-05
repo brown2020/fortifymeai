@@ -21,21 +21,25 @@ export function signInDestination(
 }
 
 /**
- * Prefer the proxy's redirect cookie, then a callback query param.
- * Both values are reduced to an internal path before navigation.
+ * Continue path after sign-in.
+ * Only an explicit `callbackUrl` query is a destination. `redirectCookie` is
+ * ignored: a logged-out prefetch of `/research` can store that path in the
+ * cookie while `/login` itself has no callbackUrl, and that must not become
+ * the default. Missing, external, and invalid values use `fallback`.
  */
 export function safeAuthCallbackUrl(
-  redirectCookie: string | null,
+  _redirectCookie: string | null,
   search: string,
   fallback: string
 ): string {
-  if (redirectCookie) {
-    return safeRedirectPath(redirectCookie, fallback);
-  }
-  return safeRedirectPath(
-    new URLSearchParams(search).get("callbackUrl"),
-    fallback
-  );
+  return safeRedirectPath(new URLSearchParams(search).get("callbackUrl"), fallback);
+}
+
+/** Keep an explicit callback on links between /login and /signup. */
+export function hrefWithAuthCallback(path: string, search: string): string {
+  const safe = safeAuthCallbackUrl(null, search, "");
+  if (!safe) return path;
+  return `${path}?callbackUrl=${encodeURIComponent(safe)}`;
 }
 
 export function getSafeRedirectPath(

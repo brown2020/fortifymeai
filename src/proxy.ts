@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, ROUTES } from "@/lib/constants";
 import { verifySessionToken } from "@/lib/session";
-import { safeRedirectPath } from "@/lib/safe-redirect";
+import { safeAuthCallbackUrl } from "@/lib/safe-redirect";
 import { sessionAccess } from "@/lib/session-access";
 
 const protectedRoutes = [
@@ -26,16 +26,10 @@ function redirectToLogin(request: NextRequest) {
   const loginUrl = new URL(ROUTES.login, request.url);
   const callbackUrl = `${request.nextUrl.pathname}${request.nextUrl.search}`;
   loginUrl.searchParams.set("callbackUrl", callbackUrl);
-  const response = NextResponse.redirect(loginUrl);
-  response.cookies.set("redirect_url", callbackUrl, {
-    path: "/",
-    maxAge: 60 * 10,
-    sameSite: "lax",
-    httpOnly: false,
-    // Prefer request protocol so http://localhost keeps the continue cookie.
-    secure: request.nextUrl.protocol === "https:",
-  });
-  return response;
+  // Do not also store this path in a cookie. A logged-out prefetch of
+  // /research would plant redirect_url=/research, and sign-in from a bare
+  // /login would treat that cookie as the default destination.
+  return NextResponse.redirect(loginUrl);
 }
 
 export async function proxy(request: NextRequest) {
@@ -44,10 +38,7 @@ export async function proxy(request: NextRequest) {
   const session = sessionCookie ? await verifySessionToken(sessionCookie) : null;
 
   if (matchesRoute(pathname, authOnlyRoutes) && session) {
-    const dest = safeRedirectPath(
-      request.nextUrl.searchParams.get("callbackUrl"),
-      ROUTES.dashboard
-    );
+    const dest = safeAuthCallbackUrl(null, request.nextUrl.search, ROUTES.dashboard);
     return NextResponse.redirect(new URL(dest, request.url));
   }
 

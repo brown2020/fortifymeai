@@ -1,31 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { ArrowLeft, Sparkles, Send } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { safeAuthCallbackUrl, signInDestination } from "@/lib/safe-redirect";
+import { hrefWithAuthCallback, safeAuthCallbackUrl, signInDestination } from "@/lib/safe-redirect";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
 import { PageBackground } from "@/components/layout/page-background";
 import { AuthDivider, GoogleSignInButton } from "@/components/auth/auth-social";
 import { AuthAlert, AuthBrandHeader, AuthEmailField } from "@/components/auth/auth-fields";
-
-function getCookieValue(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const raw = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${name}=`))
-    ?.split("=")[1];
-  if (!raw) return null;
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
-}
 
 function clearCookie(name: string) {
   if (typeof document === "undefined") return;
@@ -37,6 +23,11 @@ function leaveLogin(path: string) {
   window.location.assign(path);
 }
 
+/** Query callback only. Missing or invalid values stay on the dashboard. */
+function continuePath(): string {
+  return safeAuthCallbackUrl(null, window.location.search, ROUTES.dashboard);
+}
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,16 +35,6 @@ export default function Login() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn, signInWithGoogle, sendEmailSignInLink } = useAuthStore();
-
-  // Prefer redirect_url cookie (set by proxy); fall back to safe callbackUrl query.
-  const callbackUrlRef = useRef(ROUTES.dashboard);
-  useEffect(() => {
-    callbackUrlRef.current = safeAuthCallbackUrl(
-      getCookieValue("redirect_url"),
-      window.location.search,
-      ROUTES.dashboard
-    );
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +48,7 @@ export default function Login() {
       leaveLogin(
         signInDestination(
           user.emailVerified,
-          callbackUrlRef.current,
+          continuePath(),
           ROUTES.dashboard,
           ROUTES.verifyEmail
         )
@@ -89,7 +70,7 @@ export default function Login() {
       leaveLogin(
         signInDestination(
           user.emailVerified,
-          callbackUrlRef.current,
+          continuePath(),
           ROUTES.dashboard,
           ROUTES.verifyEmail
         )
@@ -201,6 +182,12 @@ export default function Login() {
             <Link
               href={ROUTES.signup}
               className="text-emerald-400 hover:text-emerald-300 font-medium"
+              onClick={(event) => {
+                const next = hrefWithAuthCallback(ROUTES.signup, window.location.search);
+                if (next === ROUTES.signup) return;
+                event.preventDefault();
+                window.location.assign(next);
+              }}
             >
               Sign up
             </Link>
