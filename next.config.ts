@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+import { CONTENT_SECURITY_POLICY } from "./src/lib/content-security-policy";
+
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -11,19 +13,7 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value: [
-      "default-src 'self'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-      "object-src 'none'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.gstatic.com",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://lh3.googleusercontent.com https://*.googleusercontent.com https://www.gstatic.com",
-      "font-src 'self' data:",
-      "connect-src 'self' https://*.googleapis.com wss://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://*.cloudfunctions.net https://accounts.google.com",
-      "frame-src https://accounts.google.com https://*.google.com https://*.firebaseapp.com",
-    ].join("; "),
+    value: CONTENT_SECURITY_POLICY,
   },
 ];
 

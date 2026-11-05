@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { AnalyticsRouteListener } from "@/components/providers/AnalyticsRouteListener";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
@@ -40,6 +42,9 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
+        <Suspense fallback={null}>
+          <AnalyticsRouteListener />
+        </Suspense>
         <Toaster>
           <AuthProvider>
             <Navbar />
